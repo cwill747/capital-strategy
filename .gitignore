@@ -109,4 +109,3 @@ UpgradeLog*.XML
 
 # Csharp edits
 *.csproj.user
-*.csproj
