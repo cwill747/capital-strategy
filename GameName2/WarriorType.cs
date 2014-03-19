@@ -7,83 +7,89 @@ using Microsoft.Xna.Framework;
 
 namespace GameName2
 {
-    /// <summary>
-    /// Describes a general type of warrior
-    /// </summary>
-    public class WarriorType
-    {
-        String[] stateStrings = { "stopped", "walking", "running", "attack", "been hit", "tipping over", "talking" };
-        public Game1 game { get; set; }
+	/// <summary>
+	/// Describes a general type of warrior
+	/// </summary>
+	public class WarriorType
+	{
+		String[] stateStrings = { "stopped", "walking", "running", "attack", "been hit", "tipping over", "talking" };
+		public Game1 game { get; set; }
 
-        public int maxHealth { get; set; }
-        public int attack { get; set; }
-        public int defense { get; set; }
-        public int maxMove { get; set; }
-        public double speed { get; set; }
-        public ImageAtlas[] states { get; set; }
-        public String type { get; set; }
-        public int[] stateDurations { get; set; } // time to complete a state (in millis)
-        public Point[] attackPoints { get; set; }
-        public int? attackRange { get; set; }
-        public int attackDelayConst { get; set; }
-        public int attackDelayRate { get; set; }
-        
-        // note: will need to add way of showing attack area
+		public int maxHealth { get; set; }
+		public int attack { get; set; }
+		public int defense { get; set; }
+		public int accuracy { get; set;}
+		public int evade { get; set;}
+		public int maxMove { get; set; }
+		public double speed { get; set; }
+		public ImageAtlas[] states { get; set; }
+		public String type { get; set; }
+		public int[] stateDurations { get; set; } // time to complete a state (in millis)
+		public Point[] attackPoints { get; set; }
+		public int? attackRange { get; set; }
+		public int attackDelayConst { get; set; }
+		public int attackDelayRate { get; set; }
 
-        public WarriorType(Game1 game, int maxHealth, int attack, int defense, int maxMove, double speed, String type, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate)
-        {
-            this.game = game;
-            this.maxHealth = maxHealth;
-            this.attack = attack;
-            this.defense = defense;
-            this.maxMove = maxMove;
-            this.speed = speed;
-            this.type = type;
-            this.states = loadStates(type, imageDimensions);
-            this.stateDurations = stateDurations;
-            this.attackPoints = attackPoints;
-            this.attackRange = attackRange;
-            this.attackDelayConst = attackDelayConst;
-            this.attackDelayRate = attackDelayRate;
-        }
+		// note: will need to add way of showing attack area
 
-        public WarriorType(WarriorType warriorType)
-        {
-            this.game = warriorType.game;
-            this.maxHealth = warriorType.maxHealth;
-            this.attack = warriorType.attack;
-            this.defense = warriorType.defense;
-            this.maxMove = warriorType.maxMove;
-            this.speed = warriorType.speed;
-            this.type = warriorType.type;
-            this.states = warriorType.states;
-            this.stateDurations = warriorType.stateDurations;
-            this.attackPoints = warriorType.attackPoints;
-            this.attackRange = warriorType.attackRange;
-            this.attackDelayConst = warriorType.attackDelayConst;
-            this.attackDelayRate = warriorType.attackDelayRate;
-        }
+		public WarriorType(Game1 game, int maxHealth, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate)
+		{
+			this.game = game;
+			this.maxHealth = maxHealth;
+			this.attack = attack;
+			this.defense = defense;
+			this.accuracy = accuracy;
+			this.evade = evade;
+			this.maxMove = maxMove;
+			this.speed = speed;
+			this.type = type;
+			this.states = loadStates(type, imageDimensions);
+			this.stateDurations = stateDurations;
+			this.attackPoints = attackPoints;
+			this.attackRange = attackRange;
+			this.attackDelayConst = attackDelayConst;
+			this.attackDelayRate = attackDelayRate;
+		}
 
-        public ImageAtlas[] loadStates(String type, int[] imageDimensions)
-        {
-            ImageAtlas[] states = new ImageAtlas[stateStrings.Length];
-            for (int i = 0; i < stateStrings.Length; i++)
-            {
-                String fileName = "sprites/"+type+"/"+type + " " + stateStrings[i] + ".png";
-                Texture2D texture = this.game.Content.Load<Texture2D>(fileName);
-                states[i] = new ImageAtlas(texture, game.WARRIORWIDTH, game.WARRIORHEIGHT, 8, imageDimensions[i], 0);
-            }
+		public WarriorType(WarriorType warriorType)
+		{
+			this.game = warriorType.game;
+			this.maxHealth = warriorType.maxHealth;
+			this.attack = warriorType.attack;
+			this.defense = warriorType.defense;
+			this.accuracy = warriorType.accuracy;
+			this.evade = warriorType.evade;
+			this.maxMove = warriorType.maxMove;
+			this.speed = warriorType.speed;
+			this.type = warriorType.type;
+			this.states = warriorType.states;
+			this.stateDurations = warriorType.stateDurations;
+			this.attackPoints = warriorType.attackPoints;
+			this.attackRange = warriorType.attackRange;
+			this.attackDelayConst = warriorType.attackDelayConst;
+			this.attackDelayRate = warriorType.attackDelayRate;
+		}
+
+		public ImageAtlas[] loadStates(String type, int[] imageDimensions)
+		{
+			ImageAtlas[] states = new ImageAtlas[stateStrings.Length];
+			for (int i = 0; i < stateStrings.Length; i++)
+			{
+				String fileName = "sprites/"+type+"/"+type + " " + stateStrings[i] + ".png";
+				Texture2D texture = this.game.Content.Load<Texture2D>(fileName);
+				states[i] = new ImageAtlas(texture, game.WARRIORWIDTH, game.WARRIORHEIGHT, 8, imageDimensions[i], 0);
+			}
 
 
-            return states;
-        }
+			return states;
+		}
 
-        public int getAttackDelay(int diffX, int diffy)
-        {
-            diffX = Math.Abs(diffX);
-            diffy = Math.Abs(diffy);
-            double distance = Math.Sqrt(diffX * diffX + diffy * diffy);
-            return (int)(this.attackDelayConst + distance * this.attackDelayRate);
-        }
-    }
+		public int getAttackDelay(int diffX, int diffy)
+		{
+			diffX = Math.Abs(diffX);
+			diffy = Math.Abs(diffy);
+			double distance = Math.Sqrt(diffX * diffX + diffy * diffy);
+			return (int)(this.attackDelayConst + distance * this.attackDelayRate);
+		}
+	}
 }
