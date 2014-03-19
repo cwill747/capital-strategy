@@ -467,9 +467,16 @@ namespace GameName2
 				int randomNum = rand.Next (0, 21);
 				int randomNum2 = rand.Next (0, 21);
 				int damage = (this.attack * 20) / target.defense;
-				// accuracy check
-				int hit = randomNum * this.accuracy;
-				int miss = randomNum2 * this.evade;
+				int miss = randomNum2 * target.evade;
+				int hit;
+				// bonus check
+				if (this.bonus.Equals (target.type)) {
+					hit = randomNum * (this.accuracy + 50);
+					damage *= 2;
+				} else {
+					hit = randomNum * this.accuracy;
+				}
+				//accuracy check
 				if (hit > miss) {
 					target.health -= damage;
 				}

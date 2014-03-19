@@ -24,6 +24,7 @@ namespace GameName2
 		public double speed { get; set; }
 		public ImageAtlas[] states { get; set; }
 		public String type { get; set; }
+		public String bonus { get; set;}
 		public int[] stateDurations { get; set; } // time to complete a state (in millis)
 		public Point[] attackPoints { get; set; }
 		public int? attackRange { get; set; }
@@ -32,7 +33,7 @@ namespace GameName2
 
 		// note: will need to add way of showing attack area
 
-		public WarriorType(Game1 game, int maxHealth, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate)
+		public WarriorType(Game1 game, int maxHealth, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, String bonus, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate)
 		{
 			this.game = game;
 			this.maxHealth = maxHealth;
@@ -43,6 +44,7 @@ namespace GameName2
 			this.maxMove = maxMove;
 			this.speed = speed;
 			this.type = type;
+			this.bonus = bonus;
 			this.states = loadStates(type, imageDimensions);
 			this.stateDurations = stateDurations;
 			this.attackPoints = attackPoints;
@@ -62,6 +64,7 @@ namespace GameName2
 			this.maxMove = warriorType.maxMove;
 			this.speed = warriorType.speed;
 			this.type = warriorType.type;
+			this.bonus = warriorType.bonus;
 			this.states = warriorType.states;
 			this.stateDurations = warriorType.stateDurations;
 			this.attackPoints = warriorType.attackPoints;
