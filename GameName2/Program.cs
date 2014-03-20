@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 #endregion
 
-namespace GameName2
+namespace CapitalStrategy
 {
 #if WINDOWS || LINUX
     /// <summary>

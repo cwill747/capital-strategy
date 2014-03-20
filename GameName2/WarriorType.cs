@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
-namespace GameName2
+namespace CapitalStrategy
 {
 	/// <summary>
 	/// Describes a general type of warrior

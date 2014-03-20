@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 #endregion
 
-namespace GameName2
+namespace CapitalStrategy
 {
 	/// <summary>
 	/// Class specific to the instance of a particular warrior

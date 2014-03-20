@@ -53,6 +53,7 @@
     <Compile Include="Board.cs" />
     <Compile Include="Direction.cs" />
     <Compile Include="Game1.cs" />
+    <Compile Include="GameState.cs" />
     <Compile Include="ImageAtlas.cs" />
     <Compile Include="MouseWrapper.cs" />
     <Compile Include="State.cs" />

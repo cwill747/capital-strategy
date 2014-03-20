@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace GameName2
+namespace CapitalStrategy
 {
     /// <summary>
     /// This class is for finding the correct index in ImageAtlas[] states field for a Warrior

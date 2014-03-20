@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Input.Touch;
 #endregion
 
-namespace GameName2
+namespace CapitalStrategy
 {
 	/// <summary>
 	/// This is the main type for your game
@@ -51,6 +51,9 @@ namespace GameName2
 		public Warrior beingAttacked { get; set; }
 
 		MouseWrapper mouseState;
+        
+
+        
 
 		public Game1()
 			: base()
@@ -75,6 +78,7 @@ namespace GameName2
 			this.WARRIORHEIGHT = this.BOARDHEIGHT * 2 / this.ROWS;
 			TouchPanel.EnabledGestures = GestureType.Tap;
 			isYourTurn = true;
+            
 			this.turnProgress = TurnProgress.beginning;
 			base.Initialize();
 		}
