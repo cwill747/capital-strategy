@@ -27,19 +27,14 @@ namespace CapitalStrategy.Windows
         public int SELECTED_WARRIOR_INFO_X = 610;
         public int SELECTED_WARRIOR_INFO_Y = 40;
 
-        public int WARRIORWIDTH { get; set; }
-        public int WARRIORHEIGHT { get; set; }
-
         public Texture2D red;
         public Texture2D white;
-        public Texture2D charcoal;
         public Texture2D heartIcon;
         public Texture2D attackIcon;
         public Texture2D shieldIcon;
         public Texture2D moveIcon;
         public SpriteFont menufont;
         public SpriteFont infofont;
-
 
         Texture2D background;
         Rectangle backgroundRec;
@@ -53,6 +48,7 @@ namespace CapitalStrategy.Windows
         Warrior selectedWarrior;
         Warrior currentTurnWarrior;
         public Boolean isYourTurn { get; set; }
+        
 
         public int turnProgress { get; set; }
         public int targetCol { get; set; }
@@ -61,14 +57,14 @@ namespace CapitalStrategy.Windows
         Warrior displayWarrior;
         MouseWrapper mouseState;
 
+
+
         public GameMatch(Game1 windowManager)
         {
             this.windowManager = windowManager;
         }
         public void Initialize()
         {
-            this.WARRIORWIDTH = this.BOARDWIDTH * 2 / this.COLS;
-            this.WARRIORHEIGHT = this.BOARDHEIGHT * 2 / this.ROWS;
             isYourTurn = true;
             this.turnProgress = TurnProgress.beginning;
         }
@@ -82,15 +78,14 @@ namespace CapitalStrategy.Windows
             background = Content.Load<Texture2D>("stars");
             red = Content.Load<Texture2D>("colors/red");
             white = Content.Load<Texture2D>("colors/white");
-            charcoal = Content.Load<Texture2D>("colors/charcoal");
             heartIcon = Content.Load<Texture2D>("icons/heartIcon");
             attackIcon = Content.Load<Texture2D>("icons/attackIcon");
             shieldIcon = Content.Load<Texture2D>("icons/shieldIcon");
             moveIcon = Content.Load<Texture2D>("icons/moveIcon");
 
             backgroundRec = new Rectangle(0, 0, windowManager.Window.ClientBounds.Width, windowManager.Window.ClientBounds.Height);
-            Texture2D tileImage = Content.Load<Texture2D>("floortileatlas.jpg");
-            board = new Board(ROWS, COLS, this.BOARDWIDTH, this.BOARDHEIGHT, tileImage);
+            
+            board = new Board(ROWS, COLS, new Rectangle(0, 25, this.BOARDWIDTH, this.BOARDHEIGHT), Game1.tileImage);
             // Game1 game, int maxHealth, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate)
 
             XmlTextReader reader = new XmlTextReader("Configuration/WarriorTypes.xml");
@@ -321,13 +316,13 @@ namespace CapitalStrategy.Windows
             // want to display health as bar across top -- two rectangles, white and red
             int tileWidth = this.BOARDWIDTH / this.board.cols;
             int tileHeight = this.BOARDHEIGHT / this.board.rows;
-            int xLoc = (int)(warrior.col * tileWidth);
-            int yLoc = (int)(warrior.row * tileHeight);
+            int xLoc = (int)(warrior.col * tileWidth + board.location.X);
+            int yLoc = (int)(warrior.row * tileHeight + board.location.Y);
             int healthBarY = yLoc - tileHeight / 2; // most warriors are taller than the tile
             // then attack, defense and move
             double widthPerHP = ((double)tileWidth) / 100;
             this.spriteBatch.Begin();
-            this.spriteBatch.Draw(charcoal, new Rectangle(xLoc - 2, healthBarY - 2, (int)(widthPerHP * warrior.maxHealth) + 4, tileHeight / 10 + 4), Color.WhiteSmoke);
+            this.spriteBatch.Draw(Game1.charcoal, new Rectangle(xLoc - 2, healthBarY - 2, (int)(widthPerHP * warrior.maxHealth) + 4, tileHeight / 10 + 4), Color.WhiteSmoke);
             this.spriteBatch.Draw(white, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.maxHealth), tileHeight / 10), Color.WhiteSmoke);
             this.spriteBatch.Draw(red, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.health), tileHeight / 10), Color.WhiteSmoke);
             this.spriteBatch.End();
@@ -385,20 +380,20 @@ namespace CapitalStrategy.Windows
                 toDrawX = SELECTED_WARRIOR_INFO_X;
                 toDrawY = SELECTED_WARRIOR_INFO_Y + 80;
                 displayWarrior.drawInArbitraryLocation(toDrawX, toDrawY);
-                displayWarrior.drawWarriorType(toDrawX + this.WARRIORWIDTH / 2 + imgPadding, toDrawY - imgPadding);
+                displayWarrior.drawWarriorType(toDrawX + board.WARRIORWIDTH / 2 + imgPadding, toDrawY - imgPadding);
                 this.spriteBatch.Begin();
-                toDrawX = toDrawX + this.WARRIORWIDTH / 2 + imgPadding;
+                toDrawX = toDrawX + board.WARRIORWIDTH / 2 + imgPadding;
 
                 // Draw the warriors health
                 this.spriteBatch.Draw(heartIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.spriteBatch.Draw(charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * selectedWarrior.maxHealth) + 4, barHeight + 4), Color.WhiteSmoke);
+                this.spriteBatch.Draw(Game1.charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * selectedWarrior.maxHealth) + 4, barHeight + 4), Color.WhiteSmoke);
                 this.spriteBatch.Draw(white, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.maxHealth), barHeight), Color.WhiteSmoke);
                 this.spriteBatch.Draw(red, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.health), barHeight), Color.WhiteSmoke);
                 toDrawY += iconHeight + padding;
 
                 // Draw the warriors attack strength
                 this.spriteBatch.Draw(attackIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.spriteBatch.Draw(charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
+                this.spriteBatch.Draw(Game1.charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
                 this.spriteBatch.Draw(white, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * 100), barHeight), Color.WhiteSmoke);
                 this.spriteBatch.Draw(red, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.attack), barHeight), Color.WhiteSmoke);
                 toDrawY += iconHeight + padding;
@@ -406,7 +401,7 @@ namespace CapitalStrategy.Windows
                 // Draw the warriors defense strength
                 // @TODO: Change the 2+ on this to be a resolution-independent value
                 this.spriteBatch.Draw(shieldIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.spriteBatch.Draw(charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
+                this.spriteBatch.Draw(Game1.charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
                 this.spriteBatch.Draw(white, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * 100), barHeight), Color.WhiteSmoke);
                 this.spriteBatch.Draw(red, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.defense), barHeight), Color.WhiteSmoke);
                 toDrawY += iconHeight + padding;

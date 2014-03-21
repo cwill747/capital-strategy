@@ -13,13 +13,9 @@ namespace CapitalStrategy
         public int rows { get; set; }
         public int cols { get; set; }
         public int currentFrame { get; set; }
-        public int spriteWidth { get; set; }
-        public int spriteHeight { get; set; }
 
-        public ImageAtlas(Texture2D texture, int spriteWidth, int spriteHeight, int rows, int cols, int currentFrame)
+        public ImageAtlas(Texture2D texture, int rows, int cols, int currentFrame)
         {
-            this.spriteWidth = spriteWidth;
-            this.spriteHeight = spriteHeight;
             this.texture = texture;
             this.rows = rows;
             this.cols = cols;
@@ -27,11 +23,6 @@ namespace CapitalStrategy
         }
 
 
-        public void draw(SpriteBatch spriteBatch, Vector2 location)
-        {
-            this.draw(spriteBatch, new Rectangle((int)location.X, (int)location.Y, spriteWidth, spriteHeight));
-            
-        }
         public void draw(SpriteBatch spriteBatch, Rectangle location)
         {
             int rowIndex = currentFrame / cols;

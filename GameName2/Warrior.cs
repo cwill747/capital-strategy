@@ -63,10 +63,10 @@ namespace CapitalStrategy
 		public void draw()
 		{
 			SpriteBatch spriteBatch = this.game.spriteBatch;
-			Vector2 destinationLoc = this.game.board.getLocation(this.row, this.col);
+			Vector2 destinationLoc = board.getLocation(this.row, this.col);
             //string EntityInfo = "This is a warrior";
             SpriteFont menufont = this.game.menufont;
-			Rectangle destination = new Rectangle((int)destinationLoc.X - (game.WARRIORWIDTH - game.BOARDWIDTH / game.COLS) / 2, (int)destinationLoc.Y - (game.WARRIORHEIGHT - game.BOARDHEIGHT / game.ROWS) / 2 - game.BOARDHEIGHT / game.ROWS / 3, game.WARRIORWIDTH, game.WARRIORHEIGHT);
+			Rectangle destination = new Rectangle((int)destinationLoc.X - (board.WARRIORWIDTH - board.location.Width / board.cols) / 2, (int)destinationLoc.Y - (board.WARRIORHEIGHT - board.location.Height / board.rows) / 2 - board.location.Height / board.rows / 3, board.WARRIORWIDTH, board.WARRIORHEIGHT);
 			ImageAtlas source = this.states[state];
 			Color color = this.isYours ? Color.LightBlue : Color.LightSalmon;
 			source.draw(spriteBatch, destination, direction, (int) stateDepth, color);
@@ -76,7 +76,7 @@ namespace CapitalStrategy
         public void drawInArbitraryLocation(int x, int y)
         {
             SpriteBatch spriteBatch = this.game.spriteBatch;
-			Rectangle destination = new Rectangle((int)x - (game.WARRIORWIDTH - game.BOARDWIDTH / game.COLS) / 2, (int)y - (game.WARRIORHEIGHT - game.BOARDHEIGHT / game.ROWS) / 2 - game.BOARDHEIGHT / game.ROWS / 3, game.WARRIORWIDTH, game.WARRIORHEIGHT);
+			Rectangle destination = new Rectangle((int)x - (board.WARRIORWIDTH - board.location.Width / board.cols) / 2, (int)y - (board.WARRIORHEIGHT - board.location.Height / board.rows) / 2 - board.location.Height / board.rows / 3, board.WARRIORWIDTH, board.WARRIORHEIGHT);
             this.stateDepth = 0;
             this.state = State.walking;
             this.direction = Direction.S;

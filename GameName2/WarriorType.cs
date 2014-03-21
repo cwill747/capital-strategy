@@ -81,7 +81,7 @@ namespace CapitalStrategy
 			{
 				String fileName = "sprites/"+type+"/"+type + " " + stateStrings[i] + ".png";
 				Texture2D texture = this.game.Content.Load<Texture2D>(fileName);
-				states[i] = new ImageAtlas(texture, game.WARRIORWIDTH, game.WARRIORHEIGHT, 8, imageDimensions[i], 0);
+				states[i] = new ImageAtlas(texture, 8, imageDimensions[i], 0);
 			}
 
 

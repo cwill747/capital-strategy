@@ -29,9 +29,9 @@ namespace CapitalStrategy
         {
             this.pastState = this.mouseState;
             this.mouseState = mouseState;
-            this.row = mouseState.Y / (board.height / board.rows);
-            this.col = mouseState.X / (board.width / board.cols);
-            this.isOverGrid = mouseState.X < board.width && mouseState.Y < board.height && mouseState.X >= 0 && mouseState.Y >= 0;
+            this.row = (mouseState.Y - board.location.Y) / (board.location.Height / board.rows);
+            this.col = (mouseState.X - board.location.X) / (board.location.Width / board.cols);
+            this.isOverGrid = mouseState.X < board.location.Width && mouseState.Y < board.location.Height && mouseState.X >= 0 && mouseState.Y >= 0;
         }
 
         public Boolean wasClicked()

@@ -9,20 +9,23 @@ namespace CapitalStrategy
 {
     public class Board
     {
-        public int width { get; set; }
-        public int height { get; set; }
+        public int WARRIORWIDTH { get; set; }
+        public int WARRIORHEIGHT { get; set; }
+
         public int rows { get; set; }
         public int cols { get; set; }
+        public Rectangle location { get; set; }
         public Warrior[][] warriors { get; set; }
         public Color[][] tileTints { get; set; }
         ImageAtlas tileAtlas;
         
 
 
-        public Board(int rows, int cols, int width, int height, Texture2D tileImage)
+        public Board(int rows, int cols, Rectangle location, Texture2D tileImage)
         {
             this.rows = rows;
             this.cols = cols;
+            this.location = location;
             warriors = new Warrior[rows][];
             for (int i = 0; i < rows; i++)
             {
@@ -33,30 +36,33 @@ namespace CapitalStrategy
             {
                 tileTints[i] = new Color[cols];
             }
+            this.WARRIORWIDTH = location.Width * 2 / this.cols;
+            this.WARRIORHEIGHT = location.Height * 2 / this.rows;
             this.resetTints();
-            this.width = width;
-            this.height = height;
-            int tileWidth = width / warriors[0].Length;
-            int tileHeight = height / warriors.Length;
-            this.tileAtlas = new ImageAtlas(tileImage, tileWidth, tileHeight, 13, 20, 56);
+            int tileWidth = location.Width / warriors[0].Length;
+            int tileHeight = location.Height / warriors.Length;
+            this.tileAtlas = new ImageAtlas(tileImage, 13, 20, 56);
         }
 
         public void drawTiles(SpriteBatch spriteBatch)
         {
-            int tileWidth = width / warriors[0].Length;
-            int tileHeight = height / warriors.Length;
+            spriteBatch.Begin();
+            spriteBatch.Draw(Game1.charcoal, new Rectangle(location.X - 5, location.Y - 5, location.Width + 10, location.Height + 10), Color.WhiteSmoke);
+            spriteBatch.End();
+            int tileWidth = location.Width / warriors[0].Length;
+            int tileHeight = location.Height / warriors.Length;
             for (int i = 0; i < warriors.Length; i++)
             {
                 for (int j = 0; j < warriors[i].Length; j++)
                 {
-                    this.tileAtlas.draw(spriteBatch, new Rectangle(j*tileWidth, i * tileHeight, tileWidth, tileHeight), tileTints[i][j]);
+                    this.tileAtlas.draw(spriteBatch, new Rectangle(j*tileWidth + location.X, i * tileHeight + location.Y, tileWidth, tileHeight), tileTints[i][j]);
                 }
             }
         }
         public Vector2 getLocation(double row, double col)
         {
-            double width = this.width * col / this.cols;
-            double height = this.height * row / this.rows;
+            double width = this.location.Width * col / this.cols + location.X;
+            double height = this.location.Height* row / this.rows + location.Y;
             Vector2 retVal = new Vector2((float)width, (float)height);
             return retVal;
         }

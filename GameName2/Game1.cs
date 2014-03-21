@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Storage;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Input.Touch;
+using CapitalStrategy.Windows;
 using System.Xml;
 
 #endregion
@@ -36,6 +37,10 @@ namespace CapitalStrategy
         public static Texture2D button;
         public static Texture2D background;
         public static Texture2D backButton;
+        public static Texture2D tileImage;
+        public static Texture2D charcoal;
+
+        public List<WarriorType> warriorTypes = new List<WarriorType>();
         
 
         // List of windows. GameState class determines index of current window
@@ -100,6 +105,8 @@ namespace CapitalStrategy
             Game1.button = Content.Load<Texture2D>("GUI/button");
             Game1.backButton = Content.Load<Texture2D>("GUI/back_button");
             Game1.background = Content.Load<Texture2D>("login/loginBackground");
+            Game1.tileImage = Content.Load<Texture2D>("floortileatlas.jpg");
+            Game1.charcoal = Content.Load<Texture2D>("colors/charcoal");
 
             Game1.gameFont = Content.Load<SpriteFont>("fonts/gamefont");
             Game1.menuFont = Content.Load<SpriteFont>("fonts/menufont");
@@ -112,6 +119,44 @@ namespace CapitalStrategy
                     window.LoadContent();
                 }
             }
+            GameMatch game = (GameMatch)this.windows[GameState.gameMatch];
+            warriorTypes.Add(new WarriorType(
+                game,       // game
+                80,         // maxhealth
+                50,         // attack
+                40,         // defense
+                100,        // accuracy
+                30,         // evade
+                3,          // maxMove
+                3,          // speed
+                "axestan shield", // type 
+                "blue archer", new int[] { 1, 8, 8, 13, 7, 9, 7 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
+                null, 1, 500, 0));
+            warriorTypes.Add(new WarriorType(game, 60, 40, 70,
+                80, 60, 4, 5, "firedragon",
+                "crocy", new int[] { 1, 7, 7, 9, 1, 11, 7 }, new int[] { 1000, 400, 1000, 1000, 1000, 1000, 1000 },
+                null, 2, 500, 0));
+            warriorTypes.Add(new WarriorType(game, 70, 40, 50,
+                75, 20, 4, 3, "blue archer",
+                "magier", new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
+                null, 6, 500, 10));
+            warriorTypes.Add(new WarriorType(game, 50, -80, 30,
+                100, 0, 4, 3, "white mage",
+                null, new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
+                new Point[] { new Point(-1,-1), new Point(1,1), 
+					new Point(1,-1), new Point(-1,1), new Point(-2, 0), 
+					new Point(2, 0), new Point(0, 2), new Point(0, -2), 
+					new Point(1,0), new Point(-1,0),new Point(0,1),
+					new Point(0,-1),new Point(0,0)},
+                null, 500, 0));
+            warriorTypes.Add(new WarriorType(game, 90, 60, 50,
+                50, 50, 2, 2, "crocy",
+                "firedragon", new int[] { 1, 8, 8, 11, 9, 11, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
+                null, 1, 500, 0));
+            warriorTypes.Add(new WarriorType(game, 70, 40, 45,
+                75, 25, 3, 3, "magier",
+                "axestan shield", new int[] { 9, 7, 7, 9, 9, 10, 9 }, new int[] { 1000, 500, 1000, 1500, 1000, 1000, 1000 },
+                null, 3, 500, 10));
 
             
 		}
@@ -150,6 +195,34 @@ namespace CapitalStrategy
             windows[gameState].Draw();
 			base.Draw(gameTime);
 		}
+
+        public WarriorType getWarriorType(String warriorType) {
+            if (warriorType.Equals("axestan warrior")) 
+            {
+                return warriorTypes[0];
+            }
+            if (warriorType.Equals("firedragon")) 
+            {
+                return warriorTypes[1];
+            }
+            if (warriorType.Equals("blue archer")) 
+            {
+                return warriorTypes[2];
+            }
+            if (warriorType.Equals("white mage")) 
+            {
+                return warriorTypes[3];
+            }
+            if (warriorType.Equals("crocy")) 
+            {
+                return warriorTypes[4];
+            }
+            if (warriorType.Equals("magier")) 
+            {
+                return warriorTypes[5];
+            }
+            return warriorTypes[1];
+        }
 
 	}
 }
