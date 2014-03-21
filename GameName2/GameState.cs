@@ -11,5 +11,6 @@ namespace CapitalStrategy
         public const int mainMenu = 1;
         public const int customizeMenu = 2;
         public const int onlineMatch = 3;
+        public const int totalStates = 4;
     }
 }

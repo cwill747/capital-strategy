@@ -52,8 +52,13 @@ namespace CapitalStrategy
 
 		MouseWrapper mouseState;
         public int gameState { get; set; }
-        
 
+        public static SpriteFont smallFont;
+        public static Texture2D inputPaneImage;
+        public static Texture2D button;
+
+        // List of windows. GameState class determines index of current window
+        public Windows.Window[] windows { get; set; }
         
 
 		public Game1()
@@ -79,9 +84,19 @@ namespace CapitalStrategy
 			this.WARRIORHEIGHT = this.BOARDHEIGHT * 2 / this.ROWS;
 			TouchPanel.EnabledGestures = GestureType.Tap;
 			isYourTurn = true;
-
             this.gameState = GameState.login;
 			this.turnProgress = TurnProgress.beginning;
+            this.windows = new Windows.Window[GameState.totalStates];
+            this.windows[GameState.login] = new Windows.Login(this);
+
+            foreach (Windows.Window window in windows)
+            {
+                if (window != null)
+                {
+
+                    window.Initialize();
+                }
+            }
 			base.Initialize();
 		}
 
@@ -95,6 +110,10 @@ namespace CapitalStrategy
 			spriteBatch = new SpriteBatch(GraphicsDevice);
 
 			// TODO: use this.Content to load your game content here
+            Game1.inputPaneImage = Content.Load<Texture2D>("GUI/inputPane");
+            Game1.smallFont = Content.Load<SpriteFont>("fonts/smallFont");
+            Game1.button = Content.Load<Texture2D>("GUI/button");
+
 			background = Content.Load<Texture2D>("stars");
 			red = Content.Load<Texture2D>("colors/red");
 			white = Content.Load<Texture2D>("colors/white");
@@ -151,6 +170,16 @@ namespace CapitalStrategy
 
 
 			mouseState = new MouseWrapper(board, Mouse.GetState());
+
+            foreach (Windows.Window window in windows)
+            {
+                if (window != null)
+                {
+                    window.LoadContent();
+                }
+            }
+
+            
 		}
 
 		/// <summary>
@@ -169,53 +198,58 @@ namespace CapitalStrategy
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Update(GameTime gameTime)
 		{
-			if (this.currentTurnWarrior != null)
-			{
-				if (this.turnProgress == TurnProgress.moving)
-				{
-					Boolean finishedMoving = currentTurnWarrior.move(gameTime);
-					if (finishedMoving)
-					{
-						this.turnProgress = TurnProgress.moved;
-					}
-				}
-				if (this.turnProgress == TurnProgress.moved)
-				{
-					this.currentTurnWarrior.drawAttackRange();
-				}
-				if (this.turnProgress == TurnProgress.targetAcquired)
-				{
-					this.board.tileTints[this.targetRow][this.targetCol] = Warrior.targetAcquiredColor;
-				}
-				if (this.turnProgress == TurnProgress.attacked)
-				{
-					// calculate damage
-					this.currentTurnWarrior.strike(this.beingAttacked);
-					this.turnProgress = TurnProgress.beginning;
-					this.isYourTurn = !this.isYourTurn;
-				}
-			}
-			mouseState.update(Mouse.GetState());
-			if (mouseState.wasClicked() && mouseState.isOverGrid)
-			{
-				this.handleClickOverGrid();
-			}
-			if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-				Exit();
+            if (gameState == GameState.onlineMatch)
+            {
+                if (this.currentTurnWarrior != null)
+                {
+                    if (this.turnProgress == TurnProgress.moving)
+                    {
+                        Boolean finishedMoving = currentTurnWarrior.move(gameTime);
+                        if (finishedMoving)
+                        {
+                            this.turnProgress = TurnProgress.moved;
+                        }
+                    }
+                    if (this.turnProgress == TurnProgress.moved)
+                    {
+                        this.currentTurnWarrior.drawAttackRange();
+                    }
+                    if (this.turnProgress == TurnProgress.targetAcquired)
+                    {
+                        this.board.tileTints[this.targetRow][this.targetCol] = Warrior.targetAcquiredColor;
+                    }
+                    if (this.turnProgress == TurnProgress.attacked)
+                    {
+                        // calculate damage
+                        this.currentTurnWarrior.strike(this.beingAttacked);
+                        this.turnProgress = TurnProgress.beginning;
+                        this.isYourTurn = !this.isYourTurn;
+                    }
+                }
+                mouseState.update(Mouse.GetState());
+                if (mouseState.wasClicked() && mouseState.isOverGrid)
+                {
+                    this.handleClickOverGrid();
+                }
+                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                    Exit();
 
-			// TODO: Add your update logic here
-			for (int row = 0; row < board.warriors.Length; row++)
-			{
-				for (int col = 0; col < board.warriors[row].Length; col++)
-				{
-					Warrior warrior = board.warriors[row][col];
-					if (warrior != null)
-					{
-						warrior.update(gameTime, this);
-					}
+                // TODO: Add your update logic here
+                for (int row = 0; row < board.warriors.Length; row++)
+                {
+                    for (int col = 0; col < board.warriors[row].Length; col++)
+                    {
+                        Warrior warrior = board.warriors[row][col];
+                        if (warrior != null)
+                        {
+                            warrior.update(gameTime, this);
+                        }
 
-				}
-			}
+                    }
+                }
+            }
+            windows[gameState].Update(gameTime);
+
 			base.Update(gameTime);
 		}
 
@@ -225,30 +259,33 @@ namespace CapitalStrategy
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw(GameTime gameTime)
 		{
+
 			GraphicsDevice.Clear(Color.CornflowerBlue);
-
-			// TODO: Add your drawing code here
-			spriteBatch.Begin();
-			spriteBatch.Draw(background, backgroundRec, Color.White);
-			spriteBatch.End();
-			board.drawTiles(spriteBatch);
-			for (int row = 0; row < board.warriors.Length; row++)
-			{
-				for (int col = 0; col < board.warriors[row].Length; col++)
-				{
-					Warrior warrior = board.warriors[row][col];
-					if (warrior != null)
-					{
-						warrior.draw();
-					}
-				}
-			}
-			if (mouseState.isOverGrid && board.warriors[mouseState.row][mouseState.col] != null)
-			{
-				this.drawHealthBar(mouseState.row, mouseState.col);
-			}
-			this.drawInfoFrame(this.selectedWarrior);
-
+            if (gameState == GameState.onlineMatch)
+            {
+                // TODO: Add your drawing code here
+                spriteBatch.Begin();
+                spriteBatch.Draw(background, backgroundRec, Color.White);
+                spriteBatch.End();
+                board.drawTiles(spriteBatch);
+                for (int row = 0; row < board.warriors.Length; row++)
+                {
+                    for (int col = 0; col < board.warriors[row].Length; col++)
+                    {
+                        Warrior warrior = board.warriors[row][col];
+                        if (warrior != null)
+                        {
+                            warrior.draw();
+                        }
+                    }
+                }
+                if (mouseState.isOverGrid && board.warriors[mouseState.row][mouseState.col] != null)
+                {
+                    this.drawHealthBar(mouseState.row, mouseState.col);
+                }
+                this.drawInfoFrame(this.selectedWarrior);
+            }
+            windows[gameState].Draw();
 
 			base.Draw(gameTime);
 		}
