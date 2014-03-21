@@ -51,6 +51,7 @@ namespace CapitalStrategy
 		public Warrior beingAttacked { get; set; }
 
 		MouseWrapper mouseState;
+        public int gameState { get; set; }
         
 
         
@@ -78,7 +79,8 @@ namespace CapitalStrategy
 			this.WARRIORHEIGHT = this.BOARDHEIGHT * 2 / this.ROWS;
 			TouchPanel.EnabledGestures = GestureType.Tap;
 			isYourTurn = true;
-            
+
+            this.gameState = GameState.login;
 			this.turnProgress = TurnProgress.beginning;
 			base.Initialize();
 		}
