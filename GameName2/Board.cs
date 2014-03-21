@@ -4,6 +4,11 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Storage;
+using Microsoft.Xna.Framework.GamerServices;
+using Microsoft.Xna.Framework.Input.Touch;
 
 namespace CapitalStrategy
 {
@@ -75,6 +80,17 @@ namespace CapitalStrategy
                     tileTints[i][j] = Color.White;
                 }
             }
+        }
+        public Vector2 clickOverGrid(float x, float y)
+        {
+            int clickRow = (int)((y - this.location.Y) / (this.location.Height / this.rows));
+            int clickCol = (int)((x - this.location.X) / (this.location.Width / this.cols));
+            
+            return new Vector2(clickRow, clickCol);
+        }
+        public Boolean isClickOverGrid(float x, float y)
+        {
+            return x - this.location.X < this.location.Width && y - this.location.Y < this.location.Height && x - this.location.X >= 0 && y - this.location.Y >= 0;
         }
     }
 }

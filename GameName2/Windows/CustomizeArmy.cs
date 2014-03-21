@@ -20,6 +20,7 @@ namespace CapitalStrategy.Windows
         public BackButton backButton { get; set; }
         public MouseState oldMouseState { get; set; }
         public Board board { get; set; }
+        public Warrior currentWarrior { get; set; }
 
         public CustomizeArmy(Game1 windowManager)
         {
@@ -52,6 +53,27 @@ namespace CapitalStrategy.Windows
                     if (backButton.checkClick(newMouseState))
                     {
                     }
+                    
+                    if (board.isClickOverGrid(newMouseState.X, newMouseState.Y))
+                    {
+                        Vector2 coord = board.clickOverGrid(newMouseState.X, newMouseState.Y);
+                        currentWarrior = board.warriors[(int)coord.X][(int)coord.Y];
+                        board.warriors[(int)coord.X][(int)coord.Y] = null;
+                        if (currentWarrior != null)
+                        {
+                            currentWarrior.x = newMouseState.X;
+                            currentWarrior.y = newMouseState.Y;
+                        }
+                    }
+                }
+                else if (newMouseState.LeftButton == ButtonState.Pressed && oldMouseState.LeftButton == ButtonState.Pressed)
+                {
+                    // update current warrior location
+                    if (currentWarrior != null)
+                    {
+                        currentWarrior.x = newMouseState.X;
+                        currentWarrior.y = newMouseState.Y;
+                    }
                 }
                 if (newMouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton != ButtonState.Released)
                 {
@@ -61,6 +83,28 @@ namespace CapitalStrategy.Windows
                         int newGameState = Game1.gameStates.Pop();
                         this.windowManager.gameState = newGameState;
                         this.windowManager.windows[newGameState].Initialize();
+                    }
+                    if (currentWarrior != null)
+                    {
+                        Vector2 rowCol = board.clickOverGrid(currentWarrior.x, currentWarrior.y);
+                        int row = (int)rowCol.X;
+                        int col = (int)rowCol.Y;
+                        if (!board.isClickOverGrid(currentWarrior.x, currentWarrior.y))
+                        {
+                            board.warriors[(int)currentWarrior.row][(int)currentWarrior.col] = currentWarrior;
+                        }
+                        else if (board.warriors[row][col] == null)
+                        {
+                            currentWarrior.row = row;
+                            currentWarrior.col = col;
+                            board.warriors[row][col] = currentWarrior;
+                        }
+                        else
+                        {
+                            board.warriors[(int)currentWarrior.row][(int)currentWarrior.col] = currentWarrior;
+                        }
+                        currentWarrior = null;
+                        
                     }
                 }
             }
@@ -82,12 +126,16 @@ namespace CapitalStrategy.Windows
                     //System.Diagnostics.Debug.WriteLine("draw");
                     if (warrior != null)
                     {
-                        this.windowManager.spriteBatch.Begin();
-                        this.windowManager.spriteBatch.DrawString(Game1.smallFont, "hi", board.getLocation(row, col), Color.White);
-                        this.windowManager.spriteBatch.End();
+                        //this.windowManager.spriteBatch.Begin();
+                        //this.windowManager.spriteBatch.DrawString(Game1.smallFont, "hi", board.getLocation(row, col), Color.White);
+                        //this.windowManager.spriteBatch.End();
                         warrior.draw();
                     }
                 }
+            }
+            if (currentWarrior != null)
+            {
+                currentWarrior.drawToLocation();
             }
             this.backButton.drawBackButton(this.windowManager.spriteBatch);
         }

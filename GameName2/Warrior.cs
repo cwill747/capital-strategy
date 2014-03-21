@@ -34,6 +34,9 @@ namespace CapitalStrategy
 		public Board board { get; set; }
 		public int curDelay { get; set; }
 
+        public float x { get; set; }
+        public float y { get; set; }
+
 
 		public Warrior(Board board, double row, double col, int direction, int state, Boolean isYours, WarriorType warriorType) : base(warriorType)
 		{
@@ -72,6 +75,17 @@ namespace CapitalStrategy
 			source.draw(spriteBatch, destination, direction, (int) stateDepth, color);
             Vector2 vec = new Vector2(0, 0);
 		}
+        public void drawToLocation()
+        {
+            SpriteBatch spriteBatch = this.game.spriteBatch;
+            Vector2 destinationLoc = new Vector2(this.x, this.y);
+            //string EntityInfo = "This is a warrior";
+            SpriteFont menufont = this.game.menufont;
+            Rectangle destination = new Rectangle((int)destinationLoc.X - (board.WARRIORWIDTH - board.location.Width / board.cols) / 2, (int)destinationLoc.Y - (board.WARRIORHEIGHT - board.location.Height / board.rows) / 2 - board.location.Height / board.rows / 3, board.WARRIORWIDTH, board.WARRIORHEIGHT);
+            ImageAtlas source = this.states[state];
+            Color color = this.isYours ? Color.LightBlue : Color.LightSalmon;
+            source.draw(spriteBatch, destination, direction, (int)stateDepth, color);
+        }
 
         public void drawInArbitraryLocation(int x, int y)
         {
