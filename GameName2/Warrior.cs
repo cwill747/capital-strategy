@@ -47,16 +47,50 @@ namespace CapitalStrategy
 			this.curDelay = 0;
 		}
 
+        public Warrior(Warrior previousWarrior) : base(previousWarrior)
+        {
+            this.board = previousWarrior.board;
+            this.row = previousWarrior.row;
+            this.col = previousWarrior.col;
+            this.direction = Direction.S;
+            this.state = State.walking;
+            this.health = previousWarrior.maxHealth;
+            this.stateDepth = 0;
+            this.curDelay = 0;
+            this.isYours = previousWarrior.isYours;
+        }
 		public void draw()
 		{
 			SpriteBatch spriteBatch = this.game.spriteBatch;
 			Vector2 destinationLoc = this.game.board.getLocation(this.row, this.col);
-
+            string EntityInfo = "This is a warrior";
+            SpriteFont menufont = this.game.menufont;
 			Rectangle destination = new Rectangle((int)destinationLoc.X - (game.WARRIORWIDTH - game.BOARDWIDTH / game.COLS) / 2, (int)destinationLoc.Y - (game.WARRIORHEIGHT - game.BOARDHEIGHT / game.ROWS) / 2 - game.BOARDHEIGHT / game.ROWS / 3, game.WARRIORWIDTH, game.WARRIORHEIGHT);
 			ImageAtlas source = this.states[state];
 			Color color = this.isYours ? Color.LightBlue : Color.LightSalmon;
 			source.draw(spriteBatch, destination, direction, (int) stateDepth, color);
+            Vector2 vec = new Vector2(0, 0);
 		}
+
+        public void drawInArbitraryLocation(int x, int y)
+        {
+            SpriteBatch spriteBatch = this.game.spriteBatch;
+			Rectangle destination = new Rectangle((int)x - (game.WARRIORWIDTH - game.BOARDWIDTH / game.COLS) / 2, (int)y - (game.WARRIORHEIGHT - game.BOARDHEIGHT / game.ROWS) / 2 - game.BOARDHEIGHT / game.ROWS / 3, game.WARRIORWIDTH, game.WARRIORHEIGHT);
+            this.stateDepth = 0;
+            this.state = State.walking;
+            this.direction = Direction.S;
+            ImageAtlas source = this.states[state];
+            Color color = this.isYours ? Color.LightBlue : Color.LightSalmon;
+            source.draw(spriteBatch, destination, this.direction, (int) this.stateDepth, color);
+        }
+
+        public void drawWarriorType(int x, int y)
+        {
+            this.game.spriteBatch.Begin();
+            string selwarrior = this.type.ToUpperInvariant();
+            this.game.spriteBatch.DrawString(this.game.infofont, selwarrior, new Vector2(x, y), Color.White);
+            this.game.spriteBatch.End();
+        }
 		public void update(GameTime gameTime, Game1 game)
 		{
 			int millis = gameTime.ElapsedGameTime.Milliseconds;
