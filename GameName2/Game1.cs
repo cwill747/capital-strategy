@@ -301,8 +301,11 @@ namespace CapitalStrategy
 						return;
 					}
 				}
+				else {
+					this.turnProgress = TurnProgress.moved;
+					return;
+				}
 			}
-
 		}
 
 		public int drawHealthBar(int row, int col)
