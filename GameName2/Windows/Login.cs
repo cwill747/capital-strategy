@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Storage;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Input.Touch;
+using MySql.Data.MySqlClient;
 using CapitalStrategy.GUI;
 #endregion
 
@@ -26,6 +27,9 @@ namespace CapitalStrategy.Windows
         public KeyboardState oldState { get; set; }
         public MouseState oldMouseState { get; set; }
         public Button submitButton { get; set; }
+        public String errorMessage { get; set; }
+        public Vector2 errorMessageLoc { get; set; }
+        public Rectangle capitalLogoLoc { get; set; }
 
         public Login(Game1 windowManager)
         {
@@ -36,6 +40,7 @@ namespace CapitalStrategy.Windows
         {
             this.oldState = new KeyboardState();
             this.oldMouseState = new MouseState();
+            this.errorMessage = "";
         }
 
         public void LoadContent()
@@ -43,11 +48,15 @@ namespace CapitalStrategy.Windows
             this.smallFont = windowManager.Content.Load<SpriteFont>("fonts/smallfont");
             this.background = windowManager.Content.Load<Texture2D>("login/loginBackground");
             this.capitalLogo = windowManager.Content.Load<Texture2D>("login/capital");
-            int leftEdge = 250;
-            int startY = 300;
-            this.usernameInput = new InputDialog("username", new Rectangle(leftEdge, startY, 170, 25), isActive: true);
-            this.passwordInput = new InputDialog("password", new Rectangle(leftEdge, startY + 40, 170, 25), mask: true);
-            this.submitButton = new Button("SUBMIT", new Rectangle(leftEdge-85, startY + 80, 250, 50));
+            int displayWidth = 325;
+            int displayHeight = 340;
+            int leftEdge = (windowManager.graphics.PreferredBackBufferWidth - displayWidth) / 2;
+            int startY = (windowManager.graphics.PreferredBackBufferHeight - displayHeight) / 2;
+            this.capitalLogoLoc = new Rectangle(leftEdge, startY, 325, 180);
+            this.usernameInput = new InputDialog("username", new Rectangle(leftEdge + 125, startY + 210, 170, 25), isActive: true);
+            this.passwordInput = new InputDialog("password", new Rectangle(leftEdge + 125, startY + 250, 170, 25), mask: true);
+            this.submitButton = new Button("SUBMIT", new Rectangle(leftEdge + 40, startY + 290, 250, 50));
+            this.errorMessageLoc = new Vector2(leftEdge + 25, startY + 360);
         }
 
         public void UnloadContent()
@@ -105,6 +114,7 @@ namespace CapitalStrategy.Windows
                     }
                     if (this.submitButton.checkClick(newMouseState))
                     {
+                        this.login();
                     }
                 }
                 if (newMouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
@@ -119,12 +129,46 @@ namespace CapitalStrategy.Windows
         public void Draw()
         {
             windowManager.spriteBatch.Begin();
-            windowManager.spriteBatch.Draw(this.background, new Rectangle(0, 0, this.windowManager.BOARDWIDTH, this.windowManager.BOARDHEIGHT), Color.White);
-            windowManager.spriteBatch.Draw(this.capitalLogo, new Rectangle(125, 90, 325, 180), Color.White);
+            windowManager.spriteBatch.Draw(this.background, new Rectangle(0, 0, this.windowManager.graphics.PreferredBackBufferWidth, this.windowManager.graphics.PreferredBackBufferHeight), Color.White);
+            windowManager.spriteBatch.Draw(this.capitalLogo, this.capitalLogoLoc, Color.White);
+            windowManager.spriteBatch.DrawString(Game1.smallFont, this.errorMessage, this.errorMessageLoc, Color.Red);
             windowManager.spriteBatch.End();
             usernameInput.draw(windowManager.spriteBatch);
             this.passwordInput.draw(windowManager.spriteBatch);
             this.submitButton.draw(windowManager.spriteBatch);
+            
+        }
+        public void login()
+        {
+            DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
+            if (db.OpenConnection() == true)
+            {
+                string query = "SELECT * FROM users WHERE username=@username and password=@password";
+                MySqlCommand cmd = new MySqlCommand(query, db.connection);
+                cmd.Parameters.AddWithValue("@username", this.usernameInput.content);
+                cmd.Parameters.AddWithValue("@password", this.passwordInput.content);
+                //Create a data reader and Execute the command
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                //Read the data and store them in the list
+                if (dataReader.Read())
+                {
+                    windowManager.gameState = GameState.mainMenu;
+                    this.errorMessage = "";
+                    //System.Diagnostics.Debug.WriteLine(dataReader["username"]);
+                    //System.Diagnostics.Debug.WriteLine(dataReader["password"]);
+                }
+                else
+                {
+                    this.errorMessage = "Invalid username or password.";
+                }
+
+                //close Data Reader
+                dataReader.Close();
+            }
+            else
+            {
+                this.errorMessage = "Could not connect to DB.";
+            }
         }
     }
 }

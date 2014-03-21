@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Storage;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Input.Touch;
 using System.Xml;
-using MySql.Data.MySqlClient;
+
 #endregion
 
 namespace CapitalStrategy
@@ -38,7 +38,7 @@ namespace CapitalStrategy
 		public Texture2D moveIcon;
         public SpriteFont menufont;
         public SpriteFont infofont;
-		GraphicsDeviceManager graphics;
+		public GraphicsDeviceManager graphics;
 		public SpriteBatch spriteBatch { get; set; }
 		Texture2D background;
 		Rectangle backgroundRec;
@@ -71,34 +71,15 @@ namespace CapitalStrategy
 		public Game1()
 			: base()
 		{
-			graphics = new GraphicsDeviceManager(this);
-			graphics.PreferredBackBufferWidth = this.BOARDWIDTH + 400;
-			graphics.PreferredBackBufferHeight = this.BOARDHEIGHT + 50;
+			this.graphics = new GraphicsDeviceManager(this);
+			this.graphics.PreferredBackBufferWidth = this.BOARDWIDTH + 400;
+			this.graphics.PreferredBackBufferHeight = this.BOARDHEIGHT + 50;
 			IsMouseVisible = true;
 			Content.RootDirectory = "Content";
 		}
 
 
-        public void login()
-        {
-            DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
-            string query = "SELECT * FROM users";
-            if (db.OpenConnection() == true)
-            {
-                MySqlCommand cmd = new MySqlCommand(query, db.connection);
-                //Create a data reader and Execute the command
-                MySqlDataReader dataReader = cmd.ExecuteReader();
-                //Read the data and store them in the list
-                while (dataReader.Read())
-                {
-                    System.Diagnostics.Debug.WriteLine(dataReader["username"]);
-                    System.Diagnostics.Debug.WriteLine(dataReader["password"]);
-                }
-
-                //close Data Reader
-                dataReader.Close();
-            }
-        }
+        
 		/// <summary>
 		/// Allows the game to perform any initialization it needs to before starting to run.
 		/// This is where it can query for any required services and load any non-graphic
@@ -116,6 +97,7 @@ namespace CapitalStrategy
 			this.turnProgress = TurnProgress.beginning;
             this.windows = new Windows.Window[GameState.totalStates];
             this.windows[GameState.login] = new Windows.Login(this);
+            this.windows[GameState.gameMatch] = new Windows.GameMatch(this);
 
             foreach (Windows.Window window in windows)
             {
@@ -126,7 +108,6 @@ namespace CapitalStrategy
                 }
             }
 			base.Initialize();
-            login();
 		}
 
 		/// <summary>
@@ -255,7 +236,7 @@ namespace CapitalStrategy
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Update(GameTime gameTime)
 		{
-            if (gameState == GameState.onlineMatch)
+            if (gameState == GameState.gameMatch)
             {
                 if (this.currentTurnWarrior != null)
                 {
@@ -324,7 +305,7 @@ namespace CapitalStrategy
 		{
 
 			GraphicsDevice.Clear(Color.CornflowerBlue);
-            if (gameState == GameState.onlineMatch)
+            if (gameState == GameState.gameMatch)
             {
                 // TODO: Add your drawing code here
                 spriteBatch.Begin();
