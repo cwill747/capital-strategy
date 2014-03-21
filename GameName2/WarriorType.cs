@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using CapitalStrategy.Windows;
 
 namespace CapitalStrategy
 {
@@ -13,7 +14,7 @@ namespace CapitalStrategy
 	public class WarriorType
 	{
 		String[] stateStrings = { "stopped", "walking", "running", "attack", "been hit", "tipping over", "talking" };
-		public Game1 game { get; set; }
+		public GameMatch game { get; set; }
 
 		public int maxHealth { get; set; }
 		public int attack { get; set; }
@@ -33,7 +34,7 @@ namespace CapitalStrategy
 
 		// note: will need to add way of showing attack area
 
-		public WarriorType(Game1 game, int maxHealth, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, String bonus, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate)
+		public WarriorType(GameMatch game, int maxHealth, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, String bonus, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate)
 		{
 			this.game = game;
 			this.maxHealth = maxHealth;

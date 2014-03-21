@@ -50,8 +50,8 @@ namespace CapitalStrategy.Windows
             this.capitalLogo = windowManager.Content.Load<Texture2D>("login/capital");
             int displayWidth = 325;
             int displayHeight = 340;
-            int leftEdge = (windowManager.graphics.PreferredBackBufferWidth - displayWidth) / 2;
-            int startY = (windowManager.graphics.PreferredBackBufferHeight - displayHeight) / 2;
+            int leftEdge = (windowManager.Window.ClientBounds.Width - displayWidth) / 2;
+            int startY = (windowManager.Window.ClientBounds.Height - displayHeight) / 2;
             this.capitalLogoLoc = new Rectangle(leftEdge, startY, 325, 180);
             this.usernameInput = new InputDialog("username", new Rectangle(leftEdge + 125, startY + 210, 170, 25), isActive: true);
             this.passwordInput = new InputDialog("password", new Rectangle(leftEdge + 125, startY + 250, 170, 25), mask: true);
@@ -129,7 +129,7 @@ namespace CapitalStrategy.Windows
         public void Draw()
         {
             windowManager.spriteBatch.Begin();
-            windowManager.spriteBatch.Draw(this.background, new Rectangle(0, 0, this.windowManager.graphics.PreferredBackBufferWidth, this.windowManager.graphics.PreferredBackBufferHeight), Color.White);
+            windowManager.spriteBatch.Draw(this.background, new Rectangle(0, 0, this.windowManager.Window.ClientBounds.Width, this.windowManager.Window.ClientBounds.Height), Color.White);
             windowManager.spriteBatch.Draw(this.capitalLogo, this.capitalLogoLoc, Color.White);
             windowManager.spriteBatch.DrawString(Game1.smallFont, this.errorMessage, this.errorMessageLoc, Color.Red);
             windowManager.spriteBatch.End();
@@ -152,7 +152,7 @@ namespace CapitalStrategy.Windows
                 //Read the data and store them in the list
                 if (dataReader.Read())
                 {
-                    windowManager.gameState = GameState.mainMenu;
+                    windowManager.gameState = GameState.gameMatch;
                     this.errorMessage = "";
                     //System.Diagnostics.Debug.WriteLine(dataReader["username"]);
                     //System.Diagnostics.Debug.WriteLine(dataReader["password"]);

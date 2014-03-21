@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using CapitalStrategy.Windows;
 #endregion
 
 namespace CapitalStrategy
@@ -63,7 +64,7 @@ namespace CapitalStrategy
 		{
 			SpriteBatch spriteBatch = this.game.spriteBatch;
 			Vector2 destinationLoc = this.game.board.getLocation(this.row, this.col);
-            string EntityInfo = "This is a warrior";
+            //string EntityInfo = "This is a warrior";
             SpriteFont menufont = this.game.menufont;
 			Rectangle destination = new Rectangle((int)destinationLoc.X - (game.WARRIORWIDTH - game.BOARDWIDTH / game.COLS) / 2, (int)destinationLoc.Y - (game.WARRIORHEIGHT - game.BOARDHEIGHT / game.ROWS) / 2 - game.BOARDHEIGHT / game.ROWS / 3, game.WARRIORWIDTH, game.WARRIORHEIGHT);
 			ImageAtlas source = this.states[state];
@@ -91,7 +92,7 @@ namespace CapitalStrategy
             this.game.spriteBatch.DrawString(this.game.infofont, selwarrior, new Vector2(x, y), Color.White);
             this.game.spriteBatch.End();
         }
-		public void update(GameTime gameTime, Game1 game)
+		public void update(GameTime gameTime, GameMatch game)
 		{
 			int millis = gameTime.ElapsedGameTime.Milliseconds;
 			if (curDelay <= 0)
