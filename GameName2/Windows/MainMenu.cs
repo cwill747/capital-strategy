@@ -20,6 +20,7 @@ namespace CapitalStrategy.Windows
         public Button playGameButton { get; set; }
         public Button customizeArmyButton { get; set; }
         public MouseState pastState { get; set; }
+        public BackButton backButton { get; set; }
         
         public MainMenu(Game1 windowManager)
         {
@@ -39,6 +40,7 @@ namespace CapitalStrategy.Windows
             int offsetY = (this.windowManager.Window.ClientBounds.Height - height) / 2;
             this.playGameButton = new Button("PLAY GAME!", new Rectangle(offsetX, offsetY, 350, 100), Game1.menuFont);
             this.customizeArmyButton = new Button("CUSTOMIZE ARMY", new Rectangle(offsetX, offsetY + 130, 350, 100), Game1.menuFont);
+            this.backButton = new BackButton();
 
         }
 
@@ -56,6 +58,9 @@ namespace CapitalStrategy.Windows
                     if (this.customizeArmyButton.checkClick(newState))
                     {
                     }
+                    if (this.backButton.checkClick(newState))
+                    {
+                    }
                 }
                 if (newState.LeftButton == ButtonState.Released && pastState.LeftButton != ButtonState.Released)
                 {
@@ -63,8 +68,20 @@ namespace CapitalStrategy.Windows
                     {
                         this.windowManager.gameState = GameState.gameMatch;
                         this.windowManager.windows[GameState.gameMatch].Initialize();
+                        Game1.gameStates.Push(GameState.mainMenu);
                     }
-                    this.customizeArmyButton.unClick(newState);
+                    if (this.customizeArmyButton.unClick(newState))
+                    {
+                        this.windowManager.gameState = GameState.customizeArmy;
+                        this.windowManager.windows[GameState.customizeArmy].Initialize();
+                        Game1.gameStates.Push(GameState.mainMenu);
+                    }
+                    if (this.backButton.unClick(newState))
+                    {
+                        int newGameState = Game1.gameStates.Pop();
+                        this.windowManager.gameState = newGameState;
+                        this.windowManager.windows[newGameState].Initialize();
+                    }
                 }
             }
             this.pastState = newState;
@@ -77,6 +94,7 @@ namespace CapitalStrategy.Windows
             this.windowManager.spriteBatch.End();
             this.playGameButton.draw(this.windowManager.spriteBatch);
             this.customizeArmyButton.draw(this.windowManager.spriteBatch);
+            this.backButton.drawBackButton(windowManager.spriteBatch);
         }
     }
 }

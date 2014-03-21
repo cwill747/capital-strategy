@@ -37,6 +37,9 @@ namespace CapitalStrategy.Windows
 
         public void Initialize()
         {
+            Game1.gameStates.Clear();
+            windowManager.username = "";
+            windowManager.password = "";
             this.oldState = new KeyboardState();
             this.oldMouseState = new MouseState();
             this.errorMessage = "";
@@ -157,6 +160,7 @@ namespace CapitalStrategy.Windows
                 {
                     windowManager.gameState = GameState.mainMenu;
                     this.windowManager.windows[GameState.mainMenu].Initialize();
+                    Game1.gameStates.Push(GameState.login);
                     this.windowManager.username = username;
                     this.windowManager.password = password;
                     this.errorMessage = "";

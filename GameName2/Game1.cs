@@ -25,6 +25,7 @@ namespace CapitalStrategy
 
 		
         public int gameState { get; set; }
+        public static Stack<int> gameStates { get; set; }
         public String username { get; set; }
         public String password { get; set; }
 
@@ -34,6 +35,7 @@ namespace CapitalStrategy
         public static Texture2D inputPaneImage;
         public static Texture2D button;
         public static Texture2D background;
+        public static Texture2D backButton;
         
 
         // List of windows. GameState class determines index of current window
@@ -65,11 +67,13 @@ namespace CapitalStrategy
 			TouchPanel.EnabledGestures = GestureType.Tap;
 			
             this.gameState = GameState.login;
+            Game1.gameStates = new Stack<int>();
 			
             this.windows = new Windows.Window[GameState.totalStates];
             this.windows[GameState.login] = new Windows.Login(this);
             this.windows[GameState.gameMatch] = new Windows.GameMatch(this);
             this.windows[GameState.mainMenu] = new Windows.MainMenu(this);
+            this.windows[GameState.customizeArmy] = new Windows.CustomizeArmy(this);
 
             foreach (Windows.Window window in windows)
             {
@@ -93,11 +97,13 @@ namespace CapitalStrategy
 
 			// TODO: use this.Content to load your game content here
             Game1.inputPaneImage = Content.Load<Texture2D>("GUI/inputPane");
-            Game1.smallFont = Content.Load<SpriteFont>("fonts/smallFont");
             Game1.button = Content.Load<Texture2D>("GUI/button");
+            Game1.backButton = Content.Load<Texture2D>("GUI/back_button");
             Game1.background = Content.Load<Texture2D>("login/loginBackground");
+
             Game1.gameFont = Content.Load<SpriteFont>("fonts/gamefont");
             Game1.menuFont = Content.Load<SpriteFont>("fonts/menufont");
+            Game1.smallFont = Content.Load<SpriteFont>("fonts/smallFont");
            
             foreach (Windows.Window window in windows)
             {

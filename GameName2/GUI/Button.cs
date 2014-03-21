@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Input.Touch;
 
 namespace CapitalStrategy.GUI
 {
-    class Button
+    public class Button
     {
         public Rectangle location { get; set; }
         public Boolean isPressed { get; set; }

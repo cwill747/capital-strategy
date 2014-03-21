@@ -38,7 +38,7 @@ namespace CapitalStrategy
             this.height = height;
             int tileWidth = width / warriors[0].Length;
             int tileHeight = height / warriors.Length;
-            this.tileAtlas = new ImageAtlas(tileImage, tileWidth, tileHeight, 13, 20, 108);
+            this.tileAtlas = new ImageAtlas(tileImage, tileWidth, tileHeight, 13, 20, 56);
         }
 
         public void drawTiles(SpriteBatch spriteBatch)
