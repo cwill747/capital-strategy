@@ -21,6 +21,7 @@ namespace CapitalStrategy.Windows
         public Button customizeArmyButton { get; set; }
         public MouseState pastState { get; set; }
         public BackButton backButton { get; set; }
+        public Vector2 welcomeVector { get; set; }
         
         public MainMenu(Game1 windowManager)
         {
@@ -35,11 +36,12 @@ namespace CapitalStrategy.Windows
         public void LoadContent()
         {
             int width = 350;
-            int height = 230;
+            int height = 330;
             int offsetX = (this.windowManager.Window.ClientBounds.Width - width) / 2;
             int offsetY = (this.windowManager.Window.ClientBounds.Height - height) / 2;
-            this.playGameButton = new Button("PLAY GAME!", new Rectangle(offsetX, offsetY, 350, 100), Game1.menuFont);
-            this.customizeArmyButton = new Button("CUSTOMIZE ARMY", new Rectangle(offsetX, offsetY + 130, 350, 100), Game1.menuFont);
+            this.welcomeVector = new Vector2(offsetX, offsetY);
+            this.playGameButton = new Button("PLAY GAME!", new Rectangle(offsetX, offsetY+100, 350, 100), Game1.menuFont);
+            this.customizeArmyButton = new Button("CUSTOMIZE ARMY", new Rectangle(offsetX, offsetY + 230, 350, 100), Game1.menuFont);
             this.backButton = new BackButton();
 
         }
@@ -91,6 +93,7 @@ namespace CapitalStrategy.Windows
         {
             this.windowManager.spriteBatch.Begin();
             windowManager.spriteBatch.Draw(Game1.background, new Rectangle(0, 0, this.windowManager.Window.ClientBounds.Width, this.windowManager.Window.ClientBounds.Height), Color.White);
+            this.windowManager.spriteBatch.DrawString(Game1.gameFont, "Welcome, " + this.windowManager.username + "!", this.welcomeVector, Color.White);
             this.windowManager.spriteBatch.End();
             this.playGameButton.draw(this.windowManager.spriteBatch);
             this.customizeArmyButton.draw(this.windowManager.spriteBatch);
