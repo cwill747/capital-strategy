@@ -221,7 +221,7 @@ namespace CapitalStrategy.Windows
         {
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            spriteBatch.Draw(background, backgroundRec, Color.White);
+            spriteBatch.Draw(Game1.background, backgroundRec, Color.White);
             spriteBatch.End();
             board.drawTiles(spriteBatch);
             for (int row = 0; row < board.warriors.Length; row++)

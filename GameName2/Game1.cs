@@ -25,10 +25,16 @@ namespace CapitalStrategy
 
 		
         public int gameState { get; set; }
+        public String username { get; set; }
+        public String password { get; set; }
 
+        public static SpriteFont gameFont;
+        public static SpriteFont menuFont;
         public static SpriteFont smallFont;
         public static Texture2D inputPaneImage;
         public static Texture2D button;
+        public static Texture2D background;
+        
 
         // List of windows. GameState class determines index of current window
         public Windows.Window[] windows { get; set; }
@@ -63,6 +69,7 @@ namespace CapitalStrategy
             this.windows = new Windows.Window[GameState.totalStates];
             this.windows[GameState.login] = new Windows.Login(this);
             this.windows[GameState.gameMatch] = new Windows.GameMatch(this);
+            this.windows[GameState.mainMenu] = new Windows.MainMenu(this);
 
             foreach (Windows.Window window in windows)
             {
@@ -88,6 +95,9 @@ namespace CapitalStrategy
             Game1.inputPaneImage = Content.Load<Texture2D>("GUI/inputPane");
             Game1.smallFont = Content.Load<SpriteFont>("fonts/smallFont");
             Game1.button = Content.Load<Texture2D>("GUI/button");
+            Game1.background = Content.Load<Texture2D>("login/loginBackground");
+            Game1.gameFont = Content.Load<SpriteFont>("fonts/gamefont");
+            Game1.menuFont = Content.Load<SpriteFont>("fonts/menufont");
            
             foreach (Windows.Window window in windows)
             {

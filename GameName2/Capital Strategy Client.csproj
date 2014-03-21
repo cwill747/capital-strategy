@@ -67,6 +67,7 @@
     <Compile Include="Warrior.cs" />
     <Compile Include="WarriorType.cs" />
     <Compile Include="Windows\GameMatch.cs" />
+    <Compile Include="Windows\MainMenu.cs" />
     <Compile Include="Windows\Window.cs" />
     <Compile Include="Windows\Login.cs" />
   </ItemGroup>

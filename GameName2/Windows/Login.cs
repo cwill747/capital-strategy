@@ -20,7 +20,6 @@ namespace CapitalStrategy.Windows
     {
         public Game1 windowManager { get; set; }
         public SpriteFont smallFont { get; set; }
-        public Texture2D background { get; set; }
         public Texture2D capitalLogo { get; set; }
         public InputDialog usernameInput { get; set; }
         public InputDialog passwordInput { get; set; }
@@ -46,7 +45,6 @@ namespace CapitalStrategy.Windows
         public void LoadContent()
         {
             this.smallFont = windowManager.Content.Load<SpriteFont>("fonts/smallfont");
-            this.background = windowManager.Content.Load<Texture2D>("login/loginBackground");
             this.capitalLogo = windowManager.Content.Load<Texture2D>("login/capital");
             int displayWidth = 325;
             int displayHeight = 340;
@@ -55,7 +53,7 @@ namespace CapitalStrategy.Windows
             this.capitalLogoLoc = new Rectangle(leftEdge, startY, 325, 180);
             this.usernameInput = new InputDialog("username", new Rectangle(leftEdge + 125, startY + 210, 170, 25), isActive: true);
             this.passwordInput = new InputDialog("password", new Rectangle(leftEdge + 125, startY + 250, 170, 25), mask: true);
-            this.submitButton = new Button("SUBMIT", new Rectangle(leftEdge + 40, startY + 290, 250, 50));
+            this.submitButton = new Button("SUBMIT", new Rectangle(leftEdge + 40, startY + 290, 250, 50), Game1.smallFont);
             this.errorMessageLoc = new Vector2(leftEdge + 25, startY + 360);
         }
 
@@ -114,12 +112,15 @@ namespace CapitalStrategy.Windows
                     }
                     if (this.submitButton.checkClick(newMouseState))
                     {
-                        this.login();
+                        
                     }
                 }
                 if (newMouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
                 {
-                    this.submitButton.unClick();
+                    if (this.submitButton.unClick(newMouseState))
+                    {
+                        this.login();
+                    }
                     
                 }
                 oldMouseState = newMouseState;
@@ -129,7 +130,7 @@ namespace CapitalStrategy.Windows
         public void Draw()
         {
             windowManager.spriteBatch.Begin();
-            windowManager.spriteBatch.Draw(this.background, new Rectangle(0, 0, this.windowManager.Window.ClientBounds.Width, this.windowManager.Window.ClientBounds.Height), Color.White);
+            windowManager.spriteBatch.Draw(Game1.background, new Rectangle(0, 0, this.windowManager.Window.ClientBounds.Width, this.windowManager.Window.ClientBounds.Height), Color.White);
             windowManager.spriteBatch.Draw(this.capitalLogo, this.capitalLogoLoc, Color.White);
             windowManager.spriteBatch.DrawString(Game1.smallFont, this.errorMessage, this.errorMessageLoc, Color.Red);
             windowManager.spriteBatch.End();
@@ -145,14 +146,19 @@ namespace CapitalStrategy.Windows
             {
                 string query = "SELECT * FROM users WHERE username=@username and password=@password";
                 MySqlCommand cmd = new MySqlCommand(query, db.connection);
-                cmd.Parameters.AddWithValue("@username", this.usernameInput.content);
-                cmd.Parameters.AddWithValue("@password", this.passwordInput.content);
+                String username = this.usernameInput.content;
+                String password = this.passwordInput.content;
+                cmd.Parameters.AddWithValue("@username", username);
+                cmd.Parameters.AddWithValue("@password", password);
                 //Create a data reader and Execute the command
                 MySqlDataReader dataReader = cmd.ExecuteReader();
                 //Read the data and store them in the list
                 if (dataReader.Read())
                 {
-                    windowManager.gameState = GameState.gameMatch;
+                    windowManager.gameState = GameState.mainMenu;
+                    this.windowManager.windows[GameState.mainMenu].Initialize();
+                    this.windowManager.username = username;
+                    this.windowManager.password = password;
                     this.errorMessage = "";
                     //System.Diagnostics.Debug.WriteLine(dataReader["username"]);
                     //System.Diagnostics.Debug.WriteLine(dataReader["password"]);

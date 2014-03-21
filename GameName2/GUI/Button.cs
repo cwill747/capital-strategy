@@ -19,12 +19,12 @@ namespace CapitalStrategy.GUI
         public String label { get; set; }
         public SpriteFont labelFont { get; set; }
         public Boolean clicked { get; set; }
-        public Button(String label, Rectangle location)
+        public Button(String label, Rectangle location, SpriteFont labelFont)
         {
             this.location = location;
             this.isPressed = false;
             this.label = label;
-            this.labelFont = Game1.smallFont;
+            this.labelFont = labelFont;
             this.clicked = false;
         }
 
@@ -57,9 +57,17 @@ namespace CapitalStrategy.GUI
             }
             return false;
         }
-        public void unClick()
+
+        // when we unclick, we will kick off the action from the button
+        public Boolean unClick(MouseState mouseState)
         {
+            Boolean retVal = false;
+            if (this.clicked == true && mouseState.X >= location.X && mouseState.X <= location.X + location.Width && mouseState.Y >= location.Y && mouseState.Y <= location.Y + location.Height)
+            {
+                retVal = true;
+            }
             this.clicked = false;
+            return retVal;
         }
     }
 }
