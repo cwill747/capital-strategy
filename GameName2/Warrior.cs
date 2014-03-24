@@ -27,6 +27,7 @@ namespace CapitalStrategy
 		public int destCol { get; set; }
 		public int direction { get; set; } // use Direction class
 		public int health { get; set; }
+		public int cooldown { get; set;} // cooldown is set to maxCooldown when the unit attacks (even if it attacked nothing)
 		public int state { get; set; } // use movement class
 		public double stateDepth;
 		public Boolean isYours; // by yours, I mean player 1/bottom player
@@ -47,6 +48,7 @@ namespace CapitalStrategy
 			this.state = state;
 			this.isYours = isYours;
 			this.health = warriorType.maxHealth;
+			this.cooldown = 0;
 			this.stateDepth = 0;
 			this.curDelay = 0;
 		}
@@ -59,6 +61,7 @@ namespace CapitalStrategy
             this.direction = Direction.S;
             this.state = State.walking;
             this.health = previousWarrior.maxHealth;
+			this.cooldown = 0;
             this.stateDepth = 0;
             this.curDelay = 0;
             this.isYours = previousWarrior.isYours;

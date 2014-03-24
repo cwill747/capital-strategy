@@ -56,6 +56,7 @@ namespace CapitalStrategy.Windows
         public Warrior beingAttacked { get; set; }
         Warrior displayWarrior;
         MouseWrapper mouseState;
+		public int cooldownCounter{ get; set;}
 
 
 
@@ -66,6 +67,7 @@ namespace CapitalStrategy.Windows
         public void Initialize()
         {
             isYourTurn = true;
+			cooldownCounter = 0;
             this.turnProgress = TurnProgress.beginning;
         }
         public void LoadContent()
@@ -93,6 +95,7 @@ namespace CapitalStrategy.Windows
             axestanShield = new WarriorType(
                 this,       // game
                 80,         // maxhealth
+				2,			// maxCool (number of turns + 1)
                 50,         // attack
                 40,         // defense
                 100,        // accuracy
@@ -102,15 +105,15 @@ namespace CapitalStrategy.Windows
                 "axestan shield", // type 
                 "blue archer", new int[] { 1, 8, 8, 13, 7, 9, 7 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
                 null, 1, 500, 0);
-            firedragon = new WarriorType(this, 60, 40, 70,
+			firedragon = new WarriorType(this, 60, 3, 40, 70,
                 80, 60, 4, 5, "firedragon",
                 "crocy", new int[] { 1, 7, 7, 9, 1, 11, 7 }, new int[] { 1000, 400, 1000, 1000, 1000, 1000, 1000 },
                 null, 2, 500, 0);
-            blueArcher = new WarriorType(this, 70, 40, 50,
+			blueArcher = new WarriorType(this, 70, 3, 40, 50,
                 75, 20, 4, 3, "blue archer",
                 "magier", new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
                 null, 6, 500, 10);
-            this.whiteMage = new WarriorType(this, 50, -80, 30,
+			this.whiteMage = new WarriorType(this, 50, 2, -80, 30,
                 100, 0, 4, 3, "white mage",
                 null, new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
                 new Point[] { new Point(-1,-1), new Point(1,1), 
@@ -119,11 +122,11 @@ namespace CapitalStrategy.Windows
 					new Point(1,0), new Point(-1,0),new Point(0,1),
 					new Point(0,-1),new Point(0,0)},
                 null, 500, 0);
-            crocy = new WarriorType(this, 90, 60, 50,
+			crocy = new WarriorType(this, 90, 2, 60, 50,
                 50, 50, 2, 2, "crocy",
                 "firedragon", new int[] { 1, 8, 8, 11, 9, 11, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
                 null, 1, 500, 0);
-            magier = new WarriorType(this, 70, 40, 45,
+			magier = new WarriorType(this, 70, 2, 40, 45,
                 75, 25, 3, 3, "magier",
                 "axestan shield", new int[] { 9, 7, 7, 9, 9, 10, 9 }, new int[] { 1000, 500, 1000, 1500, 1000, 1000, 1000 },
                 null, 3, 500, 10);
@@ -161,6 +164,29 @@ namespace CapitalStrategy.Windows
         }
         public void Update(GameTime gameTime)
         {
+			if (this.turnProgress == TurnProgress.beginning && this.cooldownCounter == 0) {
+				if (this.isYourTurn) {
+					for (int i = 0; i < ROWS; i++) {
+						for (int j = 0; j < COLS; j++) {
+							Warrior unitC = board.warriors [i] [j];
+							if (unitC != null && unitC.isYours) {
+								unitC.cool -= 1;
+							}
+						}
+					}
+				} else if (!this.isYourTurn){
+					for (int i = 0; i < ROWS; i++) {
+						for (int j = 0; j < COLS; j++) {
+							Warrior unitC = board.warriors [i] [j];
+							if (unitC != null && !unitC.isYours) {
+								unitC.cool -= 1;
+							}
+						}
+					}
+				}
+				cooldownCounter = 1;
+			}
+
             if (this.currentTurnWarrior != null)
             {
                 if (this.turnProgress == TurnProgress.moving)
@@ -183,6 +209,7 @@ namespace CapitalStrategy.Windows
                 {
                     // calculate damage
                     this.currentTurnWarrior.strike(this.beingAttacked);
+					this.cooldownCounter = 0;
                     this.turnProgress = TurnProgress.beginning;
                     this.isYourTurn = !this.isYourTurn;
                 }
@@ -253,7 +280,9 @@ namespace CapitalStrategy.Windows
             if (this.turnProgress == TurnProgress.beginning)
             {
 
-                if (selectedWarrior != null && ((this.isYourTurn && this.selectedWarrior.isYours) || (!this.isYourTurn && !this.selectedWarrior.isYours)))
+                if (selectedWarrior != null && 
+					((this.isYourTurn && this.selectedWarrior.isYours) || (!this.isYourTurn && !this.selectedWarrior.isYours))
+					&& selectedWarrior.cooldown <= 0)
                 {
                     // find if this is a valid move
                     if (selectedWarrior.isValidMove(board, mouseState.row, mouseState.col))
@@ -293,6 +322,7 @@ namespace CapitalStrategy.Windows
                         int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
                         beingAttacked.setDirection(xDiff, yDiff);
                         beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
+						this.currentTurnWarrior.cooldown = this.currentTurnWarrior.maxCooldown;
                     }
                     else
                     {

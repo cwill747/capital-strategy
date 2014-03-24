@@ -17,6 +17,7 @@ namespace CapitalStrategy
 		public GameMatch game { get; set; }
 
 		public int maxHealth { get; set; }
+		public int maxCooldown { get; set;}
 		public int attack { get; set; }
 		public int defense { get; set; }
 		public int accuracy { get; set;}
@@ -34,10 +35,11 @@ namespace CapitalStrategy
 
 		// note: will need to add way of showing attack area
 
-		public WarriorType(GameMatch game, int maxHealth, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, String bonus, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate)
+		public WarriorType(GameMatch game, int maxHealth, int maxCooldown, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, String bonus, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate)
 		{
 			this.game = game;
 			this.maxHealth = maxHealth;
+			this.maxCooldown = maxCooldown;
 			this.attack = attack;
 			this.defense = defense;
 			this.accuracy = accuracy;
@@ -58,6 +60,7 @@ namespace CapitalStrategy
 		{
 			this.game = warriorType.game;
 			this.maxHealth = warriorType.maxHealth;
+			this.maxCooldown = warriorType.maxCooldown;
 			this.attack = warriorType.attack;
 			this.defense = warriorType.defense;
 			this.accuracy = warriorType.accuracy;
