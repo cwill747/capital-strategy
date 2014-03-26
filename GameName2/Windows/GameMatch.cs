@@ -169,8 +169,8 @@ namespace CapitalStrategy.Windows
 					for (int i = 0; i < ROWS; i++) {
 						for (int j = 0; j < COLS; j++) {
 							Warrior unitC = board.warriors [i] [j];
-							if (unitC != null && unitC.isYours) {
-								unitC.cool -= 1;
+							if (unitC != null && unitC.isYours && unitC.cooldown > 0) {
+								unitC.cooldown -= 1;
 							}
 						}
 					}
@@ -178,8 +178,8 @@ namespace CapitalStrategy.Windows
 					for (int i = 0; i < ROWS; i++) {
 						for (int j = 0; j < COLS; j++) {
 							Warrior unitC = board.warriors [i] [j];
-							if (unitC != null && !unitC.isYours) {
-								unitC.cool -= 1;
+							if (unitC != null && !unitC.isYours && unitC.cooldown > 0) {
+								unitC.cooldown -= 1;
 							}
 						}
 					}
