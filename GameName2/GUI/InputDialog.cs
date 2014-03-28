@@ -25,8 +25,9 @@ namespace CapitalStrategy.GUI
         public SpriteFont inputFont { get; set; }
         public double cursorState { get; set; }
         public Boolean mask { get; set; }
+        public Boolean isVisible { get; set; }
 
-        public InputDialog(String label, Rectangle location, Boolean isActive = false, Boolean mask = false)
+        public InputDialog(String label, Rectangle location, Boolean isActive = false, Boolean mask = false, Boolean isVisible = true)
         {
             this.label = label;
             this.location = location;
@@ -36,6 +37,7 @@ namespace CapitalStrategy.GUI
             this.inputFont = Game1.smallFont;
             this.cursorState = 0;
             this.mask = mask;
+            this.isVisible = isVisible;
         }
 
         public void clear()
@@ -51,38 +53,41 @@ namespace CapitalStrategy.GUI
 
         public void draw(SpriteBatch spriteBatch)
         {
-            Vector2 labelDim = this.labelFont.MeasureString(label);
-            Vector2 contentDim = this.inputFont.MeasureString(content);
-            spriteBatch.Begin();
-            
-            spriteBatch.DrawString(labelFont, label, new Vector2(location.X - (labelDim.X + 20), location.Y), Color.White);
-            Color inputBackground = Color.White;
-            if (!this.isActive)
+            if (this.isVisible)
             {
-                inputBackground = Color.FromNonPremultiplied(new Vector4((float).85, (float).85, (float).85, 1));
-            }
-            spriteBatch.Draw(Game1.inputPaneImage, this.location, inputBackground);
-            
-            // keep substringing until content is not too long
-            String output = content;
-            if (this.mask)
-            {
-                output = "";
-                for (int i = 0; i < content.Length; i++)
+                Vector2 labelDim = this.labelFont.MeasureString(label);
+                Vector2 contentDim = this.inputFont.MeasureString(content);
+                spriteBatch.Begin();
+
+                spriteBatch.DrawString(labelFont, label, new Vector2(location.X - (labelDim.X + 20), location.Y), Color.White);
+                Color inputBackground = Color.White;
+                if (!this.isActive)
                 {
-                    output += "*";
+                    inputBackground = Color.FromNonPremultiplied(new Vector4((float).85, (float).85, (float).85, 1));
                 }
+                spriteBatch.Draw(Game1.inputPaneImage, this.location, inputBackground);
+
+                // keep substringing until content is not too long
+                String output = content;
+                if (this.mask)
+                {
+                    output = "";
+                    for (int i = 0; i < content.Length; i++)
+                    {
+                        output += "*";
+                    }
+                }
+                while (this.inputFont.MeasureString(output).X >= location.Width - 8)
+                {
+                    output = output.Substring(1);
+                }
+                spriteBatch.DrawString(this.inputFont, output, new Vector2(this.location.X + 4, this.location.Y), Color.Black);
+                if (this.isActive && cursorState < 1)
+                {
+                    spriteBatch.DrawString(this.inputFont, "|", new Vector2(this.location.X + this.inputFont.MeasureString(output).X + 6, this.location.Y), Color.Black);
+                }
+                spriteBatch.End();
             }
-            while (this.inputFont.MeasureString(output).X >= location.Width - 8)
-            {
-                output = output.Substring(1);
-            }
-            spriteBatch.DrawString(this.inputFont, output, new Vector2(this.location.X + 4, this.location.Y), Color.Black);
-            if (this.isActive && cursorState < 1)
-            {
-                spriteBatch.DrawString(this.inputFont, "|", new Vector2(this.location.X + this.inputFont.MeasureString(output).X+6, this.location.Y), Color.Black);
-            }
-            spriteBatch.End();
         }
 
         public void backspace()
@@ -118,7 +123,7 @@ namespace CapitalStrategy.GUI
         }
         public Boolean handleClick(MouseState mouseState)
         {
-            if (mouseState.X >= location.X && mouseState.X <= location.X + location.Width && mouseState.Y >= location.Y && mouseState.Y <= location.Y + location.Height)
+            if (this.isVisible && mouseState.X >= location.X && mouseState.X <= location.X + location.Width && mouseState.Y >= location.Y && mouseState.Y <= location.Y + location.Height)
             {
                 this.isActive = true;
                 return true;
@@ -128,6 +133,18 @@ namespace CapitalStrategy.GUI
         public void toggleActive()
         {
             this.isActive = !this.isActive;
+            if (!this.isVisible)
+            {
+                this.isActive = false;
+            }
+        }
+        public void setVisible(Boolean isVisible)
+        {
+            this.isVisible = isVisible;
+            if (this.isVisible == false)
+            {
+                this.toggleActive();
+            }
         }
     }
 }
