@@ -21,6 +21,11 @@ namespace CapitalStrategy.Windows
         public MouseState oldMouseState { get; set; }
         public Board board { get; set; }
         public Warrior currentWarrior { get; set; }
+        public Button save { get; set; }
+        public List<WarriorWrapper> warriorWrappers { get; set; }
+
+        private Rectangle pageContent = new Rectangle();
+       
 
         public CustomizeArmy(Game1 windowManager)
         {
@@ -30,29 +35,43 @@ namespace CapitalStrategy.Windows
 
         public void Initialize()
         {
-            int xOffset = (this.windowManager.Window.ClientBounds.Width - 700) / 2;
-            board = new Board(5, 10, new Rectangle(xOffset, 100, 700, 350), Game1.tileImage);
+            this.pageContent.X = (this.windowManager.Window.ClientBounds.Width - 700) / 2;
+            this.pageContent.Y = 100;
+            int boardHeight = 350;
+            this.pageContent.Height = boardHeight;
+            int boardWidth = 700;
+            this.pageContent.Width = boardWidth;
+            board = new Board(5, 10, new Rectangle(this.pageContent.X, this.pageContent.Y, boardWidth, boardHeight), Game1.tileImage);
             this.oldMouseState = new MouseState();
-            this.loadWarriors();
-            
+            this.warriorWrappers = this.loadWarriors();
+
+            int saveButtonWidth = 100;
+            int saveButtonHeight = 50;
+            int padding = 10;
+            this.save = new Button("SAVE", new Rectangle(this.pageContent.X + this.pageContent.Width - padding - saveButtonWidth,
+                this.pageContent.Y + this.pageContent.Height + padding, saveButtonWidth, saveButtonHeight), Game1.smallFont, isDisabled: true);
+
+            this.pageContent.Height = this.pageContent.Height + padding + saveButtonHeight;
             
         }
 
         public void LoadContent()
         {
             this.backButton = new BackButton();
+            
         }
 
         public void Update(GameTime gameTime)
         {
+            this.save.update(gameTime);
             MouseState newMouseState = Mouse.GetState();
             if (!newMouseState.Equals(this.oldMouseState))
             {
                 if (newMouseState.LeftButton == ButtonState.Pressed && oldMouseState.LeftButton != ButtonState.Pressed)
                 {
-                    if (backButton.checkClick(newMouseState))
-                    {
-                    }
+                    this.backButton.checkClick(newMouseState);
+                    this.save.checkClick(newMouseState);
+                    
                     
                     if (board.isClickOverGrid(newMouseState.X, newMouseState.Y))
                     {
@@ -84,6 +103,10 @@ namespace CapitalStrategy.Windows
                         this.windowManager.gameState = newGameState;
                         this.windowManager.windows[newGameState].Initialize();
                     }
+                    if (this.save.unClick(newMouseState))
+                    {
+                        this.saveArmy();
+                    }
                     if (currentWarrior != null)
                     {
                         Vector2 rowCol = board.clickOverGrid(currentWarrior.x, currentWarrior.y);
@@ -104,6 +127,7 @@ namespace CapitalStrategy.Windows
                             board.warriors[(int)currentWarrior.row][(int)currentWarrior.col] = currentWarrior;
                         }
                         currentWarrior = null;
+                        this.save.isDisabled = false;
                         
                     }
                 }
@@ -113,6 +137,7 @@ namespace CapitalStrategy.Windows
 
         public void Draw()
         {
+
             this.windowManager.spriteBatch.Begin();
             windowManager.spriteBatch.Draw(Game1.background, new Rectangle(0, 0, this.windowManager.Window.ClientBounds.Width, this.windowManager.Window.ClientBounds.Height), Color.White);
             this.windowManager.spriteBatch.End();
@@ -138,14 +163,75 @@ namespace CapitalStrategy.Windows
                 currentWarrior.drawToLocation();
             }
             this.backButton.drawBackButton(this.windowManager.spriteBatch);
+            this.save.draw(this.windowManager.spriteBatch);
         }
 
-        public List<Warrior> loadWarriors()
+        public List<WarriorWrapper> loadWarriors()
         {
-            List<Warrior> retVal = new List<Warrior>();
+            List<WarriorWrapper> retVal = new List<WarriorWrapper>();
             DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
             if (db.OpenConnection() == true)
             {
+                string query = "SELECT * FROM Warriors NATURAL JOIN users WHERE username=@username and password=@password";
+                MySqlCommand cmd = new MySqlCommand(query, db.connection);
+                String username = this.windowManager.username;
+                String password = this.windowManager.password;
+                cmd.Parameters.AddWithValue("@username", username);
+                cmd.Parameters.AddWithValue("@password", password);
+                //Create a data reader and Execute the command
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                //Read the data and store them in the list
+                while (dataReader.Read())
+                {
+                    int curRow = board.rows - Int32.Parse(dataReader["row"].ToString()) - 1;
+                    int curCol = Int32.Parse(dataReader["col"].ToString());
+                    Warrior w = new Warrior(board, curRow, curCol, Direction.N, State.stopped, true, this.windowManager.getWarriorType(dataReader["warriorType"].ToString()));
+                    board.warriors[curRow][curCol] = w;
+                    System.Diagnostics.Debug.WriteLine(dataReader["warriorType"]);
+                    WarriorWrapper ww = new WarriorWrapper(w, Int32.Parse(dataReader["warrior_id"].ToString()));
+                    //System.Diagnostics.Debug.WriteLine(dataReader["username"]);
+                    //System.Diagnostics.Debug.WriteLine(dataReader["password"]);
+                    retVal.Add(ww);
+                }
+
+                //close Data Reader
+                dataReader.Close();
+            }
+        
+
+
+            return retVal;
+        }
+
+        public void saveArmy()
+        {
+            DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
+            if (db.OpenConnection() == true)
+            {
+                foreach (WarriorWrapper ww in this.warriorWrappers)
+                {
+                    this.updateWarriorInDB(ww, db);
+                }
+            }
+        }
+        public void updateWarriorInDB(WarriorWrapper ww, DBConnect db)
+        {
+            String query = "UPDATE Warriors SET row=@row, col=@col WHERE warrior_id=@warrior_id";
+            MySqlCommand cmd = new MySqlCommand(query, db.connection);
+            cmd.Parameters.AddWithValue("@row", this.board.rows - ww.warrior.row - 1);
+            cmd.Parameters.AddWithValue("@col", ww.warrior.col);
+            cmd.Parameters.AddWithValue("@warrior_id", ww.id);
+            int result = cmd.ExecuteNonQuery();
+            if (result == 1)
+            {
+                this.save.isDisabled = true;
+            }
+            else
+            {
+                this.save.isDisabled = false;
+            }
+           
+            /*
                 string query = "SELECT * FROM Warriors NATURAL JOIN users WHERE username=@username and password=@password";
                 MySqlCommand cmd = new MySqlCommand(query, db.connection);
                 String username = this.windowManager.username;
@@ -167,11 +253,18 @@ namespace CapitalStrategy.Windows
 
                 //close Data Reader
                 dataReader.Close();
-            }
-        
+                 */
+        }
 
-
-            return retVal;
+    }
+    class WarriorWrapper
+    {
+        public Warrior warrior { get; set; }
+        public int id { get; set; }
+        public WarriorWrapper(Warrior warrior, int id)
+        {
+            this.warrior = warrior;
+            this.id = id;
         }
     }
 }

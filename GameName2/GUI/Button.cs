@@ -19,19 +19,25 @@ namespace CapitalStrategy.GUI
         public String label { get; set; }
         public SpriteFont labelFont { get; set; }
         public Boolean clicked { get; set; }
-        public Button(String label, Rectangle location, SpriteFont labelFont)
+        public Boolean isDisabled { get; set; }
+        public Button(String label, Rectangle location, SpriteFont labelFont, Boolean isDisabled = false)
         {
             this.location = location;
             this.isPressed = false;
             this.label = label;
             this.labelFont = labelFont;
             this.clicked = false;
+            this.isDisabled = isDisabled;
         }
 
         public void draw(SpriteBatch spriteBatch)
         {
             Color colorToUse = Color.White;
             if (this.clicked)
+            {
+                colorToUse = Color.Gray;
+            }
+            if (this.isDisabled)
             {
                 colorToUse = Color.Gray;
             }
@@ -50,7 +56,7 @@ namespace CapitalStrategy.GUI
 
         public Boolean checkClick(MouseState mouseState)
         {
-            if (mouseState.X >= location.X && mouseState.X <= location.X + location.Width && mouseState.Y >= location.Y && mouseState.Y <= location.Y + location.Height)
+            if (!this.isDisabled && mouseState.X >= location.X && mouseState.X <= location.X + location.Width && mouseState.Y >= location.Y && mouseState.Y <= location.Y + location.Height)
             {
                 this.clicked = true;
                 return true;
@@ -62,7 +68,7 @@ namespace CapitalStrategy.GUI
         public Boolean unClick(MouseState mouseState)
         {
             Boolean retVal = false;
-            if (this.clicked == true && mouseState.X >= location.X && mouseState.X <= location.X + location.Width && mouseState.Y >= location.Y && mouseState.Y <= location.Y + location.Height)
+            if (!this.isDisabled && this.clicked == true && mouseState.X >= location.X && mouseState.X <= location.X + location.Width && mouseState.Y >= location.Y && mouseState.Y <= location.Y + location.Height)
             {
                 retVal = true;
             }
