@@ -69,6 +69,10 @@ namespace CapitalStrategy.Windows
             isYourTurn = true;
 			cooldownCounter = 0;
             this.turnProgress = TurnProgress.beginning;
+            if (board != null)
+            {
+                this.board.loadWarriors(this.windowManager, true);
+            }
         }
         public void LoadContent()
         {
@@ -146,7 +150,7 @@ namespace CapitalStrategy.Windows
             p2.AddWarrior(crocy);
             p2.AddWarrior(magier);
             
-            for (int i = 0; i < 2; i++)
+            for (int i = 1; i < 2; i++)
             {
                 board.warriors[i == 0 ? 7 : 9 - 7][3] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 3, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
                 board.warriors[i == 0 ? 7 : 9 - 7][5] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
@@ -159,6 +163,8 @@ namespace CapitalStrategy.Windows
                 board.warriors[i == 0 ? 8 : 9 - 8][5] = new Warrior(this.board, i == 0 ? 8 : 9 - 8, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, magier);
                 board.warriors[i == 0 ? 7 : 9 - 7][2] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 2, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, blueArcher);
             }
+
+            
 
 
             mouseState = new MouseWrapper(board, Mouse.GetState());
