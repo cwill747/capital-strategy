@@ -145,7 +145,8 @@ namespace CapitalStrategy.Windows
             p2.AddWarrior(blueArcher);
             p2.AddWarrior(crocy);
             p2.AddWarrior(magier);
-            for (int i = 0; i < 2; i++)
+            
+            for (int i = 1; i < 2; i++)
             {
                 board.warriors[i == 0 ? 7 : 9 - 7][3] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 3, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
                 board.warriors[i == 0 ? 7 : 9 - 7][5] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);

@@ -43,7 +43,7 @@ namespace CapitalStrategy.Windows
             this.pageContent.Width = boardWidth;
             board = new Board(5, 10, new Rectangle(this.pageContent.X, this.pageContent.Y, boardWidth, boardHeight), Game1.tileImage);
             this.oldMouseState = new MouseState();
-            this.warriorWrappers = this.loadWarriors();
+            this.warriorWrappers = this.board.loadWarriors(this.windowManager, true);
 
             int saveButtonWidth = 100;
             int saveButtonHeight = 50;
@@ -166,42 +166,7 @@ namespace CapitalStrategy.Windows
             this.save.draw(this.windowManager.spriteBatch);
         }
 
-        public List<WarriorWrapper> loadWarriors()
-        {
-            List<WarriorWrapper> retVal = new List<WarriorWrapper>();
-            DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
-            if (db.OpenConnection() == true)
-            {
-                string query = "SELECT * FROM Warriors NATURAL JOIN users WHERE username=@username and password=@password";
-                MySqlCommand cmd = new MySqlCommand(query, db.connection);
-                String username = this.windowManager.username;
-                String password = this.windowManager.password;
-                cmd.Parameters.AddWithValue("@username", username);
-                cmd.Parameters.AddWithValue("@password", password);
-                //Create a data reader and Execute the command
-                MySqlDataReader dataReader = cmd.ExecuteReader();
-                //Read the data and store them in the list
-                while (dataReader.Read())
-                {
-                    int curRow = board.rows - Int32.Parse(dataReader["row"].ToString()) - 1;
-                    int curCol = Int32.Parse(dataReader["col"].ToString());
-                    Warrior w = new Warrior(board, curRow, curCol, Direction.N, State.stopped, true, this.windowManager.getWarriorType(dataReader["warriorType"].ToString()));
-                    board.warriors[curRow][curCol] = w;
-                    System.Diagnostics.Debug.WriteLine(dataReader["warriorType"]);
-                    WarriorWrapper ww = new WarriorWrapper(w, Int32.Parse(dataReader["warrior_id"].ToString()));
-                    //System.Diagnostics.Debug.WriteLine(dataReader["username"]);
-                    //System.Diagnostics.Debug.WriteLine(dataReader["password"]);
-                    retVal.Add(ww);
-                }
-
-                //close Data Reader
-                dataReader.Close();
-            }
         
-
-
-            return retVal;
-        }
 
         public void saveArmy()
         {
@@ -257,14 +222,5 @@ namespace CapitalStrategy.Windows
         }
 
     }
-    class WarriorWrapper
-    {
-        public Warrior warrior { get; set; }
-        public int id { get; set; }
-        public WarriorWrapper(Warrior warrior, int id)
-        {
-            this.warrior = warrior;
-            this.id = id;
-        }
-    }
+
 }

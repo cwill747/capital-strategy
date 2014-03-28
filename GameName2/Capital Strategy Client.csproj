@@ -67,6 +67,7 @@
     <Compile Include="TurnProgress.cs" />
     <Compile Include="Warrior.cs" />
     <Compile Include="WarriorType.cs" />
+    <Compile Include="WarriorWrapper.cs" />
     <Compile Include="Windows\CustomizeArmy.cs" />
     <Compile Include="Windows\GameMatch.cs" />
     <Compile Include="Windows\MainMenu.cs" />

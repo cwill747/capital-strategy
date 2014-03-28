@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Storage;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Input.Touch;
+using MySql.Data.MySqlClient;
 
 namespace CapitalStrategy
 {
@@ -92,5 +93,47 @@ namespace CapitalStrategy
         {
             return x - this.location.X < this.location.Width && y - this.location.Y < this.location.Height && x - this.location.X >= 0 && y - this.location.Y >= 0;
         }
+
+        public List<WarriorWrapper> loadWarriors(Game1 windowManager, Boolean isPlayer1)
+        {
+            List<WarriorWrapper> retVal = new List<WarriorWrapper>();
+            DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
+            if (db.OpenConnection() == true)
+            {
+                string query = "SELECT * FROM Warriors NATURAL JOIN users WHERE username=@username and password=@password";
+                MySqlCommand cmd = new MySqlCommand(query, db.connection);
+                cmd.Parameters.AddWithValue("@username", windowManager.username);
+                cmd.Parameters.AddWithValue("@password", windowManager.password);
+                //Create a data reader and Execute the command
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                //Read the data and store them in the list
+                while (dataReader.Read())
+                {
+                    int curRow = Int32.Parse(dataReader["row"].ToString());
+                    if (isPlayer1)
+                    {
+                        curRow = this.rows - curRow - 1;
+                    }
+                    int curCol = Int32.Parse(dataReader["col"].ToString());
+                    Warrior w = new Warrior(this, curRow, curCol, isPlayer1 ? Direction.N : Direction.S, State.stopped, true, windowManager.getWarriorType(dataReader["warriorType"].ToString()));
+                    this.warriors[curRow][curCol] = w;
+                    System.Diagnostics.Debug.WriteLine(dataReader["warriorType"]);
+                    WarriorWrapper ww = new WarriorWrapper(w, Int32.Parse(dataReader["warrior_id"].ToString()));
+                    //System.Diagnostics.Debug.WriteLine(dataReader["username"]);
+                    //System.Diagnostics.Debug.WriteLine(dataReader["password"]);
+                    retVal.Add(ww);
+                }
+
+                //close Data Reader
+                dataReader.Close();
+            }
+
+
+
+            return retVal;
+        }
+
+
     }
+
 }
