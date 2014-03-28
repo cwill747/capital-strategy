@@ -294,7 +294,7 @@ namespace CapitalStrategy.Windows
                     }
                 }
                 this.selectedWarrior = board.warriors[mouseState.row][mouseState.col];
-                if (this.selectedWarrior != null)
+                if (this.selectedWarrior != null && this.selectedWarrior.cooldown == 0)
                 {
                     System.Diagnostics.Debug.WriteLine("here");
                     selectedWarrior.updateUserOptions(this.isYourTurn);
@@ -356,6 +356,11 @@ namespace CapitalStrategy.Windows
             this.spriteBatch.Draw(Game1.charcoal, new Rectangle(xLoc - 2, healthBarY - 2, (int)(widthPerHP * warrior.maxHealth) + 4, tileHeight / 10 + 4), Color.WhiteSmoke);
             this.spriteBatch.Draw(white, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.maxHealth), tileHeight / 10), Color.WhiteSmoke);
             this.spriteBatch.Draw(red, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.health), tileHeight / 10), Color.WhiteSmoke);
+
+            //draw cooldown
+            if (warrior.cooldown != 0)
+              this.spriteBatch.DrawString(this.infofont, warrior.cooldown.ToString(), new Vector2(xLoc, yLoc), Color.White);
+            
             this.spriteBatch.End();
             return healthBarY + tileHeight / 10;
         }
