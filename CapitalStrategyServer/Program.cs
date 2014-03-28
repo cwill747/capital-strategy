@@ -1,21 +1,26 @@
 ﻿using System;
 using System.Threading;
-
+using CapitalStrategyServer.Messaging;
 using Lidgren.Network;
+using System.Collections.Generic;
 
 namespace CapitalStrategyServer
 {
     class Program
     {
+
+
+
+
         static void Main(string[] args)
         {
             NetPeerConfiguration config = new NetPeerConfiguration("xnaapp");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
             config.Port = 14242;
-            QueueManager qm = new QueueManager();
             // create and start server
             NetServer server = new NetServer(config);
             server.Start();
+            Server s = new Server();
 
             // schedule initial sending of position updates
             double nextSendUpdates = NetTime.Now;
@@ -50,8 +55,9 @@ namespace CapitalStrategyServer
                                 //
                                 // A new player just connected!
                                 //
-                                qm.clientConnected(NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier));
-                                Console.WriteLine(NetUtility.ToHexString(msg.SenderConnection.RemoteUniqueIdentifier) + " connected!");
+                                Client c = new Client(msg.SenderConnection.RemoteUniqueIdentifier);
+                                s.addConnection(c);
+                                Console.WriteLine(msg.SenderConnection.RemoteUniqueIdentifier + " connected!");
                             }
 
                             break;
@@ -61,6 +67,7 @@ namespace CapitalStrategyServer
                             //
                             Message m = new Message();
                             msg.ReadAllFields(m);
+                            s.msgQueue.addToIncomingQueue(m);
                             Console.WriteLine("Received Message: " + m.ToString());
                             break;
                     }
@@ -68,39 +75,29 @@ namespace CapitalStrategyServer
                     //
                     // send position updates 30 times per second
                     //
-                    double now = NetTime.Now;
-                    if (now > nextSendUpdates)
-                    {
-                        // Yes, it's time to send position updates
+                    server.Recycle(msg);
 
-                        // for each player...
-                        foreach (NetConnection player in server.Connections)
-                        {
-                            // ... send information about every other player (actually including self)
-                            foreach (NetConnection otherPlayer in server.Connections)
-                            {
-                                // send position update about 'otherPlayer' to 'player'
-                                NetOutgoingMessage om = server.CreateMessage();
-
-                                // write who this position is for
-                                om.Write(otherPlayer.RemoteUniqueIdentifier);
-
-                                if (otherPlayer.Tag == null)
-                                    otherPlayer.Tag = new int[2];
-
-                                int[] pos = otherPlayer.Tag as int[];
-                                om.Write(pos[0]);
-                                om.Write(pos[1]);
-
-                                // send message
-                                server.SendMessage(om, player, NetDeliveryMethod.Unreliable);
-                            }
-                        }
-
-                        // schedule next update
-                        nextSendUpdates += (1.0 / 30.0);
-                    }
                 }
+
+
+                // Yes, it's time to send position updates
+                foreach (Message m in s.msgQueue.outgoingMessages)
+                {
+                    if (m.waitingToSend == true)
+                    {
+                        m.waitingToSend = false;
+                        NetOutgoingMessage om = server.CreateMessage();
+                        Console.WriteLine("Sending Message: " + m.ToString());
+                        om.WritePadBits();
+                        om.WriteAllFields(m);
+                        server.SendMessage(om, server.Connections.Find(nc => nc.RemoteUniqueIdentifier.Equals(m.sendToUUID)), NetDeliveryMethod.ReliableUnordered);
+                    }
+                    
+                }
+                s.msgQueue.outgoingMessages.RemoveAll(x => x.waitingToSend == false);
+
+                s.msgQueue.update();
+
 
                 // sleep to allow other processes to run smoothly
                 Thread.Sleep(1);
@@ -108,5 +105,7 @@ namespace CapitalStrategyServer
 
             server.Shutdown("app exiting");
         }
+
+        
     }
 }
