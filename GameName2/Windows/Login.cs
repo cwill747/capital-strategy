@@ -91,7 +91,7 @@ namespace CapitalStrategy.Windows
                         }
                         else if (key.Equals(Keys.Enter))
                         {
-                            this.login();
+                            this.login(this.usernameInput.content, this.passwordInput.content);
                         }
                         else
                         {
@@ -126,7 +126,7 @@ namespace CapitalStrategy.Windows
                 {
                     if (this.submitButton.unClick(newMouseState))
                     {
-                        this.login();
+                        this.login(this.usernameInput.content, this.passwordInput.content);
                     }
                     
                 }
@@ -146,13 +146,11 @@ namespace CapitalStrategy.Windows
             this.submitButton.draw(windowManager.spriteBatch);
             
         }
-        public void login()
+        public void login(string username, string password)
         {
             DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
             if (db.OpenConnection() == true)
             {
-                String username = this.usernameInput.content;
-                String password = this.passwordInput.content;
                 string appsalt = "Ay2cXjA4";
 
                 string hashquery = "SELECT salt, password FROM users WHERE username=@username";
@@ -191,4 +189,5 @@ namespace CapitalStrategy.Windows
             }
         }
     }
+
 }
