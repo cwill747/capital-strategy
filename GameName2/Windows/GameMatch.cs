@@ -435,6 +435,10 @@ namespace CapitalStrategy.Windows
                 this.spriteBatch.Begin();
                 toDrawX = toDrawX + board.WARRIORWIDTH / 2 + imgPadding;
 
+                // Draw the warriors cooldown
+                string coolDisplay = "Cooldown: "+this.selectedWarrior.cooldown.ToString();
+                this.spriteBatch.DrawString(this.infofont, coolDisplay, new Vector2(toDrawX + board.WARRIORWIDTH, toDrawY + (2*imgPadding)), Color.White);
+
                 // Draw the warriors health
                 this.spriteBatch.Draw(heartIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
                 this.spriteBatch.Draw(Game1.charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * selectedWarrior.maxHealth) + 4, barHeight + 4), Color.WhiteSmoke);

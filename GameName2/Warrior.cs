@@ -124,7 +124,7 @@ namespace CapitalStrategy
 					}
 
 				}
-				if (stateDepth > this.states[state].cols && this.health < 0)
+				if (stateDepth > this.states[state].cols && this.health <= 0)
 				{
 					if (this.state == State.tippingOver)
 					{
