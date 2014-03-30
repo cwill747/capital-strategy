@@ -35,6 +35,8 @@ namespace CapitalStrategy.Windows
         public Texture2D moveIcon;
         public SpriteFont menufont;
         public SpriteFont infofont;
+        public Texture2D hourglass;
+
 
         Texture2D background;
         Rectangle backgroundRec;
@@ -88,6 +90,7 @@ namespace CapitalStrategy.Windows
             attackIcon = Content.Load<Texture2D>("icons/attackIcon");
             shieldIcon = Content.Load<Texture2D>("icons/shieldIcon");
             moveIcon = Content.Load<Texture2D>("icons/moveIcon");
+            hourglass = Content.Load<Texture2D>("icons/hourglass");
 
             backgroundRec = new Rectangle(0, 0, windowManager.Window.ClientBounds.Width, windowManager.Window.ClientBounds.Height);
             
@@ -364,9 +367,15 @@ namespace CapitalStrategy.Windows
             this.spriteBatch.Draw(red, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.health), tileHeight / 10), Color.WhiteSmoke);
 
             //draw cooldown
+            int iconHeight = tileHeight /2;
+            int toDrawY = yLoc + (iconHeight /2);
+            int toDrawX = xLoc;
+            int iconWidth = tileWidth / 2;
             if (warrior.cooldown != 0)
-              this.spriteBatch.DrawString(this.infofont, warrior.cooldown.ToString(), new Vector2(xLoc, yLoc), Color.White);
-            
+            {
+                this.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
+                this.spriteBatch.DrawString(this.infofont, warrior.cooldown.ToString(), new Vector2(xLoc+iconWidth, yLoc+(iconHeight/3)), Color.White);
+            }
             this.spriteBatch.End();
             return healthBarY + tileHeight / 10;
         }
