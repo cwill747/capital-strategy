@@ -74,8 +74,29 @@ namespace CapitalStrategy
             SpriteFont menufont = this.game.menufont;
 			Rectangle destination = new Rectangle((int)destinationLoc.X - (board.WARRIORWIDTH - board.location.Width / board.cols) / 2, (int)destinationLoc.Y - (board.WARRIORHEIGHT - board.location.Height / board.rows) / 2 - board.location.Height / board.rows / 3, board.WARRIORWIDTH, board.WARRIORHEIGHT);
 			ImageAtlas source = this.states[state];
-			Color color = this.isYours ? Color.LightBlue : Color.LightSalmon;
-			source.draw(spriteBatch, destination, direction, (int) stateDepth, color);
+
+			//Color color = this.isYours ? Color.LightBlue : Color.LightSalmon;
+            Color color;
+            if (this.cooldown > 0 && this.isYours){
+                color = Color.DarkBlue;
+            }
+            else if (this.cooldown > 0 && !this.isYours)
+            {
+                color = Color.DarkRed;
+            }
+            else if (this.isYours && this.cooldown == 0)
+            {
+                color = Color.LightBlue;
+            }
+            else if (!this.isYours && this.cooldown == 0)
+            {
+                color = Color.LightSalmon;
+            }
+            else
+            {
+                color = Color.LimeGreen;
+            }
+            source.draw(spriteBatch, destination, direction, (int) stateDepth, color);
             Vector2 vec = new Vector2(0, 0);
 		}
         public void drawToLocation()
