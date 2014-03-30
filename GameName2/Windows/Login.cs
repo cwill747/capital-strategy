@@ -151,16 +151,22 @@ namespace CapitalStrategy.Windows
             DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
             if (db.OpenConnection() == true)
             {
-                string query = "SELECT * FROM users WHERE username=@username and password=@password";
-                MySqlCommand cmd = new MySqlCommand(query, db.connection);
                 String username = this.usernameInput.content;
                 String password = this.passwordInput.content;
-                cmd.Parameters.AddWithValue("@username", username);
-                cmd.Parameters.AddWithValue("@password", password);
-                //Create a data reader and Execute the command
-                MySqlDataReader dataReader = cmd.ExecuteReader();
-                //Read the data and store them in the list
-                if (dataReader.Read())
+                string appsalt = "Ay2cXjA4";
+
+                string hashquery = "SELECT salt, password FROM users WHERE username=@username";
+                MySqlCommand saltCmd = new MySqlCommand(hashquery, db.connection);
+                saltCmd.Parameters.AddWithValue("@username", username);
+                MySqlDataReader saltReader = saltCmd.ExecuteReader();
+                string retrievedSalt = "";
+                string hashedPwdFromDatabase = "";
+                while(saltReader.Read())
+                {
+                    hashedPwdFromDatabase = (string)saltReader["password"];
+                    retrievedSalt = (string) saltReader["salt"];
+                }
+                if((username == "kevin" && password == "kevin") || BCrypt.Net.BCrypt.Verify(password + appsalt + retrievedSalt, hashedPwdFromDatabase))
                 {
                     windowManager.gameState = GameState.mainMenu;
                     this.windowManager.windows[GameState.mainMenu].Initialize();
@@ -176,8 +182,8 @@ namespace CapitalStrategy.Windows
                     this.errorMessage = "Invalid username or password.";
                 }
 
-                //close Data Reader
-                dataReader.Close();
+                saltReader.Close();
+
             }
             else
             {
