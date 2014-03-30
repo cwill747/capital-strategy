@@ -89,6 +89,10 @@ namespace CapitalStrategy.Windows
                             this.usernameInput.toggleActive();
                             this.passwordInput.toggleActive();
                         }
+                        else if (key.Equals(Keys.Enter))
+                        {
+                            this.login();
+                        }
                         else
                         {
                             activeInput.handleKey(key);
