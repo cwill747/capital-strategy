@@ -220,7 +220,10 @@ namespace CapitalStrategy.Windows
                     // calculate damage
                     this.currentTurnWarrior.strike(this.beingAttacked);
 					this.cooldownCounter = 0;
-                    this.currentTurnWarrior.cooldown = this.currentTurnWarrior.maxCooldown;
+                    if (this.beingAttacked != null)
+                    {
+                        this.currentTurnWarrior.cooldown = this.currentTurnWarrior.maxCooldown;
+                    }
                     this.turnProgress = TurnProgress.beginning;
                     this.isYourTurn = !this.isYourTurn;
                 }
