@@ -60,7 +60,8 @@ namespace CapitalStrategy.Windows
         MouseWrapper mouseState;
 		public int cooldownCounter{ get; set;}
 
-
+        //for after match
+        public Boolean armyStillAround = false;
 
         public GameMatch(Game1 windowManager)
         {
@@ -75,6 +76,7 @@ namespace CapitalStrategy.Windows
             {
                 this.board.loadWarriors(this.windowManager, true);
             }
+
         }
         public void LoadContent()
         {
@@ -82,6 +84,9 @@ namespace CapitalStrategy.Windows
             this.Content = windowManager.Content;
             menufont = Content.Load<SpriteFont>("fonts/gamefont");
             this.infofont = Content.Load<SpriteFont>("fonts/menufont");
+            
+
+
 
             background = Content.Load<Texture2D>("stars");
             red = Content.Load<Texture2D>("colors/red");
@@ -133,7 +138,7 @@ namespace CapitalStrategy.Windows
                 50, 50, 2, 2, "crocy",
                 "firedragon", new int[] { 1, 8, 8, 11, 9, 11, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
                 null, 1, 500, 0);
-			magier = new WarriorType(this, 70, 2, 40, 45,
+			magier = new WarriorType(this,70, 2, 40, 45,
                 75, 25, 3, 3, "magier",
                 "axestan shield", new int[] { 9, 7, 7, 9, 9, 10, 9 }, new int[] { 1000, 500, 1000, 1500, 1000, 1000, 1000 },
                 null, 3, 500, 10);
@@ -155,16 +160,16 @@ namespace CapitalStrategy.Windows
             
             for (int i = 1; i < 2; i++)
             {
-                board.warriors[i == 0 ? 7 : 9 - 7][3] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 3, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
-                //board.warriors[i == 0 ? 7 : 9 - 7][5] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
-                board.warriors[i == 0 ? 9 : 9 - 9][5] = new Warrior(this.board, i == 0 ? 9 : 9 - 9, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, whiteMage);
-                //board.warriors[i == 0 ? 9 : 9 - 9][2] = new Warrior(this.board, i == 0 ? 9 : 9 - 9, 2, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, whiteMage);
+                //board.warriors[i == 0 ? 7 : 9 - 7][3] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 3, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
+                board.warriors[i == 0 ? 7 : 9 - 7][5] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
+                //board.warriors[i == 0 ? 9 : 9 - 9][5] = new Warrior(this.board, i == 0 ? 9 : 9 - 9, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, whiteMage);
+                board.warriors[i == 0 ? 9 : 9 - 9][2] = new Warrior(this.board, i == 0 ? 9 : 9 - 9, 2, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, whiteMage);
                 board.warriors[i == 0 ? 6 : 9 - 6][7] = new Warrior(this.board, i == 0 ? 6 : 9 - 6, 7, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, firedragon);
-                board.warriors[i == 0 ? 7 : 9 - 7][6] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 6, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, blueArcher);
+                //board.warriors[i == 0 ? 7 : 9 - 7][6] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 6, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, blueArcher);
                 board.warriors[i == 0 ? 7 : 9 - 7][4] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 4, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, crocy);
                 //board.warriors[i == 0 ? 8 : 9 - 8][3] = new Warrior(this.board, i == 0 ? 8 : 9 - 8, 3, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, magier);
                 board.warriors[i == 0 ? 8 : 9 - 8][5] = new Warrior(this.board, i == 0 ? 8 : 9 - 8, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, magier);
-                //board.warriors[i == 0 ? 7 : 9 - 7][2] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 2, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, blueArcher);
+                board.warriors[i == 0 ? 7 : 9 - 7][2] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 2, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, blueArcher);
             }
 
             
@@ -174,7 +179,75 @@ namespace CapitalStrategy.Windows
         }
         public void Update(GameTime gameTime)
         {
-			if (this.turnProgress == TurnProgress.beginning && this.cooldownCounter == 0) {
+
+            if (isYourTurn)
+            {
+                //for end game
+                this.armyStillAround = false;
+                Boolean endCheck = true;
+                if (!armyStillAround)
+                {
+                    for (int i = 0; i < ROWS; i++)
+                    {
+                        if (!armyStillAround)
+                        {
+                            for (int j = 0; j < COLS; j++)
+                            {
+                                Warrior unitC = board.warriors[i][j];
+                                if (unitC != null && unitC.isYours)
+                                {
+                                    armyStillAround = true;
+                                    endCheck = false;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (endCheck)
+                {
+                    int newGameState = Game1.gameStates.Pop();
+                    this.windowManager.gameState = newGameState;
+                    this.windowManager.windows[newGameState].Initialize();
+                }
+            }
+            else
+            {
+                this.armyStillAround = false;
+                Boolean endCheck = true;
+                if (!armyStillAround)
+                {
+                    for (int i = 0; i < ROWS; i++)
+                    {
+                        if (!armyStillAround)
+                        {
+                            for (int j = 0; j < COLS; j++)
+                            {
+                                Warrior unitC = board.warriors[i][j];
+                                if (unitC != null && !unitC.isYours)
+                                {
+                                    armyStillAround = true;
+                                    endCheck = false;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (endCheck)
+                {
+                    int newGameState = Game1.gameStates.Pop();
+                    this.windowManager.gameState = newGameState;
+                    this.windowManager.windows[newGameState].Initialize();
+                }
+                // end of end game
+
+            }
+
+            if (this.turnProgress == TurnProgress.beginning && this.cooldownCounter == 0)
+            {
+
+
 				if (this.isYourTurn) {
 					for (int i = 0; i < ROWS; i++) {
 						for (int j = 0; j < COLS; j++) {
@@ -184,18 +257,25 @@ namespace CapitalStrategy.Windows
 							}
 						}
 					}
-				} else if (!this.isYourTurn){
-					for (int i = 0; i < ROWS; i++) {
-						for (int j = 0; j < COLS; j++) {
-							Warrior unitC = board.warriors [i] [j];
-							if (unitC != null && !unitC.isYours && unitC.cooldown > 0) {
-								unitC.cooldown -= 1;
-							}
-						}
-					}
-				}
+                }
+                else if (!this.isYourTurn)
+                {
+                    for (int i = 0; i < ROWS; i++)
+                    {
+                        for (int j = 0; j < COLS; j++)
+                        {
+                            Warrior unitC = board.warriors[i][j];
+                            if (unitC != null && !unitC.isYours && unitC.cooldown > 0)
+                            {
+                                unitC.cooldown -= 1;
+                            }
+                        }
+                    }
+                }
 				cooldownCounter = 1;
 			}
+
+
 
             if (this.currentTurnWarrior != null)
             {
@@ -219,7 +299,6 @@ namespace CapitalStrategy.Windows
                 {
                     // calculate damage
               
-
 					this.cooldownCounter = 0;
                     if (this.beingAttacked != null)
                     {

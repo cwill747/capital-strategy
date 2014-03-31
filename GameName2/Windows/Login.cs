@@ -164,7 +164,12 @@ namespace CapitalStrategy.Windows
                     hashedPwdFromDatabase = (string)saltReader["password"];
                     retrievedSalt = (string) saltReader["salt"];
                 }
-                if((username == "kevin" && password == "kevin") || BCrypt.Net.BCrypt.Verify(password + appsalt + retrievedSalt, hashedPwdFromDatabase))
+                //edited
+                if (username == "" || password == "")
+                {
+                    this.errorMessage = "Username or password is blank.";
+                }
+                else if ((username == "kevin" && password == "kevin") || BCrypt.Net.BCrypt.Verify(password + appsalt + retrievedSalt, hashedPwdFromDatabase))
                 {
                     windowManager.gameState = GameState.mainMenu;
                     this.windowManager.windows[GameState.mainMenu].Initialize();
