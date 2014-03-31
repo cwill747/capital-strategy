@@ -23,10 +23,20 @@ namespace CapitalStrategy.Windows
         public Warrior currentWarrior { get; set; }
         public Button save { get; set; }
         public List<WarriorWrapper> warriorWrappers { get; set; }
-
+        public Texture2D red;
+        public Texture2D white;
+        public Texture2D heartIcon;
+        public Texture2D attackIcon;
+        public Texture2D shieldIcon;
+        public Texture2D moveIcon;
+        public SpriteFont menufont;
+        public SpriteFont infofont;
+        public Texture2D hourglass;
         private Rectangle pageContent = new Rectangle();
-       
-
+        private int boardHeight;
+        private int boardWidth;
+        private int tileWidth;
+        private int tileHeight;
         public CustomizeArmy(Game1 windowManager)
         {
             this.windowManager = windowManager;
@@ -35,11 +45,11 @@ namespace CapitalStrategy.Windows
 
         public void Initialize()
         {
-            this.pageContent.X = (this.windowManager.Window.ClientBounds.Width - 700) / 2;
-            this.pageContent.Y = 100;
-            int boardHeight = 350;
+            this.pageContent.X = 20;
+            this.pageContent.Y = 150;
+            boardHeight = 350 - 50;
             this.pageContent.Height = boardHeight;
-            int boardWidth = 700;
+            boardWidth = 700 - 100;
             this.pageContent.Width = boardWidth;
             board = new Board(5, 10, new Rectangle(this.pageContent.X, this.pageContent.Y, boardWidth, boardHeight), Game1.tileImage);
             this.oldMouseState = new MouseState();
@@ -50,7 +60,8 @@ namespace CapitalStrategy.Windows
             int padding = 10;
             this.save = new Button("SAVE", new Rectangle(this.pageContent.X + this.pageContent.Width - padding - saveButtonWidth,
                 this.pageContent.Y + this.pageContent.Height + padding, saveButtonWidth, saveButtonHeight), Game1.smallFont, isDisabled: true);
-
+            tileWidth = this.boardWidth / this.board.cols;
+            tileHeight = this.boardHeight / this.board.rows;
             this.pageContent.Height = this.pageContent.Height + padding + saveButtonHeight;
             
         }
@@ -58,7 +69,15 @@ namespace CapitalStrategy.Windows
         public void LoadContent()
         {
             this.backButton = new BackButton();
-            
+            menufont = this.windowManager.Content.Load<SpriteFont>("fonts/gamefont");
+            this.infofont = this.windowManager.Content.Load<SpriteFont>("fonts/menufont");
+            heartIcon = this.windowManager.Content.Load<Texture2D>("icons/heartIcon");
+            attackIcon = this.windowManager.Content.Load<Texture2D>("icons/attackIcon");
+            shieldIcon = this.windowManager.Content.Load<Texture2D>("icons/shieldIcon");
+            moveIcon = this.windowManager.Content.Load<Texture2D>("icons/moveIcon");
+            red = this.windowManager.Content.Load<Texture2D>("colors/red");
+            white = this.windowManager.Content.Load<Texture2D>("colors/white");
+            hourglass = this.windowManager.Content.Load<Texture2D>("icons/hourglass");
         }
 
         public void Update(GameTime gameTime)
@@ -164,6 +183,51 @@ namespace CapitalStrategy.Windows
             }
             this.backButton.drawBackButton(this.windowManager.spriteBatch);
             this.save.draw(this.windowManager.spriteBatch);
+
+            if (this.currentWarrior != null)
+            {
+                Warrior displayWarrior = new Warrior(this.currentWarrior);
+                int imgPadding = 20;
+                
+                int toDrawX = this.pageContent.X + this.boardWidth + 10;
+                int toDrawY = this.pageContent.Y;
+           
+                int iconWidth = tileWidth / 2;
+                int iconHeight = iconWidth;
+                int padding = 30;
+                int barHeight = tileHeight / 10;
+                double widthPerPoint = ((double)tileWidth) / 100;
+
+                displayWarrior.drawInArbitraryLocation(toDrawX, toDrawY);
+                displayWarrior.drawWarriorType(toDrawX + board.WARRIORWIDTH / 2 + imgPadding, toDrawY - imgPadding);
+                toDrawX = toDrawX + board.WARRIORWIDTH / 2 + imgPadding;
+                toDrawY += iconHeight + padding;
+
+
+                this.windowManager.spriteBatch.Begin();
+
+                // Draw the warriors attack strength
+                this.windowManager.spriteBatch.Draw(attackIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
+                this.windowManager.spriteBatch.Draw(Game1.charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
+                this.windowManager.spriteBatch.Draw(white, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * 100), barHeight), Color.WhiteSmoke);
+                this.windowManager.spriteBatch.Draw(red, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * currentWarrior.attack), barHeight), Color.WhiteSmoke);
+                toDrawY += iconHeight + padding;
+
+                // Draw the warriors defense strength
+                // @TODO: Change the 2+ on this to be a resolution-independent value
+                this.windowManager.spriteBatch.Draw(shieldIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
+                this.windowManager.spriteBatch.Draw(Game1.charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
+                this.windowManager.spriteBatch.Draw(white, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * 100), barHeight), Color.WhiteSmoke);
+                this.windowManager.spriteBatch.Draw(red, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * currentWarrior.defense), barHeight), Color.WhiteSmoke);
+                toDrawY += iconHeight + padding;
+
+                // Draw the warriors cooldown
+                string coolDisplay = this.currentWarrior.maxCooldown.ToString();
+                this.windowManager.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
+                this.windowManager.spriteBatch.DrawString(this.infofont, coolDisplay, new Vector2(2 + toDrawX + iconWidth + padding, toDrawY), Color.White);
+
+                this.windowManager.spriteBatch.End();
+            }
         }
 
         
