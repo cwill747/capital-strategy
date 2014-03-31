@@ -220,6 +220,7 @@ namespace CapitalStrategy.Windows
                     // calculate damage
                     this.currentTurnWarrior.strike(this.beingAttacked);
 					this.cooldownCounter = 0;
+                    this.currentTurnWarrior.cooldown = this.currentTurnWarrior.maxCooldown;
                     this.turnProgress = TurnProgress.beginning;
                     this.isYourTurn = !this.isYourTurn;
                 }
@@ -332,7 +333,6 @@ namespace CapitalStrategy.Windows
                         int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
                         beingAttacked.setDirection(xDiff, yDiff);
                         beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
-						this.currentTurnWarrior.cooldown = this.currentTurnWarrior.maxCooldown;
                     }
                     else
                     {
