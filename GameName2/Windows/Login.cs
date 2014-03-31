@@ -23,9 +23,11 @@ namespace CapitalStrategy.Windows
         public Texture2D capitalLogo { get; set; }
         public InputDialog usernameInput { get; set; }
         public InputDialog passwordInput { get; set; }
+        public InputDialog confirmPasswordInput { get; set; }
         public KeyboardState oldState { get; set; }
         public MouseState oldMouseState { get; set; }
         public Button submitButton { get; set; }
+        public Button registerButton { get; set; }
         public String errorMessage { get; set; }
         public Vector2 errorMessageLoc { get; set; }
         public Rectangle capitalLogoLoc { get; set; }
@@ -40,6 +42,7 @@ namespace CapitalStrategy.Windows
             Game1.gameStates.Clear();
             windowManager.username = "";
             windowManager.password = "";
+            windowManager.confirmPassword = "";
             this.oldState = new KeyboardState();
             this.oldMouseState = new MouseState();
             this.errorMessage = "";
@@ -56,7 +59,9 @@ namespace CapitalStrategy.Windows
             this.capitalLogoLoc = new Rectangle(leftEdge, startY, 325, 180);
             this.usernameInput = new InputDialog("username", new Rectangle(leftEdge + 125, startY + 210, 170, 25), isActive: true);
             this.passwordInput = new InputDialog("password", new Rectangle(leftEdge + 125, startY + 250, 170, 25), mask: true);
+            this.confirmPasswordInput = new InputDialog("confirm Password", new Rectangle(leftEdge + 125, startY + 290, 170, 25), mask: true, isVisible: false);
             this.submitButton = new Button("SUBMIT", new Rectangle(leftEdge + 40, startY + 290, 250, 50), Game1.smallFont);
+            this.registerButton = new Button("REGISTER", new Rectangle(leftEdge + 40, startY + 350, 250, 50), Game1.smallFont);
             this.errorMessageLoc = new Vector2(leftEdge + 25, startY + 360);
         }
 
@@ -68,7 +73,9 @@ namespace CapitalStrategy.Windows
         {
             this.usernameInput.update(gameTime);
             this.passwordInput.update(gameTime);
+            this.confirmPasswordInput.update(gameTime);
             this.submitButton.update(gameTime);
+            this.registerButton.update(gameTime);
 
             KeyboardState newState = Keyboard.GetState();
             if (!newState.Equals(oldState))
@@ -85,9 +92,10 @@ namespace CapitalStrategy.Windows
                     {
                         if (key.Equals(Keys.Tab))
                         {
-                            // we'll have to use an array for when we add a third input (ie password combination)
-                            this.usernameInput.toggleActive();
-                            this.passwordInput.toggleActive();
+                                this.passwordInput.toggleActive();
+                                this.usernameInput.toggleActive();
+                            
+                            //else if register button pressed
                         }
                         else if (key.Equals(Keys.Enter))
                         {
@@ -128,6 +136,10 @@ namespace CapitalStrategy.Windows
                     {
                         this.login(this.usernameInput.content, this.passwordInput.content);
                     }
+                    else if (this.registerButton.unClick(newMouseState))
+                    {
+                        this.register(this.usernameInput.content, this.passwordInput.content, this.confirmPasswordInput.content);
+                    }
                     
                 }
                 oldMouseState = newMouseState;
@@ -143,8 +155,10 @@ namespace CapitalStrategy.Windows
             windowManager.spriteBatch.End();
             usernameInput.draw(windowManager.spriteBatch);
             this.passwordInput.draw(windowManager.spriteBatch);
+            this.confirmPasswordInput.draw(windowManager.spriteBatch);
             this.submitButton.draw(windowManager.spriteBatch);
-            
+            this.registerButton.draw(windowManager.spriteBatch);
+
         }
         public void login(string username, string password)
         {
@@ -188,6 +202,39 @@ namespace CapitalStrategy.Windows
                 this.errorMessage = "Could not connect to DB.";
             }
         }
-    }
 
+        public void register(string username, string password, string confirmPassword)
+        {
+            DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
+
+            if (db.OpenConnection() == true)
+            {
+                //Check if username if available
+                string testIfAvailable = "SELECT username FROM users WHERE username=@username";
+                MySqlCommand availCmd = new MySqlCommand(testIfAvailable, db.connection);
+                availCmd.Parameters.AddWithValue("@username", username);
+                MySqlDataReader availReader = availCmd.ExecuteReader();
+                string comparison = "";
+                while(availReader.Read())
+                {
+                    comparison = (string)availReader["username"];
+                }
+                if (comparison == "")
+                {
+                    //BCrypt.GenerateSalt
+                }
+                else
+                {
+                    this.errorMessage = "Username not available.";
+                }
+
+            }
+
+            else
+            {
+                this.errorMessage = "Could not connect to DB.";
+            }
+        }
+
+    }
 }

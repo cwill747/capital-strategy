@@ -225,5 +225,7 @@ namespace CapitalStrategy
             return warriorTypes[1];
         }
 
-	}
+
+        public string confirmPassword { get; set; }
+    }
 }
