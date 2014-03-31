@@ -218,9 +218,10 @@ namespace CapitalStrategy.Windows
                 if (this.turnProgress == TurnProgress.attacked)
                 {
                     // calculate damage
+                    int targetHealthCheck = this.beingAttacked.health;
                     this.currentTurnWarrior.strike(this.beingAttacked);
 					this.cooldownCounter = 0;
-                    if (this.beingAttacked != null)
+                    if (this.beingAttacked != null && targetHealthCheck !=this.beingAttacked.health)
                     {
                         this.currentTurnWarrior.cooldown = this.currentTurnWarrior.maxCooldown;
                     }
