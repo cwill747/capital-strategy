@@ -31,6 +31,7 @@ namespace CapitalStrategy.Windows
         public String errorMessage { get; set; }
         public Vector2 errorMessageLoc { get; set; }
         public Rectangle capitalLogoLoc { get; set; }
+        public string appsalt = "Ay2cXjA4";
 
         public Login(Game1 windowManager)
         {
@@ -165,7 +166,6 @@ namespace CapitalStrategy.Windows
             DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
             if (db.OpenConnection() == true)
             {
-                string appsalt = "Ay2cXjA4";
 
                 string hashquery = "SELECT salt, password FROM users WHERE username=@username";
                 MySqlCommand saltCmd = new MySqlCommand(hashquery, db.connection);
@@ -212,32 +212,47 @@ namespace CapitalStrategy.Windows
         {
             DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
 
-            if (db.OpenConnection() == true)
+            if (password == confirmPassword)
             {
-                //Check if username if available
-                string testIfAvailable = "SELECT username FROM users WHERE username=@username";
-                MySqlCommand availCmd = new MySqlCommand(testIfAvailable, db.connection);
-                availCmd.Parameters.AddWithValue("@username", username);
-                MySqlDataReader availReader = availCmd.ExecuteReader();
-                string comparison = "";
-                while(availReader.Read())
+                if (db.OpenConnection() == true)
                 {
-                    comparison = (string)availReader["username"];
+                    //Check if username if available
+                    string testIfAvailable = "SELECT username FROM users WHERE username=@username";
+                    MySqlCommand availCmd = new MySqlCommand(testIfAvailable, db.connection);
+                    availCmd.Parameters.AddWithValue("@username", username);
+                    MySqlDataReader availReader = availCmd.ExecuteReader();
+                    string comparison = "";
+                    while (availReader.Read())
+                    {
+                        comparison = (string)availReader["username"];
+                    }
+                    if (comparison == "")
+                    {
+                        string pwdToHash = password + this.appsalt; // ^Y8~JJ is my hard-coded salt
+                        string salt = BCrypt.Net.BCrypt.GenerateSalt();
+                        string hashToStoreInDatabase = BCrypt.Net.BCrypt.HashPassword(pwdToHash, salt);
+                        string command = "INSERT INTO users VALUES (@username, @password, @salt)";
+                        MySqlCommand insCmd = new MySqlCommand(command, db.connection);
+                        insCmd.Parameters.AddWithValue("username", username);
+                        insCmd.Parameters.AddWithValue("password", hashToStoreInDatabase);
+                        insCmd.Parameters.AddWithValue("salt", salt);
+                        insCmd.ExecuteNonQuery();
+                    }
+                    else
+                    {
+                        this.errorMessage = "Username not available.";
+                    }
+
                 }
-                if (comparison == "")
-                {
-                    //BCrypt.GenerateSalt
-                }
+
                 else
                 {
-                    this.errorMessage = "Username not available.";
+                    this.errorMessage = "Could not connect to DB.";
                 }
-
             }
-
             else
             {
-                this.errorMessage = "Could not connect to DB.";
+                this.errorMessage = "Passwords do not match.";
             }
         }
 
