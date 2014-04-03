@@ -43,15 +43,25 @@ namespace CapitalStrategyServer.Messaging
                             // Change the current client's looking for game property to true
                             //m.sentFrom.lookingForGame = true;
                             // Tell the server queue that we have a new client looking for a game
-                            //server.qm.newClientLookingForGame(m.sentFrom);
-                            m.waitingToSend = true;
+                            server.qm.newClientLookingForGame(m.sentFrom);
                         }
                         break;
                     case 1: // message is a chat message
                         {
+                            //Check if the message is actually needing to be sent to just the server
+                            if(m.sendToUUID != this.server.netserver.UniqueIdentifier)
+                            {
+                                m.waitingToSend = true;
+                                addToOutgoingQueue(m); 
+                            }
                             // just turn the message around and send it to the chat recipient
+
+                        }
+                        break;
+                    case 2: // message is a movement message, turn it around
+                        {
                             m.waitingToSend = true;
-                            addToOutgoingQueue(m); 
+                            addToOutgoingQueue(m);
                         }
                         break;
                     default:

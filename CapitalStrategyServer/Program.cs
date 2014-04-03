@@ -9,9 +9,6 @@ namespace CapitalStrategyServer
     class Program
     {
 
-
-
-
         static void Main(string[] args)
         {
             NetPeerConfiguration config = new NetPeerConfiguration("xnaapp");
@@ -21,7 +18,7 @@ namespace CapitalStrategyServer
             NetServer server = new NetServer(config);
             server.Start();
             Server s = new Server();
-
+            s.netserver = server;
             // schedule initial sending of position updates
             double nextSendUpdates = NetTime.Now;
 
@@ -58,6 +55,10 @@ namespace CapitalStrategyServer
                                 Client c = new Client(msg.SenderConnection.RemoteUniqueIdentifier);
                                 s.addConnection(c);
                                 Console.WriteLine(msg.SenderConnection.RemoteUniqueIdentifier + " connected!");
+                                Message connectMessage = new Message(msgType.Chat, 0, msg.SenderConnection.RemoteUniqueIdentifier);
+                                connectMessage.waitingToSend = true;
+                                connectMessage.msg = "SERVER HELLO";
+                                s.msgQueue.addToOutgoingQueue(connectMessage);
                             }
 
                             break;
@@ -65,8 +66,38 @@ namespace CapitalStrategyServer
                             //
                             // The client sent input to the server
                             //
-                            Message m = new Message();
-                            msg.ReadAllFields(m);
+                            msgType type = (msgType) msg.ReadInt32();
+                            Message m;
+                            if (type == msgType.Chat)
+                            {
+                                long sentFrom = msg.ReadInt64();
+                                long sendToUUID = msg.ReadInt64();
+                                string message = msg.ReadString();
+                                m = new Message(type, sentFrom, sendToUUID);
+                                m.msg = message;
+                            }
+                            else if (type == msgType.Matchmaking)
+                            {
+                                long sentFrom = msg.ReadInt64();
+                                string message = msg.ReadString();
+                                m = new Message(type, sentFrom);
+                                m.msg = message;
+                            }
+                            else
+                            {
+                                m = new Message(
+                                    type,
+                                    msg.ReadInt64(),
+                                    msg.ReadInt64(),
+                                    new int[2] { msg.ReadInt32(), msg.ReadInt32() },
+                                    new int[2] { msg.ReadInt32(), msg.ReadInt32() },
+                                    new int[2] { msg.ReadInt32(), msg.ReadInt32() },
+                                    msg.ReadInt32(),
+                                    msg.ReadInt32(),
+                                    msg.ReadInt32(),
+                                    msg.ReadBoolean()
+                                );
+                            }
                             s.msgQueue.addToIncomingQueue(m);
                             Console.WriteLine("Received Message: " + m.ToString());
                             break;
@@ -89,7 +120,7 @@ namespace CapitalStrategyServer
                         NetOutgoingMessage om = server.CreateMessage();
                         Console.WriteLine("Sending Message: " + m.ToString());
                         om.WritePadBits();
-                        om.WriteAllFields(m);
+                        m.handleMessage(ref om);
                         server.SendMessage(om, server.Connections.Find(nc => nc.RemoteUniqueIdentifier.Equals(m.sendToUUID)), NetDeliveryMethod.ReliableUnordered);
                     }
                     

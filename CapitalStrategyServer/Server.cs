@@ -13,10 +13,11 @@ namespace CapitalStrategyServer
         public QueueManager qm;
         public MessageQueue msgQueue;
         public List<Client> connections;
+        public NetServer netserver;
 
         public Server()
         {
-            qm = new QueueManager();
+            qm = new QueueManager(this);
             msgQueue = new MessageQueue(this);
             connections = new List<Client>();
         }

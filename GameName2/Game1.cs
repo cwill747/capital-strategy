@@ -10,6 +10,11 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Input.Touch;
 using CapitalStrategy.Windows;
 using System.Xml;
+using System.Threading;
+using System.Threading.Tasks;
+using Lidgren.Network;
+using System.Diagnostics;
+using CapitalStrategyServer.Messaging;
 
 #endregion
 
@@ -39,7 +44,7 @@ namespace CapitalStrategy
         public static Texture2D backButton;
         public static Texture2D tileImage;
         public static Texture2D charcoal;
-
+        public NetClient client;
         public List<WarriorType> warriorTypes = new List<WarriorType>();
         
 
@@ -55,6 +60,9 @@ namespace CapitalStrategy
 			this.graphics.PreferredBackBufferHeight = 600 + 50;
 			IsMouseVisible = true;
 			Content.RootDirectory = "Content";
+
+            NetPeerConfiguration config = new NetPeerConfiguration("xnaapp");
+            client = new NetClient(config);
 		}
 
 
@@ -89,6 +97,11 @@ namespace CapitalStrategy
                 }
             }
 			base.Initialize();
+
+            client.Start();
+            client.Connect("127.0.0.1", 14242);
+            Debug.WriteLine("Client 1: " + client.UniqueIdentifier.ToString());
+
 		}
 
 		/// <summary>
@@ -184,6 +197,71 @@ namespace CapitalStrategy
                 Exit();
 
 			base.Update(gameTime);
+
+            NetIncomingMessage msg;
+            while ((msg = client.ReadMessage()) != null)
+            {
+                switch (msg.MessageType)
+                {
+                    case NetIncomingMessageType.StatusChanged:
+                        NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
+                        if (status == NetConnectionStatus.Connected)
+                        {
+                            Console.WriteLine("Connected! UID: " + msg.SenderConnection.RemoteUniqueIdentifier + " , IP: " + msg.SenderConnection.RemoteEndPoint.ToString());
+                        }
+                        break;
+                    case NetIncomingMessageType.Data:
+                        msgType type = (msgType) msg.ReadInt32();
+                        Message m;
+                        if (type == msgType.Chat)
+                        {
+                            long sentFrom = msg.ReadInt64();
+                            long sendToUUID = msg.ReadInt64();
+                            string message = msg.ReadString();
+                            m = new Message(type, sentFrom, sendToUUID);
+                            m.msg = message;
+
+                            if(m.msg == "SERVER HELLO")
+                            {
+                                NetOutgoingMessage om = client.CreateMessage();
+                                om.WritePadBits();
+                                Message clientHello = new Message(msgType.Chat, client.UniqueIdentifier, client.ServerConnection.RemoteUniqueIdentifier);
+                                clientHello.msg = "CLIENT HELLO";
+                                clientHello.handleMessage(ref om);
+                                Console.WriteLine("Sending message: " + clientHello.ToString());
+                                client.SendMessage(om, NetDeliveryMethod.ReliableUnordered);
+
+                            }
+                        }
+                        else if (type == msgType.Matchmaking)
+                        {
+                            long sentFrom = msg.ReadInt64();
+                            string message = msg.ReadString();
+                            m = new Message(type, sentFrom);
+                            m.msg = message;
+                        }
+                        else
+                        {
+                            m = new Message(
+                                type,
+                                msg.ReadInt64(),
+                                msg.ReadInt64(),
+                                new int[2] { msg.ReadInt32(), msg.ReadInt32() },
+                                new int[2] { msg.ReadInt32(), msg.ReadInt32() },
+                                new int[2] { msg.ReadInt32(), msg.ReadInt32() },
+                                msg.ReadInt32(),
+                                msg.ReadInt32(),
+                                msg.ReadInt32(),
+                                msg.ReadBoolean()
+                            );
+                            // HANDLE THE MOVE MESSAGE HERE
+                        }
+                        Console.WriteLine(m.ToString());
+
+                        break;
+                }
+            }
+
 		}
 
 		/// <summary>
