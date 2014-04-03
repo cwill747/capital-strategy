@@ -9,6 +9,9 @@ namespace CapitalStrategyServer.Messaging
 {
     public enum msgType : int { Matchmaking, Chat, Move };
 
+    /// <summary>
+    /// Represents a message sent from client to client or client to server
+    /// </summary>
     public class Message
     {
         public int type;
@@ -51,16 +54,16 @@ namespace CapitalStrategyServer.Messaging
         /// <summary>
         ///     Creates a move message from necessary parameters
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="sentFrom"></param>
-        /// <param name="sendToUUID"></param>
-        /// <param name="startLocation"></param>
-        /// <param name="endLocation"></param>
-        /// <param name="attackedLocation"></param>
-        /// <param name="damageDealt"></param>
-        /// <param name="attackedUnitID"></param>
-        /// <param name="attackerUnitID"></param>
-        /// <param name="unitAttackDied"></param>
+        /// <param name="type">Type of message to send</param>
+        /// <param name="sentFrom">The UID of the client the message was sent from</param>
+        /// <param name="sendToUUID">The UID of the client the message was sent to</param>
+        /// <param name="startLocation">Where the piece started on the board</param>
+        /// <param name="endLocation">Where the piece ended on the board</param>
+        /// <param name="attackedLocation">What location the piece attacked</param>
+        /// <param name="damageDealt">How much damage it dealt</param>
+        /// <param name="attackedUnitID">What piece the unit attacked</param>
+        /// <param name="attackerUnitID">What the id of the attacking piece was</param>
+        /// <param name="unitAttackDied">Whether the attacked piece died or not</param>
         public Message(msgType type, long sentFrom, long sendToUUID, int[] startLocation, int[] endLocation, int[] attackedLocation, int damageDealt,
             int attackedUnitID, int attackerUnitID, bool unitAttackDied)
         {
