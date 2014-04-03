@@ -244,15 +244,15 @@ namespace CapitalStrategy
                         {
                             m = new Message(
                                 type,
-                                msg.ReadInt64(),
-                                msg.ReadInt64(),
-                                new int[2] { msg.ReadInt32(), msg.ReadInt32() },
-                                new int[2] { msg.ReadInt32(), msg.ReadInt32() },
-                                new int[2] { msg.ReadInt32(), msg.ReadInt32() },
-                                msg.ReadInt32(),
-                                msg.ReadInt32(),
-                                msg.ReadInt32(),
-                                msg.ReadBoolean()
+                                msg.ReadInt64(), // UID of the client the message was sent from
+                                msg.ReadInt64(), // UID of the client the message is sent to (should be us)
+                                new int[2] { msg.ReadInt32(), msg.ReadInt32() }, // The start location of the piece moved
+                                new int[2] { msg.ReadInt32(), msg.ReadInt32() }, // The end location of the piece moved
+                                new int[2] { msg.ReadInt32(), msg.ReadInt32() }, // Where the piece attacked
+                                msg.ReadInt32(), // The damage dealt
+                                msg.ReadInt32(), //The attacked unit ID
+                                msg.ReadInt32(), // The attacker unit ID
+                                msg.ReadBoolean() // Whether the unit died or not
                             );
                             // HANDLE THE MOVE MESSAGE HERE
                         }
