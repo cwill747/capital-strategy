@@ -231,32 +231,25 @@ namespace CapitalStrategy.Windows
             DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
             if (db.OpenConnection() == true)
             {
-
-                string hashquery = "SELECT salt, password FROM users WHERE username=@username";
-                MySqlCommand saltCmd = new MySqlCommand(hashquery, db.connection);
-                saltCmd.Parameters.AddWithValue("@username", username);
-                MySqlDataReader saltReader = saltCmd.ExecuteReader();
-                string retrievedSalt = "";
-                string hashedPwdFromDatabase = "";
-                while (saltReader.Read())
-                {
-                    hashedPwdFromDatabase = (string)saltReader["password"];
-                    retrievedSalt = (string)saltReader["salt"];
-                }
                 //edited
                 if (username == "" || password == "")
                 {
                     this.errorMessage = "Username or password is blank.";
+                    return;
                 }
-                else if ((username == "kevin" && password == "kevin") || BCrypt.Net.BCrypt.Verify(password + appsalt + retrievedSalt, hashedPwdFromDatabase))
+                string query = "SELECT password FROM users WHERE username=@username";
+                MySqlCommand cmd = new MySqlCommand(query, db.connection);
+                cmd.Parameters.AddWithValue("@username", username);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                String passwordQuery = "";
+                if (dataReader.Read())
                 {
-                    windowManager.gameState = GameState.mainMenu;
-                    this.windowManager.windows[GameState.mainMenu].Initialize();
-                    Game1.gameStates.Push(GameState.login);
-                    this.windowManager.username = username;
-                    this.windowManager.password = password;
-                    this.errorMessage = "";
-                    this.windowManager.client.Connect("127.0.0.1", 14242);
+                    passwordQuery = (string)dataReader["password"];
+                }
+                
+                if (passwordQuery == password)
+                {
+                    this.postLogin(username, password);
 
                     //System.Diagnostics.Debug.WriteLine(dataReader["username"]);
                     //System.Diagnostics.Debug.WriteLine(dataReader["password"]);
@@ -266,7 +259,7 @@ namespace CapitalStrategy.Windows
                     this.errorMessage = "Invalid username or password.";
                 }
 
-                saltReader.Close();
+                dataReader.Close();
 
             }
             else
@@ -304,10 +297,12 @@ namespace CapitalStrategy.Windows
             if (username == "" || password == "" || confirmPassword == "")
             {
                 this.errorMessage = "All fields must be filled out.";
+                return;
             }
             if (!password.Equals(confirmPassword, StringComparison.Ordinal))
             {
                 this.errorMessage = "Passwords do not match.";
+                return;
             }
 
             if (password == confirmPassword)
@@ -319,18 +314,32 @@ namespace CapitalStrategy.Windows
                     MySqlCommand availCmd = new MySqlCommand(testIfAvailable, db.connection);
                     availCmd.Parameters.AddWithValue("@username", username);
                     MySqlDataReader availReader = availCmd.ExecuteReader();
-                    string comparison = "";
                     if (!availReader.Read())
                     {
-                        string pwdToHash = password + this.appsalt; 
-                        string salt = BCrypt.Net.BCrypt.GenerateSalt();
-                        string hashToStoreInDatabase = BCrypt.Net.BCrypt.HashPassword(pwdToHash, salt);
-                        string command = "INSERT INTO users VALUES (@username, @password, @salt)";
+                        availReader.Close();
+                        string command = "INSERT INTO users (username, password) VALUES (@username, @password)";
                         MySqlCommand insCmd = new MySqlCommand(command, db.connection);
                         insCmd.Parameters.AddWithValue("username", username);
-                        insCmd.Parameters.AddWithValue("password", hashToStoreInDatabase);
-                        insCmd.Parameters.AddWithValue("salt", salt);
-                        insCmd.ExecuteNonQuery();
+                        insCmd.Parameters.AddWithValue("password", password);
+                        if (insCmd.ExecuteNonQuery() == 1)
+                        {
+                            // set up initial configuration by inserting default lineup into db
+                            /* */
+                            String query = @"INSERT INTO Warriors (username, warriorType, row, col)
+                                                SELECT @username, warriorType, row, col
+                                            FROM Warriors
+                                            WHERE username='initial'";
+                            MySqlCommand cmd = new MySqlCommand(query, db.connection);
+                            cmd.Parameters.AddWithValue("username", username);
+                            cmd.ExecuteNonQuery();
+                            this.postLogin(username, password);
+
+                        }
+                        else
+                        {
+                            this.errorMessage = "Registration failed. Please try again.";
+                        }
+                        
                     }
                     else
                     {
@@ -345,6 +354,15 @@ namespace CapitalStrategy.Windows
                 }
             }
         }
-
+        public void postLogin(String username, String password)
+        {
+            windowManager.gameState = GameState.mainMenu;
+            this.windowManager.windows[GameState.mainMenu].Initialize();
+            Game1.gameStates.Push(GameState.login);
+            this.windowManager.username = username;
+            this.windowManager.password = password;
+            this.errorMessage = "";
+            this.windowManager.client.Connect("127.0.0.1", 14242);
+        }
     }
 }
