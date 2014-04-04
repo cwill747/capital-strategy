@@ -41,6 +41,7 @@ namespace CapitalStrategy
 
 		public Warrior(Board board, int id, double row, double col, int direction, int state, Boolean isYours, WarriorType warriorType) : base(warriorType)
 		{
+            this.id = id;
 			this.board = board;
 			this.row = row;
 			this.col = col;
@@ -177,7 +178,7 @@ namespace CapitalStrategy
 					{
 						if (discovered[i][j])
 						{
-							board.tileTints[i][j] = (this.isYours == isYourTurn) ? Warrior.yourMoveColor : Warrior.notYourMoveColor;
+							board.tileTints[i][j] = (this.isYours && isYourTurn) ? Warrior.yourMoveColor : Warrior.notYourMoveColor;
 						}
 					}
 

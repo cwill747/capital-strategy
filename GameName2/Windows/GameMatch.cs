@@ -64,6 +64,8 @@ namespace CapitalStrategy.Windows
         //for after match
         public Boolean armyStillAround = false;
 
+        public int opponentDamage { get; set; }
+
         public GameMatch(Game1 windowManager)
         {
             this.windowManager = windowManager;
@@ -291,6 +293,22 @@ namespace CapitalStrategy.Windows
                     if (finishedMoving)
                     {
                         this.turnProgress = TurnProgress.moved;
+                        if (!this.isYourTurn)
+                        {
+                            if (this.targetRow < 0)
+                            {
+                                this.turnProgress = TurnProgress.attacked;
+                            }
+                            else
+                            {
+                                this.turnProgress = TurnProgress.attacking;
+                                int xDiff = (int)(currentTurnWarrior.col - beingAttacked.col);
+                                int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
+                                beingAttacked.setDirection(xDiff, yDiff);
+                                beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
+                                this.currentTurnWarrior.beginAttack(this.targetRow, this.targetCol);
+                            }
+                        }
                     }
                 }
                 if (this.turnProgress == TurnProgress.moved)
@@ -343,23 +361,46 @@ namespace CapitalStrategy.Windows
 
                     if (this.beingAttacked != null)
                     {
+
                         int targetHealthCheck = this.beingAttacked.health;
-                        this.currentTurnWarrior.strike(this.beingAttacked);
+                        if (this.isYourTurn)
+                        {
+                            this.currentTurnWarrior.strike(this.beingAttacked);
+                        }
+                        else
+                        {
+                            this.beingAttacked.health -= this.opponentDamage;
+                        }
+                        
                         if (targetHealthCheck != this.beingAttacked.health)
                         {
-                           // int xDiff = (int)(currentTurnWarrior.col - beingAttacked.col);
-                           // int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
+                            // int xDiff = (int)(currentTurnWarrior.col - beingAttacked.col);
+                            // int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
                             //beingAttacked.setDirection(xDiff, yDiff);
-                           // beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
+                            // beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
                             this.currentTurnWarrior.cooldown = this.currentTurnWarrior.maxCooldown;
 
                         }
+
+
+
                     }
 
                     this.cooldownCounter = 0;
 
                     this.turnProgress = TurnProgress.beginning;
                     this.isYourTurn = !this.isYourTurn;
+                    if (!this.isYourTurn)
+                    {
+                        Message message = new Message();
+                        message.attackedLocation = new int[2]{2, 2};
+                        message.attackedUnitID = 2;
+                        message.attackerUnitID = 105;
+                        message.damageDealt = 30;
+                        message.attackedLocation = new int[2] { 5, 3 };
+                        message.endLocation = new int[2] { 8, 1 };
+                        this.handleOpponentMove(message);
+                    }
                 }
             }
             mouseState.update(Mouse.GetState());
@@ -461,7 +502,7 @@ namespace CapitalStrategy.Windows
             {
 
                 if (selectedWarrior != null && 
-					((this.isYourTurn && this.selectedWarrior.isYours) || (!this.isYourTurn && !this.selectedWarrior.isYours))
+					(this.isYourTurn && this.selectedWarrior.isYours)
 					&& selectedWarrior.cooldown <= 0)
                 {
                     // find if this is a valid move
@@ -479,7 +520,7 @@ namespace CapitalStrategy.Windows
                     selectedWarrior.updateUserOptions(this.isYourTurn);
                 }
             }
-            else if (this.turnProgress == TurnProgress.moved)
+            else if (this.isYourTurn && this.turnProgress == TurnProgress.moved)
             {
                 // clicking to acquire target
                 if (this.currentTurnWarrior.isStrikable((int)this.currentTurnWarrior.row, (int)this.currentTurnWarrior.col, this.mouseState.row, this.mouseState.col))
@@ -489,7 +530,7 @@ namespace CapitalStrategy.Windows
                     this.targetCol = this.mouseState.col;
                 }
             }
-            else if (this.turnProgress == TurnProgress.targetAcquired)
+            else if ( this.isYourTurn && this.turnProgress == TurnProgress.targetAcquired)
             {
                 if (this.mouseState.row == this.targetRow && this.mouseState.col == this.targetCol)
                 {
@@ -666,6 +707,12 @@ namespace CapitalStrategy.Windows
             attackingWarrior.moveTo(message.endLocation[0], message.endLocation[1]);
             this.turnProgress = TurnProgress.moving;
             this.currentTurnWarrior = attackingWarrior;
+
+            this.targetRow = message.attackedLocation[0];
+            this.targetCol = message.attackedLocation[1];
+
+            this.beingAttacked = attackedWarrior;
+            this.opponentDamage = message.damageDealt;
             
             return true;
         }
@@ -678,6 +725,7 @@ namespace CapitalStrategy.Windows
             attackedLocation[0] = this.board.rows - attackedLocation[0] - 1;
             int[] endLocation = message.endLocation;
             endLocation[0] = this.board.rows - endLocation[0] - 1;
+            
             return message;
         }
 
@@ -689,7 +737,7 @@ namespace CapitalStrategy.Windows
                 for (int col = 0; col < this.board.cols; col++)
                 {
                     Warrior atRowCol = this.board.warriors[row][col];
-                    if (atRowCol.id == id)
+                    if (atRowCol !=null && atRowCol.id == id)
                     {
                         return atRowCol;
                     }
