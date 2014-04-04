@@ -20,14 +20,14 @@ namespace CapitalStrategyServer.Messaging
         public long sentFrom;
         public long sendToUUID;
         public bool processed;
-        private int[] startLocation;
-        private int[] endLocation;
-        private int[] attackedLocation;
-        private int damageDealt;
-        private int attackedUnitID;
-        private int attackerUnitID;
-        private bool unitAttackDied;
-        private Client matchmadeClient;
+        public int[] startLocation;
+        public int[] endLocation;
+        public int[] attackedLocation;
+        public int damageDealt;
+        public int attackedUnitID;
+        public int attackerUnitID;
+        public bool unitAttackDied;
+        public Client matchmadeClient;
 
         public Message()
         {

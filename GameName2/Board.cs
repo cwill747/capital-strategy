@@ -115,7 +115,8 @@ namespace CapitalStrategy
                         curRow = this.rows - curRow - 1;
                     }
                     int curCol = Int32.Parse(dataReader["col"].ToString());
-                    Warrior w = new Warrior(this, curRow, curCol, isPlayer1 ? Direction.N : Direction.S, State.stopped, true, windowManager.getWarriorType(dataReader["warriorType"].ToString()));
+                    int id = Int32.Parse(dataReader["warrior_id"].ToString());
+                    Warrior w = new Warrior(this, id, curRow, curCol, isPlayer1 ? Direction.N : Direction.S, State.stopped, true, windowManager.getWarriorType(dataReader["warriorType"].ToString()));
                     this.warriors[curRow][curCol] = w;
                     System.Diagnostics.Debug.WriteLine(dataReader["warriorType"]);
                     WarriorWrapper ww = new WarriorWrapper(w, Int32.Parse(dataReader["warrior_id"].ToString()));

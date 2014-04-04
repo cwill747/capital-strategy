@@ -256,6 +256,7 @@ namespace CapitalStrategy
                                 msg.ReadBoolean() // Whether the unit died or not
                             );
                             // HANDLE THE MOVE MESSAGE HERE
+                            
                         }
                         Console.WriteLine(m.ToString());
 

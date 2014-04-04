@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Storage;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Input.Touch;
 using CapitalStrategy;
+using CapitalStrategyServer.Messaging;
 using System.Xml;
 
 namespace CapitalStrategy.Windows
@@ -164,15 +165,15 @@ namespace CapitalStrategy.Windows
             for (int i = 1; i < 2; i++)
             {
                 //board.warriors[i == 0 ? 7 : 9 - 7][3] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 3, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
-                board.warriors[i == 0 ? 7 : 9 - 7][5] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
-                board.warriors[i == 0 ? 9 : 9 - 9][5] = new Warrior(this.board, i == 0 ? 9 : 9 - 9, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, whiteMage);
+                board.warriors[i == 0 ? 7 : 9 - 7][5] = new Warrior(this.board, 100, i == 0 ? 7 : 9 - 7, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
+                board.warriors[i == 0 ? 9 : 9 - 9][5] = new Warrior(this.board, 101, i == 0 ? 9 : 9 - 9, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, whiteMage);
                // board.warriors[i == 0 ? 9 : 9 - 9][2] = new Warrior(this.board, i == 0 ? 9 : 9 - 9, 2, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, whiteMage);
-                board.warriors[i == 0 ? 6 : 9 - 6][7] = new Warrior(this.board, i == 0 ? 6 : 9 - 6, 7, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, firedragon);
+                board.warriors[i == 0 ? 6 : 9 - 6][7] = new Warrior(this.board, 102, i == 0 ? 6 : 9 - 6, 7, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, firedragon);
                 //board.warriors[i == 0 ? 7 : 9 - 7][6] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 6, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, blueArcher);
-               board.warriors[i == 0 ? 7 : 9 - 7][4] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 4, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, crocy);
+               board.warriors[i == 0 ? 7 : 9 - 7][4] = new Warrior(this.board, 103,  i == 0 ? 7 : 9 - 7, 4, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, crocy);
                 //board.warriors[i == 0 ? 8 : 9 - 8][3] = new Warrior(this.board, i == 0 ? 8 : 9 - 8, 3, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, magier);
-                board.warriors[i == 0 ? 8 : 9 - 8][5] = new Warrior(this.board, i == 0 ? 8 : 9 - 8, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, magier);
-                board.warriors[i == 0 ? 7 : 9 - 7][2] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 2, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, blueArcher);
+                board.warriors[i == 0 ? 8 : 9 - 8][5] = new Warrior(this.board, 104, i == 0 ? 8 : 9 - 8, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, magier);
+                board.warriors[i == 0 ? 7 : 9 - 7][2] = new Warrior(this.board, 105, i == 0 ? 7 : 9 - 7, 2, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, blueArcher);
             }
 
             
@@ -474,7 +475,7 @@ namespace CapitalStrategy.Windows
                 this.selectedWarrior = board.warriors[mouseState.row][mouseState.col];
                 if (this.selectedWarrior != null && this.selectedWarrior.cooldown == 0)
                 {
-                    System.Diagnostics.Debug.WriteLine("here");
+                    //System.Diagnostics.Debug.WriteLine("here");
                     selectedWarrior.updateUserOptions(this.isYourTurn);
                 }
             }
@@ -642,6 +643,53 @@ namespace CapitalStrategy.Windows
             }
 
 
+        }
+
+        // returns true if this is a valid move, false otherwise
+        // kicks off opponent animation for move
+        public Boolean handleOpponentMove(Message message)
+        {
+            message = this.flipOverXAxis(message);
+            if (this.isYourTurn)
+            {
+                return false;
+            }
+
+            Warrior attackingWarrior = this.getWarriorById(message.attackerUnitID);
+            Warrior attackedWarrior = this.getWarriorById(message.attackedUnitID);
+            attackingWarrior.moveTo(message.endLocation[0], message.endLocation[1]);
+            this.turnProgress = TurnProgress.moving;
+            this.currentTurnWarrior = attackingWarrior;
+            
+            return true;
+        }
+
+        // modifies message in place and returns it
+        public Message flipOverXAxis(Message message)
+        {
+            // flip everything over x axis
+            int[] attackedLocation = message.attackedLocation;
+            attackedLocation[0] = this.board.rows - attackedLocation[0] - 1;
+            int[] endLocation = message.endLocation;
+            endLocation[0] = this.board.rows - endLocation[0] - 1;
+            return message;
+        }
+
+        // looks through board to find warrior
+        public Warrior getWarriorById(int id)
+        {
+            for (int row = 0; row < this.board.rows; row++)
+            {
+                for (int col = 0; col < this.board.cols; col++)
+                {
+                    Warrior atRowCol = this.board.warriors[row][col];
+                    if (atRowCol.id == id)
+                    {
+                        return atRowCol;
+                    }
+                }
+            }
+            return null;
         }
     }
 }

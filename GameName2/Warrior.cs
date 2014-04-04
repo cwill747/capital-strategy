@@ -20,7 +20,7 @@ namespace CapitalStrategy
 		public static Color attackColor = Color.OrangeRed;
 		public static Color targetAcquiredColor = Color.Red;
 
-
+        public int id { get; set; }
 		public double row { get; set; } // needs to be a float for movement
 		public double col { get; set; }
 		public int destRow { get; set; }
@@ -39,7 +39,7 @@ namespace CapitalStrategy
         public float y { get; set; }
 
 
-		public Warrior(Board board, double row, double col, int direction, int state, Boolean isYours, WarriorType warriorType) : base(warriorType)
+		public Warrior(Board board, int id, double row, double col, int direction, int state, Boolean isYours, WarriorType warriorType) : base(warriorType)
 		{
 			this.board = board;
 			this.row = row;
