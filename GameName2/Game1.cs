@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 using Lidgren.Network;
 using System.Diagnostics;
 using CapitalStrategyServer.Messaging;
-
+using CapitalStrategyServer;
 #endregion
 
 namespace CapitalStrategy
@@ -46,7 +46,7 @@ namespace CapitalStrategy
         public static Texture2D charcoal;
         public NetClient client;
         public List<WarriorType> warriorTypes = new List<WarriorType>();
-        
+        public Client otherPlayer;
 
         // List of windows. GameState class determines index of current window
         public Windows.Window[] windows { get; set; }
@@ -228,19 +228,30 @@ namespace CapitalStrategy
                                     NetOutgoingMessage om = client.CreateMessage();
                                     om.WritePadBits();
                                     Message clientHello = new Message(msgType.Chat, client.UniqueIdentifier, client.ServerConnection.RemoteUniqueIdentifier);
-                                    clientHello.msg = "CLIENT HELLO";
+                                    clientHello.msg = "CLIENT HELLO:"+ this.username;
                                     clientHello.handleMessage(ref om);
                                     Console.WriteLine("Sending message: " + clientHello.ToString());
                                     client.SendMessage(om, NetDeliveryMethod.ReliableUnordered);
+
+                                    NetOutgoingMessage readyForMatch = client.CreateMessage();
+                                    readyForMatch.WritePadBits();
+                                    Message clientReadyForMatch = new Message(msgType.Matchmaking, client.UniqueIdentifier, client.ServerConnection.RemoteUniqueIdentifier);
+                                    clientReadyForMatch.msg = "SEEKING";
+                                    clientReadyForMatch.handleMessage(ref readyForMatch);
+                                    client.SendMessage(readyForMatch, NetDeliveryMethod.ReliableUnordered);
 
                                 }
                             }
                             else if (type == msgType.Matchmaking)
                             {
                                 long sentFrom = msg.ReadInt64();
+                                long sentTo = msg.ReadInt64();
                                 string message = msg.ReadString();
-                                m = new Message(type, sentFrom);
+                                m = new Message(type, sentFrom, sentTo);
                                 m.msg = message;
+                                // I have found a new match
+                                otherPlayer = new Client(m.sentFrom, true, false, m.msg);
+                                Console.WriteLine("Opponent found: " + otherPlayer.username);
                             }
                             else
                             {

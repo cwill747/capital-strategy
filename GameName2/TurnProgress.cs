@@ -13,5 +13,6 @@ namespace CapitalStrategy
         public const int targetAcquired = 3;
         public const int attacking = 4;
         public const int attacked = 5;
+        public const int turnOver = 6;
     }
 }

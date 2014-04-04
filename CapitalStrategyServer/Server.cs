@@ -25,6 +25,7 @@ namespace CapitalStrategyServer
         public void addConnection(Client c)
         {
             connections.Add(c);
+            this.qm.clientConnected(c);
         }
     }
 }

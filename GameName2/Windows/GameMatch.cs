@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework.Input.Touch;
 using CapitalStrategy;
 using CapitalStrategyServer.Messaging;
 using System.Xml;
+using CapitalStrategy.GUI;
 
 namespace CapitalStrategy.Windows
 {
@@ -51,15 +52,24 @@ namespace CapitalStrategy.Windows
         Warrior selectedWarrior;
         Warrior currentTurnWarrior;
         public Boolean isYourTurn { get; set; }
-        
+        public Stack<int[,]> p1MovementStack;
+        public Stack<int[,]> p2MovementStack;
+        private bool warriorIsResetting;
+        private int previousWarriorDirection;
 
+        private int endOfInfoPaneLocation;
         public int turnProgress { get; set; }
         public int targetCol { get; set; }
         public int targetRow { get; set; }
         public Warrior beingAttacked { get; set; }
         Warrior displayWarrior;
         MouseWrapper mouseState;
-		public int cooldownCounter{ get; set;}
+        MouseState oldMouseState;
+
+        // GUI STUFF
+        Button movementBtn;
+        Button attackBtn;
+        Button skipBtn;
 
         //for after match
         public Boolean armyStillAround = false;
@@ -73,13 +83,16 @@ namespace CapitalStrategy.Windows
         public void Initialize()
         {
             isYourTurn = true;
-			cooldownCounter = 0;
             this.turnProgress = TurnProgress.beginning;
             if (board != null)
             {
                 this.board.loadWarriors(this.windowManager, true);
             }
+            this.oldMouseState = new MouseState();
 
+            p1MovementStack = new Stack<int[,]>();
+            p2MovementStack = new Stack<int[,]>();
+            warriorIsResetting = false;
         }
         public void LoadContent()
         {
@@ -178,7 +191,9 @@ namespace CapitalStrategy.Windows
                 board.warriors[i == 0 ? 7 : 9 - 7][2] = new Warrior(this.board, 105, i == 0 ? 7 : 9 - 7, 2, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, blueArcher);
             }
 
-            
+            movementBtn = new Button("MOVEMENT", new Rectangle(SELECTED_WARRIOR_INFO_X, 300, 100, 25), Game1.smallFont);
+            attackBtn = new Button("ATTACK", new Rectangle(movementBtn.location.X + movementBtn.location.Width, 300, 100, 25), Game1.smallFont);
+            skipBtn = new Button("SKIP", new Rectangle(attackBtn.location.X + attackBtn.location.Width, 300, 100, 25), Game1.smallFont);
 
 
             mouseState = new MouseWrapper(board, Mouse.GetState());
@@ -209,6 +224,33 @@ namespace CapitalStrategy.Windows
                         }
                     }
                 }
+                // manages button states
+                switch(this.turnProgress)
+                {
+                    case TurnProgress.beginning:
+                    case TurnProgress.moving:
+                        movementBtn.isDisabled = true;
+                        attackBtn.isDisabled = false;
+                        skipBtn.isDisabled = false;
+                        break;
+                    case TurnProgress.moved:
+                    case TurnProgress.attacking:
+                        movementBtn.isDisabled = false;
+                        attackBtn.isDisabled = true;
+                        skipBtn.isDisabled = false;
+                        break;
+                    case TurnProgress.attacked:
+                        movementBtn.isDisabled = true;
+                        attackBtn.isDisabled = true;
+                        skipBtn.isDisabled = true;
+                        break;
+                    default:
+                        break;
+                }
+                movementBtn.update(gameTime);
+                attackBtn.update(gameTime);
+                skipBtn.update(gameTime);
+
 
                 if (endCheck)
                 {
@@ -290,7 +332,7 @@ namespace CapitalStrategy.Windows
                 if (this.turnProgress == TurnProgress.moving)
                 {
                     Boolean finishedMoving = currentTurnWarrior.move(gameTime);
-                    if (finishedMoving)
+                    if (finishedMoving && !warriorIsResetting)
                     {
                         this.turnProgress = TurnProgress.moved;
                         if (!this.isYourTurn)
@@ -310,6 +352,18 @@ namespace CapitalStrategy.Windows
                             }
                         }
                     }
+                    else if (finishedMoving && warriorIsResetting)
+                    {
+                        this.turnProgress = TurnProgress.beginning;
+                        this.currentTurnWarrior.direction = previousWarriorDirection;
+                        this.currentTurnWarrior = null;
+                        this.movementBtn.isDisabled = true;
+                        this.attackBtn.isDisabled = false;
+                        this.attackBtn.isDisabled = false;
+                        this.board.resetTints();
+                        this.warriorIsResetting = false;
+                        this.selectedWarrior = null;
+                    }
                 }
                 if (this.turnProgress == TurnProgress.moved)
                 {
@@ -322,40 +376,7 @@ namespace CapitalStrategy.Windows
                 if (this.turnProgress == TurnProgress.attacked)
                 {
 
-                    if (this.cooldownCounter == 0)
-                    {
-
-
-                        if (this.isYourTurn)
-                        {
-                            for (int i = 0; i < ROWS; i++)
-                            {
-                                for (int j = 0; j < COLS; j++)
-                                {
-                                    Warrior unitC = board.warriors[i][j];
-                                    if (unitC != null && unitC.isYours && unitC.cooldown > 0)
-                                    {
-                                        unitC.cooldown -= 1;
-                                    }
-                                }
-                            }
-                        }
-                        else if (!this.isYourTurn)
-                        {
-                            for (int i = 0; i < ROWS; i++)
-                            {
-                                for (int j = 0; j < COLS; j++)
-                                {
-                                    Warrior unitC = board.warriors[i][j];
-                                    if (unitC != null && !unitC.isYours && unitC.cooldown > 0)
-                                    {
-                                        unitC.cooldown -= 1;
-                                    }
-                                }
-                            }
-                        }
-                        cooldownCounter = 1;
-                    }
+                    
                     
                     // calculate damage
 
@@ -365,7 +386,7 @@ namespace CapitalStrategy.Windows
                         int targetHealthCheck = this.beingAttacked.health;
                         if (this.isYourTurn)
                         {
-                            this.currentTurnWarrior.strike(this.beingAttacked);
+                            this.opponentDamage = this.currentTurnWarrior.strike(this.beingAttacked);
                         }
                         else
                         {
@@ -386,14 +407,34 @@ namespace CapitalStrategy.Windows
 
                     }
 
-                    this.cooldownCounter = 0;
+                    
 
-                    this.turnProgress = TurnProgress.beginning;
+                    this.turnProgress = TurnProgress.turnOver;
+                    
+                }
+                if (turnProgress == TurnProgress.turnOver)
+                {
+                    // add message here
+                    this.decrementCooldowns();
                     this.isYourTurn = !this.isYourTurn;
+                    this.turnProgress = TurnProgress.beginning;
+                    
                     if (!this.isYourTurn)
                     {
+                        Message toSend = new Message();
+                        toSend.attackedLocation = new int[2] { this.targetRow, this.targetCol };
+                        toSend.endLocation = new int[2] { (int)this.currentTurnWarrior.row, (int)this.currentTurnWarrior.col};
+                        toSend.attackerUnitID = this.currentTurnWarrior.id;
+                        toSend.attackedUnitID = 0;
+                        toSend.damageDealt = 0;
+                        if (this.beingAttacked != null)
+                        {
+                            toSend.attackedUnitID = this.beingAttacked.id;
+                            toSend.attackedLocation = new int[2] { (int) this.beingAttacked.row, (int) this.beingAttacked.col};
+                            toSend.damageDealt = this.opponentDamage;
+                        }
                         Message message = new Message();
-                        message.attackedLocation = new int[2]{2, 2};
+                        message.attackedLocation = new int[2] { 2, 2 };
                         message.attackedUnitID = 2;
                         message.attackerUnitID = 105;
                         message.damageDealt = 30;
@@ -401,14 +442,54 @@ namespace CapitalStrategy.Windows
                         message.endLocation = new int[2] { 8, 1 };
                         this.handleOpponentMove(message);
                     }
+                    
                 }
             }
             mouseState.update(Mouse.GetState());
+
             if (mouseState.wasClicked() && mouseState.isOverGrid)
             {
                 this.handleClickOverGrid();
+                oldMouseState = mouseState.mouseState;
+
             }
-            
+            if (!mouseState.Equals(oldMouseState))
+            {
+                if (this.turnProgress == TurnProgress.moved)
+                {
+                    if (mouseState.mouseState.LeftButton == ButtonState.Pressed)
+                    {
+                        if (this.movementBtn.checkClick(mouseState.mouseState))
+                        {
+
+                        }
+                    }
+                    if (mouseState.mouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
+                    {
+                        if (this.movementBtn.unClick(mouseState.mouseState))
+                        {
+                            this.turnProgress = TurnProgress.beginning;
+                            if (this.isYourTurn)
+                            {
+                                int[,] lastMove = p1MovementStack.Pop();
+                                int[] movedFrom = { lastMove[0, 0], lastMove[0, 1] };
+                                int[] movedTo = { lastMove[1, 0], lastMove[1, 1] };
+                                this.selectedWarrior = this.board.warriors[movedTo[0]][movedTo[1]];
+                                this.selectedWarrior.moveTo(movedFrom[0], movedFrom[1]);
+                                this.turnProgress = TurnProgress.moving;
+                                board.resetTints();
+                                this.currentTurnWarrior = selectedWarrior;
+                                warriorIsResetting = true;
+                                this.previousWarriorDirection = lastMove[2, 0];
+                                //this.currentTurnWarrior.state = State.
+                            }
+                        }
+                    }
+                }
+                oldMouseState = mouseState.mouseState;
+
+            }
+
 
             // TODO: Add your update logic here
             for (int row = 0; row < board.warriors.Length; row++)
@@ -426,6 +507,20 @@ namespace CapitalStrategy.Windows
             if (displayWarrior != null)
             {
                 displayWarrior.update(gameTime, this);
+            }
+        }
+        public void decrementCooldowns()
+        {
+            for (int i = 0; i < ROWS; i++)
+            {
+                for (int j = 0; j < COLS; j++)
+                {
+                    Warrior unitC = board.warriors[i][j];
+                    if (unitC != null && unitC != this.currentTurnWarrior && ((unitC.isYours && this.isYourTurn) || (!unitC.isYours && !this.isYourTurn)) && unitC.cooldown > 0)
+                    {
+                        unitC.cooldown -= 1;
+                    }
+                }
             }
         }
         public void Draw()
@@ -486,7 +581,17 @@ namespace CapitalStrategy.Windows
             this.spriteBatch.Begin();
             string turnInfo = (this.isYourTurn) ? "It is your turn" : "Waiting for opponent";
             this.spriteBatch.DrawString(this.infofont, turnInfo, new Vector2(SELECTED_WARRIOR_INFO_X, SELECTED_WARRIOR_INFO_Y), Color.White);
+
+
             this.spriteBatch.End();
+
+            if (this.isYourTurn)
+            {
+                this.movementBtn.draw(windowManager.spriteBatch);
+                this.attackBtn.draw(windowManager.spriteBatch);
+                this.skipBtn.draw(windowManager.spriteBatch);
+
+            }
         }
 
 
@@ -509,6 +614,14 @@ namespace CapitalStrategy.Windows
                     if (selectedWarrior.isValidMove(board, mouseState.row, mouseState.col))
                     {
                         selectedWarrior.moveTo(mouseState.row, mouseState.col);
+                        if (this.isYourTurn)
+                        {
+                            p1MovementStack.Push(new int[,] { { (int)selectedWarrior.row, (int)selectedWarrior.col }, { mouseState.row, mouseState.col }, {selectedWarrior.direction, 0}});
+                        }
+                        else if (!this.isYourTurn)
+                        {
+                            p2MovementStack.Push(new int[,] { { (int)selectedWarrior.row, (int)selectedWarrior.col }, { mouseState.row, mouseState.col }, { selectedWarrior.direction, 0 } });
+                        }
                         this.turnProgress = TurnProgress.moving;
                         this.currentTurnWarrior = selectedWarrior;
                     }
@@ -522,6 +635,8 @@ namespace CapitalStrategy.Windows
             }
             else if (this.isYourTurn && this.turnProgress == TurnProgress.moved)
             {
+                
+
                 // clicking to acquire target
                 if (this.currentTurnWarrior.isStrikable((int)this.currentTurnWarrior.row, (int)this.currentTurnWarrior.col, this.mouseState.row, this.mouseState.col))
                 {
@@ -542,7 +657,7 @@ namespace CapitalStrategy.Windows
                     {
                         int xDiff = (int)(currentTurnWarrior.col - beingAttacked.col);
                         int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
-                        beingAttacked.setDirection(xDiff, yDiff);
+                        //beingAttacked.setDirection(xDiff, yDiff);
                         beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
                     }
                     else
@@ -685,6 +800,7 @@ namespace CapitalStrategy.Windows
 
                 string bonusDisplay = "Bonus against " + this.selectedWarrior.bonus;
                 this.spriteBatch.DrawString(this.infofont, bonusDisplay, new Vector2(toDrawX, toDrawY), Color.White);
+
 
                 this.spriteBatch.End();
             }

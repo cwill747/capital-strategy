@@ -38,7 +38,7 @@ namespace CapitalStrategyServer.Messaging
                 switch(m.type)
                 {
                     case 0: // message is matchmaking
-                        if(m.msg == "seeking")
+                        if(m.msg == "SEEKING")
                         {
                             // Change the current client's looking for game property to true
                             //m.sentFrom.lookingForGame = true;
@@ -49,13 +49,21 @@ namespace CapitalStrategyServer.Messaging
                     case 1: // message is a chat message
                         {
                             //Check if the message is actually needing to be sent to just the server
-                            if(m.sendToUUID != this.server.netserver.UniqueIdentifier)
+                            if (m.sendToUUID != this.server.netserver.UniqueIdentifier)
                             {
                                 m.waitingToSend = true;
-                                addToOutgoingQueue(m); 
+                                addToOutgoingQueue(m);
                             }
                             // just turn the message around and send it to the chat recipient
-
+                            else
+                            {
+                                // this client has logged in, we need to save the name
+                                if (m.msg.Contains("CLIENT HELLO"))
+                                {
+                                    Client c = server.qm.clientsConnected.Find(x => x.uniqueIdentifier == m.sentFrom);
+                                    c.username = m.msg.Split(':')[1];
+                                }
+                            }
                         }
                         break;
                     case 2: // message is a movement message, turn it around

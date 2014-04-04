@@ -79,8 +79,9 @@ namespace CapitalStrategyServer
                             else if (type == msgType.Matchmaking)
                             {
                                 long sentFrom = msg.ReadInt64();
+                                long sendToUUID = msg.ReadInt64();
                                 string message = msg.ReadString();
-                                m = new Message(type, sentFrom);
+                                m = new Message(type, sentFrom, sendToUUID);
                                 m.msg = message;
                             }
                             else
