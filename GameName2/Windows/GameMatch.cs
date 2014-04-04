@@ -121,7 +121,9 @@ namespace CapitalStrategy.Windows
                 80, 60, 4, 5, "firedragon",
                 "crocy", new int[] { 1, 7, 7, 9, 1, 11, 7 }, new int[] { 1000, 400, 1000, 1000, 1000, 1000, 1000 },
                 null, 2, 500, 0);
-			blueArcher = new WarriorType(this, 70, 3, 40, 50,
+			blueArcher = new WarriorType(this, 
+                70,
+                3, 40, 50,
                 75, 20, 4, 3, "blue archer",
                 "magier", new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
                 null, 6, 500, 10);
@@ -162,11 +164,11 @@ namespace CapitalStrategy.Windows
             {
                 //board.warriors[i == 0 ? 7 : 9 - 7][3] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 3, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
                 board.warriors[i == 0 ? 7 : 9 - 7][5] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
-                //board.warriors[i == 0 ? 9 : 9 - 9][5] = new Warrior(this.board, i == 0 ? 9 : 9 - 9, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, whiteMage);
-                board.warriors[i == 0 ? 9 : 9 - 9][2] = new Warrior(this.board, i == 0 ? 9 : 9 - 9, 2, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, whiteMage);
+                board.warriors[i == 0 ? 9 : 9 - 9][5] = new Warrior(this.board, i == 0 ? 9 : 9 - 9, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, whiteMage);
+               // board.warriors[i == 0 ? 9 : 9 - 9][2] = new Warrior(this.board, i == 0 ? 9 : 9 - 9, 2, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, whiteMage);
                 board.warriors[i == 0 ? 6 : 9 - 6][7] = new Warrior(this.board, i == 0 ? 6 : 9 - 6, 7, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, firedragon);
                 //board.warriors[i == 0 ? 7 : 9 - 7][6] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 6, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, blueArcher);
-                board.warriors[i == 0 ? 7 : 9 - 7][4] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 4, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, crocy);
+               board.warriors[i == 0 ? 7 : 9 - 7][4] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 4, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, crocy);
                 //board.warriors[i == 0 ? 8 : 9 - 8][3] = new Warrior(this.board, i == 0 ? 8 : 9 - 8, 3, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, magier);
                 board.warriors[i == 0 ? 8 : 9 - 8][5] = new Warrior(this.board, i == 0 ? 8 : 9 - 8, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, magier);
                 board.warriors[i == 0 ? 7 : 9 - 7][2] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 2, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, blueArcher);
@@ -244,6 +246,8 @@ namespace CapitalStrategy.Windows
 
             }
 
+
+            /*
             if (this.turnProgress == TurnProgress.beginning && this.cooldownCounter == 0)
             {
 
@@ -274,7 +278,7 @@ namespace CapitalStrategy.Windows
                 }
 				cooldownCounter = 1;
 			}
-
+            */
 
 
             if (this.currentTurnWarrior != null)
@@ -297,18 +301,61 @@ namespace CapitalStrategy.Windows
                 }
                 if (this.turnProgress == TurnProgress.attacked)
                 {
+
+                    if (this.cooldownCounter == 0)
+                    {
+
+
+                        if (this.isYourTurn)
+                        {
+                            for (int i = 0; i < ROWS; i++)
+                            {
+                                for (int j = 0; j < COLS; j++)
+                                {
+                                    Warrior unitC = board.warriors[i][j];
+                                    if (unitC != null && unitC.isYours && unitC.cooldown > 0)
+                                    {
+                                        unitC.cooldown -= 1;
+                                    }
+                                }
+                            }
+                        }
+                        else if (!this.isYourTurn)
+                        {
+                            for (int i = 0; i < ROWS; i++)
+                            {
+                                for (int j = 0; j < COLS; j++)
+                                {
+                                    Warrior unitC = board.warriors[i][j];
+                                    if (unitC != null && !unitC.isYours && unitC.cooldown > 0)
+                                    {
+                                        unitC.cooldown -= 1;
+                                    }
+                                }
+                            }
+                        }
+                        cooldownCounter = 1;
+                    }
+                    
                     // calculate damage
-              
-					this.cooldownCounter = 0;
+
                     if (this.beingAttacked != null)
                     {
                         int targetHealthCheck = this.beingAttacked.health;
                         this.currentTurnWarrior.strike(this.beingAttacked);
                         if (targetHealthCheck != this.beingAttacked.health)
                         {
+                           // int xDiff = (int)(currentTurnWarrior.col - beingAttacked.col);
+                           // int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
+                            //beingAttacked.setDirection(xDiff, yDiff);
+                           // beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
                             this.currentTurnWarrior.cooldown = this.currentTurnWarrior.maxCooldown;
+
                         }
                     }
+
+                    this.cooldownCounter = 0;
+
                     this.turnProgress = TurnProgress.beginning;
                     this.isYourTurn = !this.isYourTurn;
                 }
@@ -343,6 +390,38 @@ namespace CapitalStrategy.Windows
             // TODO: Add your drawing code here
             spriteBatch.Begin();
             spriteBatch.Draw(Game1.background, backgroundRec, Color.White);
+            
+            
+            for (int i = 0; i < ROWS; i++)
+                    {  
+                           for (int j = 0; j < COLS; j++)
+                            {
+                                Warrior warrior = board.warriors[i][j];
+                                if (warrior != null)
+                                {
+                                    int tileWidth = this.BOARDWIDTH / this.board.cols;
+                                    int tileHeight = this.BOARDHEIGHT / this.board.rows;
+                                    int xLoc = (int)(warrior.col * tileWidth + board.location.X);
+                                    int yLoc = (int)(warrior.row * tileHeight + board.location.Y);
+                                    int iconHeight = tileHeight / 2;
+                                    int toDrawY = yLoc + (iconHeight / 2);
+                                    int toDrawX = xLoc;
+                                    int iconWidth = tileWidth / 2;
+                                    if (warrior.cooldown != 0)
+                                    {
+                                        int cool = warrior.cooldown;
+                                        string coolString = cool.ToString();
+                                        this.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
+                                        this.spriteBatch.DrawString(this.infofont, coolString, new Vector2(xLoc + iconWidth, yLoc + (iconHeight / 3)), Color.White);
+                                    }
+                                }
+                            }
+                       
+                    }
+                
+
+
+
             spriteBatch.End();
             board.drawTiles(spriteBatch);
             for (int row = 0; row < board.warriors.Length; row++)
@@ -415,6 +494,7 @@ namespace CapitalStrategy.Windows
                     this.turnProgress = TurnProgress.attacking;
                     this.beingAttacked = this.board.warriors[this.targetRow][this.targetCol];
                     this.currentTurnWarrior.beginAttack(this.targetRow, this.targetCol);
+                    
                     if (beingAttacked != null)
                     {
                         int xDiff = (int)(currentTurnWarrior.col - beingAttacked.col);
@@ -461,8 +541,10 @@ namespace CapitalStrategy.Windows
             int iconWidth = tileWidth / 2;
             if (warrior.cooldown != 0)
             {
+                int cool = warrior.cooldown;
+                string cooldown = cool.ToString();
                 this.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.spriteBatch.DrawString(this.infofont, warrior.cooldown.ToString(), new Vector2(xLoc+iconWidth, yLoc+(iconHeight/3)), Color.White);
+                this.spriteBatch.DrawString(this.infofont, cooldown, new Vector2(xLoc+iconWidth, yLoc+(iconHeight/3)), Color.White);
             }
             this.spriteBatch.End();
             return healthBarY + tileHeight / 10;
@@ -524,8 +606,13 @@ namespace CapitalStrategy.Windows
                 toDrawX = toDrawX + board.WARRIORWIDTH / 2 + imgPadding;
 
                 // Draw the warriors cooldown
-                string coolDisplay = "Cooldown: "+this.selectedWarrior.cooldown.ToString();
+                int cool = this.selectedWarrior.cooldown;
+                string coolDisplay = "Cooldown: "+cool.ToString();
                 this.spriteBatch.DrawString(this.infofont, coolDisplay, new Vector2(toDrawX + board.WARRIORWIDTH, toDrawY + (2*imgPadding)), Color.White);
+
+                // Draw the warriors bonus
+                string bonusDisplay = "Bonus against " + this.selectedWarrior.bonus;
+                this.spriteBatch.DrawString(this.infofont, bonusDisplay, new Vector2(toDrawX- (2*imgPadding), toDrawY + (3 * imgPadding)), Color.White);
 
                 // Draw the warriors health
                 this.spriteBatch.Draw(heartIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
