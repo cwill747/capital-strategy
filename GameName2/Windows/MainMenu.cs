@@ -93,6 +93,13 @@ namespace CapitalStrategy.Windows
                     {
                         if (this.findMatchButton.unClick(newState))
                         {
+                            // will actually open find match dialog here in future
+                            // then enter gameplay when match is found
+                            /*
+                             *this.dialogText.isVisible = true;
+                            this.dialogCancel.isVisible = true;
+                            this.dialog.isVisible = true;
+                             */
                             this.windowManager.gameState = GameState.gameMatch;
                             this.windowManager.windows[GameState.gameMatch].Initialize();
                             Game1.gameStates.Push(GameState.mainMenu);

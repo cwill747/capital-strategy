@@ -65,7 +65,6 @@ namespace CapitalStrategy.Windows
         Warrior displayWarrior;
         MouseWrapper mouseState;
         MouseState oldMouseState;
-		public int cooldownCounter{ get; set;}
 
         // GUI STUFF
         Button movementBtn;
@@ -84,7 +83,6 @@ namespace CapitalStrategy.Windows
         public void Initialize()
         {
             isYourTurn = true;
-			cooldownCounter = 0;
             this.turnProgress = TurnProgress.beginning;
             if (board != null)
             {
@@ -378,40 +376,7 @@ namespace CapitalStrategy.Windows
                 if (this.turnProgress == TurnProgress.attacked)
                 {
 
-                    if (this.cooldownCounter == 0)
-                    {
-
-
-                        if (this.isYourTurn)
-                        {
-                            for (int i = 0; i < ROWS; i++)
-                            {
-                                for (int j = 0; j < COLS; j++)
-                                {
-                                    Warrior unitC = board.warriors[i][j];
-                                    if (unitC != null && unitC.isYours && unitC.cooldown > 0)
-                                    {
-                                        unitC.cooldown -= 1;
-                                    }
-                                }
-                            }
-                        }
-                        else if (!this.isYourTurn)
-                        {
-                            for (int i = 0; i < ROWS; i++)
-                            {
-                                for (int j = 0; j < COLS; j++)
-                                {
-                                    Warrior unitC = board.warriors[i][j];
-                                    if (unitC != null && !unitC.isYours && unitC.cooldown > 0)
-                                    {
-                                        unitC.cooldown -= 1;
-                                    }
-                                }
-                            }
-                        }
-                        cooldownCounter = 1;
-                    }
+                    
                     
                     // calculate damage
 
@@ -421,7 +386,7 @@ namespace CapitalStrategy.Windows
                         int targetHealthCheck = this.beingAttacked.health;
                         if (this.isYourTurn)
                         {
-                            this.currentTurnWarrior.strike(this.beingAttacked);
+                            this.opponentDamage = this.currentTurnWarrior.strike(this.beingAttacked);
                         }
                         else
                         {
@@ -442,14 +407,34 @@ namespace CapitalStrategy.Windows
 
                     }
 
-                    this.cooldownCounter = 0;
+                    
 
-                    this.turnProgress = TurnProgress.beginning;
+                    this.turnProgress = TurnProgress.turnOver;
+                    
+                }
+                if (turnProgress == TurnProgress.turnOver)
+                {
+                    // add message here
+                    this.decrementCooldowns();
                     this.isYourTurn = !this.isYourTurn;
+                    this.turnProgress = TurnProgress.beginning;
+                    
                     if (!this.isYourTurn)
                     {
+                        Message toSend = new Message();
+                        toSend.attackedLocation = new int[2] { this.targetRow, this.targetCol };
+                        toSend.endLocation = new int[2] { (int)this.currentTurnWarrior.row, (int)this.currentTurnWarrior.col};
+                        toSend.attackerUnitID = this.currentTurnWarrior.id;
+                        toSend.attackedUnitID = 0;
+                        toSend.damageDealt = 0;
+                        if (this.beingAttacked != null)
+                        {
+                            toSend.attackedUnitID = this.beingAttacked.id;
+                            toSend.attackedLocation = new int[2] { (int) this.beingAttacked.row, (int) this.beingAttacked.col};
+                            toSend.damageDealt = this.opponentDamage;
+                        }
                         Message message = new Message();
-                        message.attackedLocation = new int[2]{2, 2};
+                        message.attackedLocation = new int[2] { 2, 2 };
                         message.attackedUnitID = 2;
                         message.attackerUnitID = 105;
                         message.damageDealt = 30;
@@ -457,6 +442,7 @@ namespace CapitalStrategy.Windows
                         message.endLocation = new int[2] { 8, 1 };
                         this.handleOpponentMove(message);
                     }
+                    
                 }
             }
             mouseState.update(Mouse.GetState());
@@ -521,6 +507,20 @@ namespace CapitalStrategy.Windows
             if (displayWarrior != null)
             {
                 displayWarrior.update(gameTime, this);
+            }
+        }
+        public void decrementCooldowns()
+        {
+            for (int i = 0; i < ROWS; i++)
+            {
+                for (int j = 0; j < COLS; j++)
+                {
+                    Warrior unitC = board.warriors[i][j];
+                    if (unitC != null && unitC != this.currentTurnWarrior && ((unitC.isYours && this.isYourTurn) || (!unitC.isYours && !this.isYourTurn)) && unitC.cooldown > 0)
+                    {
+                        unitC.cooldown -= 1;
+                    }
+                }
             }
         }
         public void Draw()
@@ -657,7 +657,7 @@ namespace CapitalStrategy.Windows
                     {
                         int xDiff = (int)(currentTurnWarrior.col - beingAttacked.col);
                         int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
-                        beingAttacked.setDirection(xDiff, yDiff);
+                        //beingAttacked.setDirection(xDiff, yDiff);
                         beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
                     }
                     else
