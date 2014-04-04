@@ -226,6 +226,7 @@ namespace CapitalStrategy.Windows
                         }
                     }
                 }
+                // manages button states
                 switch(this.turnProgress)
                 {
                     case TurnProgress.beginning:
@@ -363,6 +364,7 @@ namespace CapitalStrategy.Windows
                         this.attackBtn.isDisabled = false;
                         this.board.resetTints();
                         this.warriorIsResetting = false;
+                        this.selectedWarrior = null;
                     }
                 }
                 if (this.turnProgress == TurnProgress.moved)
