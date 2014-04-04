@@ -191,6 +191,8 @@ namespace CapitalStrategy.Windows
                     this.windowManager.username = username;
                     this.windowManager.password = password;
                     this.errorMessage = "";
+                    this.windowManager.client.Connect("127.0.0.1", 14242);
+
                     //System.Diagnostics.Debug.WriteLine(dataReader["username"]);
                     //System.Diagnostics.Debug.WriteLine(dataReader["password"]);
                 }
