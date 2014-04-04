@@ -605,44 +605,44 @@ namespace CapitalStrategy.Windows
                 displayWarrior.drawWarriorType(toDrawX + board.WARRIORWIDTH / 2 + imgPadding, toDrawY - imgPadding);
                 this.spriteBatch.Begin();
                 toDrawX = toDrawX + board.WARRIORWIDTH / 2 + imgPadding;
-
-
+                int xoffset = (int) iconHeight * 2;
+                padding = (int) iconHeight * 2;
 
                 // Draw the warriors health
                 this.spriteBatch.Draw(heartIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.spriteBatch.Draw(Game1.charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * selectedWarrior.maxHealth) + 4, barHeight + 4), Color.WhiteSmoke);
-                this.spriteBatch.Draw(white, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.maxHealth), barHeight), Color.WhiteSmoke);
-                this.spriteBatch.Draw(red, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.health), barHeight), Color.WhiteSmoke);
-                toDrawY += iconHeight + padding;
+                this.spriteBatch.Draw(Game1.charcoal, new Rectangle(xoffset + toDrawX - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * selectedWarrior.maxHealth) + 4, barHeight + 4), Color.WhiteSmoke);
+                this.spriteBatch.Draw(white, new Rectangle(xoffset + toDrawX, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.maxHealth), barHeight), Color.WhiteSmoke);
+                this.spriteBatch.Draw(red, new Rectangle(xoffset + toDrawX, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.health), barHeight), Color.WhiteSmoke);
+                toDrawY += (int) ((double) iconHeight * 1.5);
 
                 // Draw the warriors attack strength
                 this.spriteBatch.Draw(attackIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.spriteBatch.Draw(Game1.charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
-                this.spriteBatch.Draw(white, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * 100), barHeight), Color.WhiteSmoke);
-                this.spriteBatch.Draw(red, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.attack), barHeight), Color.WhiteSmoke);
-                toDrawY += iconHeight + padding;
+                this.spriteBatch.Draw(Game1.charcoal, new Rectangle(xoffset + toDrawX - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
+                this.spriteBatch.Draw(white, new Rectangle(xoffset + toDrawX, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * 100), barHeight), Color.WhiteSmoke);
+                this.spriteBatch.Draw(red, new Rectangle(xoffset + toDrawX, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.attack), barHeight), Color.WhiteSmoke);
+                toDrawY += (int)((double)iconHeight * 1.5);
 
                 // Draw the warriors defense strength
                 // @TODO: Change the 2+ on this to be a resolution-independent value
                 this.spriteBatch.Draw(shieldIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.spriteBatch.Draw(Game1.charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
-                this.spriteBatch.Draw(white, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * 100), barHeight), Color.WhiteSmoke);
-                this.spriteBatch.Draw(red, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.defense), barHeight), Color.WhiteSmoke);
-                toDrawY += iconHeight + padding;
+                this.spriteBatch.Draw(Game1.charcoal, new Rectangle(xoffset + toDrawX - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
+                this.spriteBatch.Draw(white, new Rectangle(xoffset + toDrawX, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * 100), barHeight), Color.WhiteSmoke);
+                this.spriteBatch.Draw(red, new Rectangle(xoffset + toDrawX, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.defense), barHeight), Color.WhiteSmoke);
+                toDrawY += (int)((double)iconHeight * 1.5);
 
                 // Draw the warriors cooldown
                 string coolDisplay = this.selectedWarrior.maxCooldown.ToString();
                 this.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.spriteBatch.DrawString(this.infofont, coolDisplay, new Vector2(2 + toDrawX + iconWidth + padding, toDrawY), Color.White);
-                toDrawY += iconHeight + padding;
+                this.spriteBatch.DrawString(this.infofont, coolDisplay, new Vector2(xoffset + toDrawX - 2, toDrawY), Color.White);
+                toDrawY += (int)((double)iconHeight * 1.5);
 
                 // Draw the warriors bonus
                 string baseDisplay = "Base Type: " + this.selectedWarrior.baseType;
-                this.spriteBatch.DrawString(this.infofont, baseDisplay, new Vector2(2 + toDrawX + iconWidth + padding, toDrawY), Color.White);
-                toDrawY += iconHeight + padding;
+                this.spriteBatch.DrawString(this.infofont, baseDisplay, new Vector2(toDrawX, toDrawY), Color.White);
+                toDrawY += (int)((double)iconHeight * 1.5);
 
                 string bonusDisplay = "Bonus against " + this.selectedWarrior.bonus;
-                this.spriteBatch.DrawString(this.infofont, bonusDisplay, new Vector2(2 + toDrawX + iconWidth + padding, toDrawY), Color.White);
+                this.spriteBatch.DrawString(this.infofont, bonusDisplay, new Vector2(toDrawX, toDrawY), Color.White);
 
                 this.spriteBatch.End();
             }
