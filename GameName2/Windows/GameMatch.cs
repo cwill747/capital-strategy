@@ -13,7 +13,9 @@ using CapitalStrategy;
 using CapitalStrategyServer.Messaging;
 using System.Xml;
 using CapitalStrategy.GUI;
+using Lidgren.Network;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 
 namespace CapitalStrategy.Windows
 {
@@ -72,6 +74,8 @@ namespace CapitalStrategy.Windows
         Button attackBtn;
         Button skipBtn;
 
+        public Boolean waitingForTurn { get; set; }
+
         //for after match
         public Boolean armyStillAround = false;
 
@@ -83,17 +87,18 @@ namespace CapitalStrategy.Windows
         }
         public void Initialize()
         {
-            isYourTurn = true;
             this.turnProgress = TurnProgress.beginning;
             if (board != null)
             {
                 this.board.loadWarriors(this.windowManager, true);
+                this.board.loadWarriors(this.windowManager, false);
             }
             this.oldMouseState = new MouseState();
 
             p1MovementStack = new Stack<int[,]>();
             p2MovementStack = new Stack<int[,]>();
             warriorIsResetting = false;
+            this.waitingForTurn = true;
         }
         public void LoadContent()
         {
@@ -101,8 +106,9 @@ namespace CapitalStrategy.Windows
             this.Content = windowManager.Content;
             menufont = Content.Load<SpriteFont>("fonts/gamefont");
             this.infofont = Content.Load<SpriteFont>("fonts/menufont");
-            
 
+            //Song song = Content.Load<Song>("music/intoBattle");  // Put the name of your song in instead of "song_title"
+            //MediaPlayer.Play(song);
 
 
             background = Content.Load<Texture2D>("stars");
@@ -138,13 +144,13 @@ namespace CapitalStrategy.Windows
 			firedragon = new WarriorType(this, 60, 3, 40, 70,
                 80, 60, 4, 5, "firedragon", "magic",
                 "melee", new int[] { 1, 7, 7, 9, 1, 11, 7 }, new int[] { 1000, 400, 1000, 1000, 1000, 1000, 1000 },
-                null, 2, 500, 0, "swordStrike");
+                null, 2, 500, 0, "dragonRoar");
 			blueArcher = new WarriorType(this, 
                 70,
                 3, 40, 50,
                 75, 20, 4, 3, "blue archer", "ranged",
                 "magic", new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
-                null, 6, 500, 10, "swordStrike");
+                null, 6, 500, 10, "bowShot");
 			this.whiteMage = new WarriorType(this, 50, 2, -80, 30,
                 100, 0, 4, 3, "white mage", "magic",
                 "none", new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
@@ -153,7 +159,7 @@ namespace CapitalStrategy.Windows
 					new Point(2, 0), new Point(0, 2), new Point(0, -2), 
 					new Point(1,0), new Point(-1,0),new Point(0,1),
 					new Point(0,-1),new Point(0,0)},
-                null, 500, 0, "swordStrike");
+                null, 500, 0, "heal");
 			crocy = new WarriorType(this, 90, 2, 60, 50,
                 50, 50, 2, 2, "crocy", "melee", 
                 "ranged", new int[] { 1, 8, 8, 11, 9, 11, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
@@ -161,7 +167,7 @@ namespace CapitalStrategy.Windows
 			magier = new WarriorType(this,70, 2, 40, 45,
                 75, 25, 3, 3, "magier", "magic",
                 "melee", new int[] { 9, 7, 7, 9, 9, 10, 9 }, new int[] { 1000, 500, 1000, 1500, 1000, 1000, 1000 },
-                null, 3, 500, 10, "swordStrike");
+                null, 3, 500, 10, "thunder");
 
             PlayerArmy p1 = new PlayerArmy(Direction.N);
             p1.AddWarrior(axestanShield);
@@ -178,7 +184,7 @@ namespace CapitalStrategy.Windows
             p2.AddWarrior(crocy);
             p2.AddWarrior(magier);
             
-            for (int i = 1; i < 2; i++)
+            /*for (int i = 1; i < 2; i++)
             {
                 //board.warriors[i == 0 ? 7 : 9 - 7][3] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 3, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
                 board.warriors[i == 0 ? 7 : 9 - 7][5] = new Warrior(this.board, 100, i == 0 ? 7 : 9 - 7, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
@@ -190,7 +196,7 @@ namespace CapitalStrategy.Windows
                 //board.warriors[i == 0 ? 8 : 9 - 8][3] = new Warrior(this.board, i == 0 ? 8 : 9 - 8, 3, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, magier);
                 board.warriors[i == 0 ? 8 : 9 - 8][5] = new Warrior(this.board, 104, i == 0 ? 8 : 9 - 8, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, magier);
                 board.warriors[i == 0 ? 7 : 9 - 7][2] = new Warrior(this.board, 105, i == 0 ? 7 : 9 - 7, 2, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, blueArcher);
-            }
+            }*/
 
             movementBtn = new Button("MOVEMENT", new Rectangle(SELECTED_WARRIOR_INFO_X, 300, 100, 25), Game1.smallFont);
             attackBtn = new Button("ATTACK", new Rectangle(movementBtn.location.X + movementBtn.location.Width, 300, 100, 25), Game1.smallFont);
@@ -201,7 +207,6 @@ namespace CapitalStrategy.Windows
         }
         public void Update(GameTime gameTime)
         {
-
             if (isYourTurn)
             {
                 //for end game
@@ -262,35 +267,36 @@ namespace CapitalStrategy.Windows
             }
             else
             {
-                this.armyStillAround = false;
-                Boolean endCheck = true;
-                if (!armyStillAround)
-                {
-                    for (int i = 0; i < ROWS; i++)
+                
+                    this.armyStillAround = false;
+                    Boolean endCheck = true;
+                    if (!armyStillAround)
                     {
-                        if (!armyStillAround)
+                        for (int i = 0; i < ROWS; i++)
                         {
-                            for (int j = 0; j < COLS; j++)
+                            if (!armyStillAround)
                             {
-                                Warrior unitC = board.warriors[i][j];
-                                if (unitC != null && !unitC.isYours)
+                                for (int j = 0; j < COLS; j++)
                                 {
-                                    armyStillAround = true;
-                                    endCheck = false;
+                                    Warrior unitC = board.warriors[i][j];
+                                    if (unitC != null && !unitC.isYours)
+                                    {
+                                        armyStillAround = true;
+                                        endCheck = false;
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                if (endCheck)
-                {
-                    int newGameState = Game1.gameStates.Pop();
-                    this.windowManager.gameState = newGameState;
-                    this.windowManager.windows[newGameState].Initialize();
-                }
-                // end of end game
-
+                    if (endCheck)
+                    {
+                        int newGameState = Game1.gameStates.Pop();
+                        this.windowManager.gameState = newGameState;
+                        this.windowManager.windows[newGameState].Initialize();
+                    }
+                    // end of end game
+                
             }
 
 
@@ -415,6 +421,10 @@ namespace CapitalStrategy.Windows
                 }
                 if (turnProgress == TurnProgress.turnOver)
                 {
+                    if (this.isYourTurn)
+                    {
+                        this.waitingForTurn = true;
+                    }
                     // add message here
                     this.decrementCooldowns();
                     this.isYourTurn = !this.isYourTurn;
@@ -422,18 +432,21 @@ namespace CapitalStrategy.Windows
                     
                     if (!this.isYourTurn)
                     {
-                        Message toSend = new Message();
-                        toSend.attackedLocation = new int[2] { this.targetRow, this.targetCol };
-                        toSend.endLocation = new int[2] { (int)this.currentTurnWarrior.row, (int)this.currentTurnWarrior.col};
-                        toSend.attackerUnitID = this.currentTurnWarrior.id;
-                        toSend.attackedUnitID = 0;
-                        toSend.damageDealt = 0;
+                        Message toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
+                            new int[2] { (int)this.currentTurnWarrior.row, (int)this.currentTurnWarrior.col},
+                            new int[2] { this.targetRow, this.targetCol },
+                            0,
+                            0,
+                            this.currentTurnWarrior.id,
+                            false);
+
                         if (this.beingAttacked != null)
                         {
                             toSend.attackedUnitID = this.beingAttacked.id;
                             toSend.attackedLocation = new int[2] { (int) this.beingAttacked.row, (int) this.beingAttacked.col};
                             toSend.damageDealt = this.opponentDamage;
                         }
+                        /*
                         Message message = new Message();
                         message.attackedLocation = new int[2] { 2, 2 };
                         message.attackedUnitID = 2;
@@ -441,7 +454,10 @@ namespace CapitalStrategy.Windows
                         message.damageDealt = 30;
                         message.attackedLocation = new int[2] { 5, 3 };
                         message.endLocation = new int[2] { 8, 1 };
-                        this.handleOpponentMove(message);
+                         */
+                        NetOutgoingMessage om = this.windowManager.client.CreateMessage();
+                        toSend.handleMoveMessage(ref om);
+                        this.windowManager.client.SendMessage(om, NetDeliveryMethod.ReliableOrdered);
                     }
                     
                 }

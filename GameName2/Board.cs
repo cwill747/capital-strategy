@@ -100,10 +100,13 @@ namespace CapitalStrategy
             DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
             if (db.OpenConnection() == true)
             {
-                string query = "SELECT * FROM Warriors NATURAL JOIN users WHERE username=@username and password=@password";
+                string query = "SELECT * FROM Warriors NATURAL JOIN users WHERE username=@username";
                 MySqlCommand cmd = new MySqlCommand(query, db.connection);
-                cmd.Parameters.AddWithValue("@username", windowManager.username);
-                cmd.Parameters.AddWithValue("@password", windowManager.password);
+                String username = windowManager.username;
+                if (!isPlayer1) {
+                    username = windowManager.otherPlayer.username;
+                }
+                cmd.Parameters.AddWithValue("@username", username);
                 //Create a data reader and Execute the command
                 MySqlDataReader dataReader = cmd.ExecuteReader();
                 //Read the data and store them in the list
@@ -116,7 +119,7 @@ namespace CapitalStrategy
                     }
                     int curCol = Int32.Parse(dataReader["col"].ToString());
                     int id = Int32.Parse(dataReader["warrior_id"].ToString());
-                    Warrior w = new Warrior(this, id, curRow, curCol, isPlayer1 ? Direction.N : Direction.S, State.stopped, true, windowManager.getWarriorType(dataReader["warriorType"].ToString()));
+                    Warrior w = new Warrior(this, id, curRow, curCol, isPlayer1 ? Direction.N : Direction.S, State.stopped, isPlayer1, windowManager.getWarriorType(dataReader["warriorType"].ToString()));
                     this.warriors[curRow][curCol] = w;
                     System.Diagnostics.Debug.WriteLine(dataReader["warriorType"]);
                     WarriorWrapper ww = new WarriorWrapper(w, Int32.Parse(dataReader["warrior_id"].ToString()));

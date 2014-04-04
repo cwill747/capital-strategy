@@ -45,11 +45,13 @@ namespace CapitalStrategyServer
                 client1.lookingForGame = false;
                 client2 = clientsLookingForAGame[1];
                 client2.lookingForGame = false;
+                Random random = new Random();
+                bool isClient1First = random.Next(0,2) == 0 ? true : true;
                 Message sendToClient1 = new Message(msgType.Matchmaking, client2.uniqueIdentifier, client1.uniqueIdentifier);
-                sendToClient1.msg = client2.username;
+                sendToClient1.msg = client2.username + ":" + isClient1First.ToString();
                 sendToClient1.waitingToSend = true;
                 Message sendToClient2 = new Message(msgType.Matchmaking, client1.uniqueIdentifier, client2.uniqueIdentifier);
-                sendToClient2.msg = client1.username;
+                sendToClient2.msg = client1.username + ":" + (!isClient1First).ToString();
                 sendToClient2.waitingToSend = true;
                 s.msgQueue.addToOutgoingQueue(sendToClient1);
                 s.msgQueue.addToOutgoingQueue(sendToClient2);
