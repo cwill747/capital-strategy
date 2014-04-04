@@ -33,10 +33,11 @@ namespace CapitalStrategy
 		public int? attackRange { get; set; }
 		public int attackDelayConst { get; set; }
 		public int attackDelayRate { get; set; }
+        public String attackSound { get; set; }
 
 		// note: will need to add way of showing attack area
 
-		public WarriorType(GameMatch game, int maxHealth, int maxCooldown, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, String baseType, String bonus, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate)
+		public WarriorType(GameMatch game, int maxHealth, int maxCooldown, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, String baseType, String bonus, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate, String attackSound)
 		{
 			this.game = game;
 			this.maxHealth = maxHealth;
@@ -56,6 +57,7 @@ namespace CapitalStrategy
 			this.attackRange = attackRange;
 			this.attackDelayConst = attackDelayConst;
 			this.attackDelayRate = attackDelayRate;
+            this.attackSound = "soundEffects/" + attackSound;
 		}
 
 		public WarriorType(WarriorType warriorType)
@@ -78,6 +80,7 @@ namespace CapitalStrategy
 			this.attackRange = warriorType.attackRange;
 			this.attackDelayConst = warriorType.attackDelayConst;
 			this.attackDelayRate = warriorType.attackDelayRate;
+            this.attackSound = warriorType.attackSound;
 		}
 
 		public ImageAtlas[] loadStates(String type, int[] imageDimensions)
