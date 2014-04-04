@@ -65,7 +65,6 @@ namespace CapitalStrategy.Windows
         Warrior displayWarrior;
         MouseWrapper mouseState;
         MouseState oldMouseState;
-		public int cooldownCounter{ get; set;}
 
         // GUI STUFF
         Button movementBtn;
@@ -84,7 +83,6 @@ namespace CapitalStrategy.Windows
         public void Initialize()
         {
             isYourTurn = true;
-			cooldownCounter = 0;
             this.turnProgress = TurnProgress.beginning;
             if (board != null)
             {
@@ -378,40 +376,7 @@ namespace CapitalStrategy.Windows
                 if (this.turnProgress == TurnProgress.attacked)
                 {
 
-                    if (this.cooldownCounter == 0)
-                    {
-
-
-                        if (this.isYourTurn)
-                        {
-                            for (int i = 0; i < ROWS; i++)
-                            {
-                                for (int j = 0; j < COLS; j++)
-                                {
-                                    Warrior unitC = board.warriors[i][j];
-                                    if (unitC != null && unitC.isYours && unitC.cooldown > 0)
-                                    {
-                                        unitC.cooldown -= 1;
-                                    }
-                                }
-                            }
-                        }
-                        else if (!this.isYourTurn)
-                        {
-                            for (int i = 0; i < ROWS; i++)
-                            {
-                                for (int j = 0; j < COLS; j++)
-                                {
-                                    Warrior unitC = board.warriors[i][j];
-                                    if (unitC != null && !unitC.isYours && unitC.cooldown > 0)
-                                    {
-                                        unitC.cooldown -= 1;
-                                    }
-                                }
-                            }
-                        }
-                        cooldownCounter = 1;
-                    }
+                    
                     
                     // calculate damage
 
@@ -442,14 +407,21 @@ namespace CapitalStrategy.Windows
 
                     }
 
-                    this.cooldownCounter = 0;
+                    
 
-                    this.turnProgress = TurnProgress.beginning;
+                    this.turnProgress = TurnProgress.turnOver;
+                    
+                }
+                if (turnProgress == TurnProgress.turnOver)
+                {
+                    // add message here
+                    this.decrementCooldowns();
                     this.isYourTurn = !this.isYourTurn;
+                    this.turnProgress = TurnProgress.beginning;
                     if (!this.isYourTurn)
                     {
                         Message message = new Message();
-                        message.attackedLocation = new int[2]{2, 2};
+                        message.attackedLocation = new int[2] { 2, 2 };
                         message.attackedUnitID = 2;
                         message.attackerUnitID = 105;
                         message.damageDealt = 30;
@@ -457,6 +429,7 @@ namespace CapitalStrategy.Windows
                         message.endLocation = new int[2] { 8, 1 };
                         this.handleOpponentMove(message);
                     }
+                    
                 }
             }
             mouseState.update(Mouse.GetState());
@@ -521,6 +494,20 @@ namespace CapitalStrategy.Windows
             if (displayWarrior != null)
             {
                 displayWarrior.update(gameTime, this);
+            }
+        }
+        public void decrementCooldowns()
+        {
+            for (int i = 0; i < ROWS; i++)
+            {
+                for (int j = 0; j < COLS; j++)
+                {
+                    Warrior unitC = board.warriors[i][j];
+                    if (unitC != null && unitC != this.currentTurnWarrior && ((unitC.isYours && this.isYourTurn) || (!unitC.isYours && !this.isYourTurn)) && unitC.cooldown > 0)
+                    {
+                        unitC.cooldown -= 1;
+                    }
+                }
             }
         }
         public void Draw()
