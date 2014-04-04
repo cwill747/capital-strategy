@@ -99,7 +99,6 @@ namespace CapitalStrategy
 			base.Initialize();
 
             client.Start();
-            client.Connect("127.0.0.1", 14242);
             Debug.WriteLine("Client 1: " + client.UniqueIdentifier.ToString());
 
 		}
@@ -199,70 +198,74 @@ namespace CapitalStrategy
 
 			base.Update(gameTime);
 
-            NetIncomingMessage msg;
-            while ((msg = client.ReadMessage()) != null)
+            if (client.Status == NetPeerStatus.Running)
             {
-                switch (msg.MessageType)
+                NetIncomingMessage msg;
+                while ((msg = client.ReadMessage()) != null)
                 {
-                    case NetIncomingMessageType.StatusChanged:
-                        NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
-                        if (status == NetConnectionStatus.Connected)
-                        {
-                            Console.WriteLine("Connected! UID: " + msg.SenderConnection.RemoteUniqueIdentifier + " , IP: " + msg.SenderConnection.RemoteEndPoint.ToString());
-                        }
-                        break;
-                    case NetIncomingMessageType.Data:
-                        msgType type = (msgType) msg.ReadInt32();
-                        Message m;
-                        if (type == msgType.Chat)
-                        {
-                            long sentFrom = msg.ReadInt64();
-                            long sendToUUID = msg.ReadInt64();
-                            string message = msg.ReadString();
-                            m = new Message(type, sentFrom, sendToUUID);
-                            m.msg = message;
-
-                            if(m.msg == "SERVER HELLO")
+                    switch (msg.MessageType)
+                    {
+                        case NetIncomingMessageType.StatusChanged:
+                            NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
+                            if (status == NetConnectionStatus.Connected)
                             {
-                                NetOutgoingMessage om = client.CreateMessage();
-                                om.WritePadBits();
-                                Message clientHello = new Message(msgType.Chat, client.UniqueIdentifier, client.ServerConnection.RemoteUniqueIdentifier);
-                                clientHello.msg = "CLIENT HELLO";
-                                clientHello.handleMessage(ref om);
-                                Console.WriteLine("Sending message: " + clientHello.ToString());
-                                client.SendMessage(om, NetDeliveryMethod.ReliableUnordered);
+                                Console.WriteLine("Connected! UID: " + msg.SenderConnection.RemoteUniqueIdentifier + " , IP: " + msg.SenderConnection.RemoteEndPoint.ToString());
+                            }
+                            break;
+                        case NetIncomingMessageType.Data:
+                            msgType type = (msgType)msg.ReadInt32();
+                            Message m;
+                            if (type == msgType.Chat)
+                            {
+                                long sentFrom = msg.ReadInt64();
+                                long sendToUUID = msg.ReadInt64();
+                                string message = msg.ReadString();
+                                m = new Message(type, sentFrom, sendToUUID);
+                                m.msg = message;
+
+                                if (m.msg == "SERVER HELLO")
+                                {
+                                    NetOutgoingMessage om = client.CreateMessage();
+                                    om.WritePadBits();
+                                    Message clientHello = new Message(msgType.Chat, client.UniqueIdentifier, client.ServerConnection.RemoteUniqueIdentifier);
+                                    clientHello.msg = "CLIENT HELLO";
+                                    clientHello.handleMessage(ref om);
+                                    Console.WriteLine("Sending message: " + clientHello.ToString());
+                                    client.SendMessage(om, NetDeliveryMethod.ReliableUnordered);
+
+                                }
+                            }
+                            else if (type == msgType.Matchmaking)
+                            {
+                                long sentFrom = msg.ReadInt64();
+                                string message = msg.ReadString();
+                                m = new Message(type, sentFrom);
+                                m.msg = message;
+                            }
+                            else
+                            {
+                                m = new Message(
+                                    type,
+                                    msg.ReadInt64(), // UID of the client the message was sent from
+                                    msg.ReadInt64(), // UID of the client the message is sent to (should be us)
+                                    new int[2] { msg.ReadInt32(), msg.ReadInt32() }, // The start location of the piece moved
+                                    new int[2] { msg.ReadInt32(), msg.ReadInt32() }, // The end location of the piece moved
+                                    new int[2] { msg.ReadInt32(), msg.ReadInt32() }, // Where the piece attacked
+                                    msg.ReadInt32(), // The damage dealt
+                                    msg.ReadInt32(), //The attacked unit ID
+                                    msg.ReadInt32(), // The attacker unit ID
+                                    msg.ReadBoolean() // Whether the unit died or not
+                                );
+                                // HANDLE THE MOVE MESSAGE HERE
 
                             }
-                        }
-                        else if (type == msgType.Matchmaking)
-                        {
-                            long sentFrom = msg.ReadInt64();
-                            string message = msg.ReadString();
-                            m = new Message(type, sentFrom);
-                            m.msg = message;
-                        }
-                        else
-                        {
-                            m = new Message(
-                                type,
-                                msg.ReadInt64(), // UID of the client the message was sent from
-                                msg.ReadInt64(), // UID of the client the message is sent to (should be us)
-                                new int[2] { msg.ReadInt32(), msg.ReadInt32() }, // The start location of the piece moved
-                                new int[2] { msg.ReadInt32(), msg.ReadInt32() }, // The end location of the piece moved
-                                new int[2] { msg.ReadInt32(), msg.ReadInt32() }, // Where the piece attacked
-                                msg.ReadInt32(), // The damage dealt
-                                msg.ReadInt32(), //The attacked unit ID
-                                msg.ReadInt32(), // The attacker unit ID
-                                msg.ReadBoolean() // Whether the unit died or not
-                            );
-                            // HANDLE THE MOVE MESSAGE HERE
-                            
-                        }
-                        Console.WriteLine(m.ToString());
+                            Console.WriteLine(m.ToString());
 
-                        break;
+                            break;
+                    }
                 }
             }
+            
 
 		}
 
