@@ -344,9 +344,10 @@ namespace CapitalStrategy.Windows
                         this.turnProgress = TurnProgress.moved;
                         if (!this.isYourTurn)
                         {
-                            if (this.targetRow < 0)
+                            if (this.targetRow < 0 || beingAttacked == null)
                             {
-                                this.turnProgress = TurnProgress.attacked;
+                                // todo either make you unable to attack nothing or correct facing
+                                this.turnProgress = TurnProgress.turnOver;
                             }
                             else
                             {
