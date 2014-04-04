@@ -12,6 +12,7 @@ namespace CapitalStrategyServer
         public long uniqueIdentifier;
         public bool inGame;
         public bool lookingForGame;
+        public string username;
 
         public Client() : this(0L, false, false)
         {
@@ -28,6 +29,14 @@ namespace CapitalStrategyServer
             this.uniqueIdentifier = uniqueIdentifier;
             this.inGame = inGame;
             this.lookingForGame = lookingForGame;
+        }
+
+        public Client(long uniqueIdentifier, bool inGame, bool lookingForGame, string username)
+        {
+            this.uniqueIdentifier = uniqueIdentifier;
+            this.inGame = inGame;
+            this.lookingForGame = lookingForGame;
+            this.username = username;
         }
 
        public override string ToString()
