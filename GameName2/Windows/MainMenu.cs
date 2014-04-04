@@ -11,6 +11,9 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Input.Touch;
 using MySql.Data.MySqlClient;
 using CapitalStrategy.GUI;
+using CapitalStrategyServer.Messaging;
+using CapitalStrategyServer;
+using Lidgren.Network;
 
 namespace CapitalStrategy.Windows
 {
@@ -95,14 +98,23 @@ namespace CapitalStrategy.Windows
                         {
                             // will actually open find match dialog here in future
                             // then enter gameplay when match is found
-                            /*
-                             *this.dialogText.isVisible = true;
+                           
+                            this.dialogText.isVisible = true;
                             this.dialogCancel.isVisible = true;
                             this.dialog.isVisible = true;
-                             */
+                            
+                            NetOutgoingMessage readyForMatch = this.windowManager.client.CreateMessage();
+                            readyForMatch.WritePadBits();
+                            Message clientReadyForMatch = new Message(msgType.Matchmaking, this.windowManager.client.UniqueIdentifier, 
+                                this.windowManager.client.ServerConnection.RemoteUniqueIdentifier);
+                            clientReadyForMatch.msg = "SEEKING";
+                            clientReadyForMatch.handleMessage(ref readyForMatch);
+                            this.windowManager.client.SendMessage(readyForMatch, NetDeliveryMethod.ReliableUnordered);
+                            /*
                             this.windowManager.gameState = GameState.gameMatch;
                             this.windowManager.windows[GameState.gameMatch].Initialize();
                             Game1.gameStates.Push(GameState.mainMenu);
+                            */
                         }
                         if (this.customizeArmyButton.unClick(newState))
                         {

@@ -47,6 +47,7 @@ namespace CapitalStrategy
         public NetClient client;
         public List<WarriorType> warriorTypes = new List<WarriorType>();
         public Client otherPlayer;
+        public GameMatch gameMatch;
 
         // List of windows. GameState class determines index of current window
         public Windows.Window[] windows { get; set; }
@@ -84,9 +85,11 @@ namespace CapitalStrategy
 			
             this.windows = new Windows.Window[GameState.totalStates];
             this.windows[GameState.login] = new Windows.Login(this);
-            this.windows[GameState.gameMatch] = new Windows.GameMatch(this);
+            this.gameMatch = new Windows.GameMatch(this);
+            this.windows[GameState.gameMatch] = this.gameMatch;
             this.windows[GameState.mainMenu] = new Windows.MainMenu(this);
             this.windows[GameState.customizeArmy] = new Windows.CustomizeArmy(this);
+
 
             foreach (Windows.Window window in windows)
             {
@@ -233,12 +236,7 @@ namespace CapitalStrategy
                                     Console.WriteLine("Sending message: " + clientHello.ToString());
                                     client.SendMessage(om, NetDeliveryMethod.ReliableUnordered);
 
-                                    NetOutgoingMessage readyForMatch = client.CreateMessage();
-                                    readyForMatch.WritePadBits();
-                                    Message clientReadyForMatch = new Message(msgType.Matchmaking, client.UniqueIdentifier, client.ServerConnection.RemoteUniqueIdentifier);
-                                    clientReadyForMatch.msg = "SEEKING";
-                                    clientReadyForMatch.handleMessage(ref readyForMatch);
-                                    client.SendMessage(readyForMatch, NetDeliveryMethod.ReliableUnordered);
+
 
                                 }
                             }
@@ -249,9 +247,17 @@ namespace CapitalStrategy
                                 string message = msg.ReadString();
                                 m = new Message(type, sentFrom, sentTo);
                                 m.msg = message;
-                                // I have found a new match
-                                otherPlayer = new Client(m.sentFrom, true, false, m.msg);
-                                Console.WriteLine("Opponent found: " + otherPlayer.username);
+                                if (m.msg != "SEEKING")
+                                {
+                                    // I have found a new match
+                                    otherPlayer = new Client(m.sentFrom, true, false, m.msg.Substring(0, m.msg.IndexOf(':')));
+                                    bool isMyTurn = Boolean.Parse(m.msg.Substring(m.msg.IndexOf(':')+1));
+                                    Console.WriteLine("Opponent found: " + otherPlayer.username);
+                                    this.gameState = GameState.gameMatch;
+                                    this.windows[GameState.gameMatch].Initialize();
+                                    this.gameMatch.isYourTurn = isMyTurn;
+                                    Game1.gameStates.Push(GameState.mainMenu);
+                                }
                             }
                             else
                             {
@@ -259,7 +265,6 @@ namespace CapitalStrategy
                                     type,
                                     msg.ReadInt64(), // UID of the client the message was sent from
                                     msg.ReadInt64(), // UID of the client the message is sent to (should be us)
-                                    new int[2] { msg.ReadInt32(), msg.ReadInt32() }, // The start location of the piece moved
                                     new int[2] { msg.ReadInt32(), msg.ReadInt32() }, // The end location of the piece moved
                                     new int[2] { msg.ReadInt32(), msg.ReadInt32() }, // Where the piece attacked
                                     msg.ReadInt32(), // The damage dealt
@@ -267,7 +272,22 @@ namespace CapitalStrategy
                                     msg.ReadInt32(), // The attacker unit ID
                                     msg.ReadBoolean() // Whether the unit died or not
                                 );
-                                // HANDLE THE MOVE MESSAGE HERE
+
+                                /*
+                                 *             m.Write(this.type);
+                                                m.Write(this.sentFrom);
+                                                m.Write(this.sendToUUID);
+                                                m.Write(this.endLocation[0]);
+                                                m.Write(this.endLocation[1]);
+                                                m.Write(this.attackedLocation[0]);
+                                                m.Write(this.attackedLocation[1]);
+                                                m.Write(this.damageDealt);
+                                                m.Write(this.attackedUnitID);
+                                                m.Write(this.attackerUnitID);
+                                                m.Write(this.unitAttackDied);
+                                 */
+                                this.gameMatch.waitingForTurn = false;
+                                this.gameMatch.handleOpponentMove(m);
 
                             }
                             Console.WriteLine(m.ToString());

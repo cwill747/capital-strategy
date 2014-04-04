@@ -92,7 +92,6 @@ namespace CapitalStrategyServer
                                     msg.ReadInt64(),
                                     new int[2] { msg.ReadInt32(), msg.ReadInt32() },
                                     new int[2] { msg.ReadInt32(), msg.ReadInt32() },
-                                    new int[2] { msg.ReadInt32(), msg.ReadInt32() },
                                     msg.ReadInt32(),
                                     msg.ReadInt32(),
                                     msg.ReadInt32(),
@@ -120,8 +119,16 @@ namespace CapitalStrategyServer
                         m.waitingToSend = false;
                         NetOutgoingMessage om = server.CreateMessage();
                         Console.WriteLine("Sending Message: " + m.ToString());
-                        om.WritePadBits();
-                        m.handleMessage(ref om);
+                        switch (m.type)
+                        {
+                            case (int) msgType.Chat:
+                            case (int) msgType.Matchmaking:
+                                m.handleMessage(ref om);
+                                break;
+                            case (int) msgType.Move:
+                                m.handleMoveMessage(ref om);
+                                break;
+                        }
                         server.SendMessage(om, server.Connections.Find(nc => nc.RemoteUniqueIdentifier.Equals(m.sendToUUID)), NetDeliveryMethod.ReliableUnordered);
                     }
                     
