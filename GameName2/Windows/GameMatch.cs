@@ -481,6 +481,10 @@ namespace CapitalStrategy.Windows
                         {
 
                         }
+						if (this.skipBtn.checkClick(mouseState.mouseState))
+						{
+
+						}
                     }
                     if (mouseState.mouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
                     {
@@ -502,6 +506,14 @@ namespace CapitalStrategy.Windows
                                 //this.currentTurnWarrior.state = State.
                             }
                         }
+
+						if (this.skipBtn.unClick(mouseState.mouseState))
+                        {
+							if(this.isYourTurn)
+							{
+								this.turnProgress = TurnProgress.turnOver;
+							}
+						}
                     }
                 }
                 oldMouseState = mouseState.mouseState;
