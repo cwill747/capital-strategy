@@ -15,6 +15,7 @@ using System.Xml;
 using CapitalStrategy.GUI;
 using Lidgren.Network;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 
 namespace CapitalStrategy.Windows
 {
@@ -105,8 +106,9 @@ namespace CapitalStrategy.Windows
             this.Content = windowManager.Content;
             menufont = Content.Load<SpriteFont>("fonts/gamefont");
             this.infofont = Content.Load<SpriteFont>("fonts/menufont");
-            
 
+            //Song song = Content.Load<Song>("music/intoBattle");  // Put the name of your song in instead of "song_title"
+            //MediaPlayer.Play(song);
 
 
             background = Content.Load<Texture2D>("stars");
