@@ -17,11 +17,14 @@ namespace CapitalStrategy.Windows
     class MainMenu : Window
     {
         public Game1 windowManager { get; set; }
-        public Button playGameButton { get; set; }
+        public Button findMatchButton { get; set; }
         public Button customizeArmyButton { get; set; }
         public MouseState pastState { get; set; }
         public BackButton backButton { get; set; }
         public Vector2 welcomeVector { get; set; }
+        public Dialog dialog { get; set; }
+        public Button dialogCancel { get; set; }
+        public TextAnimation dialogText { get; set; }
         
         public MainMenu(Game1 windowManager)
         {
@@ -40,49 +43,81 @@ namespace CapitalStrategy.Windows
             int offsetX = (this.windowManager.Window.ClientBounds.Width - width) / 2;
             int offsetY = (this.windowManager.Window.ClientBounds.Height - height) / 2;
             this.welcomeVector = new Vector2(offsetX, offsetY);
-            this.playGameButton = new Button("PLAY GAME!", new Rectangle(offsetX, offsetY+100, 350, 100), Game1.menuFont);
+            this.findMatchButton = new Button("FIND MATCH", new Rectangle(offsetX, offsetY+100, 350, 100), Game1.menuFont);
             this.customizeArmyButton = new Button("CUSTOMIZE ARMY", new Rectangle(offsetX, offsetY + 230, 350, 100), Game1.menuFont);
             this.backButton = new BackButton();
-
+            int dialogWidth = 600;
+            int dialogHeight = 300;
+            this.dialog = new Dialog(this.windowManager, dialogWidth, dialogHeight, isVisible: false);
+            this.dialogCancel = new Button("CANCEL", dialog.getComponentLocation(200, 200, 70), Game1.menuFont, isVisible: false);
+            List<String> phrases = new List<String>();
+            phrases.Add("Searching for opponent");
+            phrases.Add("Searching for opponent.");
+            phrases.Add("Searching for opponent..");
+            phrases.Add("Searching for opponent...");
+            
+            this.dialogText = new TextAnimation(dialog.getComponentLocation(100, (int)Game1.menuFont.MeasureString("Searching for opponent...").X, 100), phrases, 500, Game1.menuFont, isVisible: false);
         }
 
         public void Update(GameTime gameTime)
         {
             MouseState newState = Mouse.GetState();
+            this.dialogText.update(gameTime);
             if (!this.pastState.Equals(newState))
             {
                 if (newState.LeftButton == ButtonState.Pressed && pastState.LeftButton != ButtonState.Pressed)
                 {
-                    if (this.playGameButton.checkClick(newState))
+                    if (!this.dialog.isVisible)
                     {
-                        
+                        if (this.findMatchButton.checkClick(newState))
+                        {
+
+                        }
+                        if (this.customizeArmyButton.checkClick(newState))
+                        {
+                        }
+                        if (this.backButton.checkClick(newState))
+                        {
+                        }
                     }
-                    if (this.customizeArmyButton.checkClick(newState))
+                    else
                     {
-                    }
-                    if (this.backButton.checkClick(newState))
-                    {
+                        if (this.dialogCancel.checkClick(newState))
+                        {
+                        }
                     }
                 }
                 if (newState.LeftButton == ButtonState.Released && pastState.LeftButton != ButtonState.Released)
                 {
-                    if (this.playGameButton.unClick(newState))
+                    if (!this.dialog.isVisible)
                     {
-                        this.windowManager.gameState = GameState.gameMatch;
-                        this.windowManager.windows[GameState.gameMatch].Initialize();
-                        Game1.gameStates.Push(GameState.mainMenu);
+                        if (this.findMatchButton.unClick(newState))
+                        {
+                            this.windowManager.gameState = GameState.gameMatch;
+                            this.windowManager.windows[GameState.gameMatch].Initialize();
+                            Game1.gameStates.Push(GameState.mainMenu);
+                        }
+                        if (this.customizeArmyButton.unClick(newState))
+                        {
+                            this.windowManager.gameState = GameState.customizeArmy;
+                            this.windowManager.windows[GameState.customizeArmy].Initialize();
+                            Game1.gameStates.Push(GameState.mainMenu);
+                        }
+                        if (this.backButton.unClick(newState))
+                        {
+                            int newGameState = Game1.gameStates.Pop();
+                            this.windowManager.gameState = newGameState;
+                            this.windowManager.windows[newGameState].Initialize();
+                        }
                     }
-                    if (this.customizeArmyButton.unClick(newState))
+                    else
                     {
-                        this.windowManager.gameState = GameState.customizeArmy;
-                        this.windowManager.windows[GameState.customizeArmy].Initialize();
-                        Game1.gameStates.Push(GameState.mainMenu);
-                    }
-                    if (this.backButton.unClick(newState))
-                    {
-                        int newGameState = Game1.gameStates.Pop();
-                        this.windowManager.gameState = newGameState;
-                        this.windowManager.windows[newGameState].Initialize();
+                        if (this.dialogCancel.unClick(newState))
+                        {
+                            this.dialogCancel.isVisible = false;
+                            this.dialog.isVisible = false;
+                            this.dialogText.isVisible = false;
+                        }
                     }
                 }
             }
@@ -95,9 +130,13 @@ namespace CapitalStrategy.Windows
             windowManager.spriteBatch.Draw(Game1.background, new Rectangle(0, 0, this.windowManager.Window.ClientBounds.Width, this.windowManager.Window.ClientBounds.Height), Color.White);
             this.windowManager.spriteBatch.DrawString(Game1.gameFont, "Welcome, " + this.windowManager.username + "!", this.welcomeVector, Color.White);
             this.windowManager.spriteBatch.End();
-            this.playGameButton.draw(this.windowManager.spriteBatch);
+            this.findMatchButton.draw(this.windowManager.spriteBatch);
             this.customizeArmyButton.draw(this.windowManager.spriteBatch);
             this.backButton.drawBackButton(windowManager.spriteBatch);
+            this.dialog.draw();
+            this.dialogCancel.draw(this.windowManager.spriteBatch);
+            this.dialogText.draw(this.windowManager.spriteBatch);
+         
         }
     }
 }
