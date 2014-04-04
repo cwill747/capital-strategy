@@ -459,6 +459,8 @@ namespace CapitalStrategy.Windows
                         NetOutgoingMessage om = this.windowManager.client.CreateMessage();
                         toSend.handleMoveMessage(ref om);
                         this.windowManager.client.SendMessage(om, NetDeliveryMethod.ReliableOrdered);
+                        this.currentTurnWarrior = null;
+                        this.beingAttacked = null;
                     }
                     
                 }
@@ -512,6 +514,8 @@ namespace CapitalStrategy.Windows
 							if(this.isYourTurn)
 							{
 								this.turnProgress = TurnProgress.turnOver;
+                                this.currentTurnWarrior.updateUserOptions(false);
+                                board.resetTints();
 							}
 						}
                     }
