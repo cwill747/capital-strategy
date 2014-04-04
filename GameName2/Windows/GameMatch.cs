@@ -606,16 +606,7 @@ namespace CapitalStrategy.Windows
                 this.spriteBatch.Begin();
                 toDrawX = toDrawX + board.WARRIORWIDTH / 2 + imgPadding;
 
-                // Draw the warriors cooldown
-                int cool = this.selectedWarrior.cooldown;
-                string coolDisplay = "Cooldown: "+cool.ToString();
-                this.spriteBatch.DrawString(this.infofont, coolDisplay, new Vector2(toDrawX + board.WARRIORWIDTH, toDrawY + (2*imgPadding)), Color.White);
 
-                // Draw the warriors bonus
-                string bonusDisplay = "Bonus against " + this.selectedWarrior.bonus;
-                string baseDisplay = "Base Type: " + this.selectedWarrior.baseType;
-                this.spriteBatch.DrawString(this.infofont, baseDisplay, new Vector2(toDrawX - (2 * imgPadding), toDrawY + (3 * imgPadding)), Color.White);
-                this.spriteBatch.DrawString(this.infofont, bonusDisplay, new Vector2(toDrawX- (2*imgPadding), toDrawY + (4 * imgPadding)), Color.White);
 
                 // Draw the warriors health
                 this.spriteBatch.Draw(heartIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
@@ -638,10 +629,25 @@ namespace CapitalStrategy.Windows
                 this.spriteBatch.Draw(white, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * 100), barHeight), Color.WhiteSmoke);
                 this.spriteBatch.Draw(red, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.defense), barHeight), Color.WhiteSmoke);
                 toDrawY += iconHeight + padding;
+
+                // Draw the warriors cooldown
+                string coolDisplay = this.selectedWarrior.maxCooldown.ToString();
+                this.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
+                this.spriteBatch.DrawString(this.infofont, coolDisplay, new Vector2(2 + toDrawX + iconWidth + padding, toDrawY), Color.White);
+                toDrawY += iconHeight + padding;
+
+                // Draw the warriors bonus
+                string baseDisplay = "Base Type: " + this.selectedWarrior.baseType;
+                this.spriteBatch.DrawString(this.infofont, baseDisplay, new Vector2(2 + toDrawX + iconWidth + padding, toDrawY), Color.White);
+                toDrawY += iconHeight + padding;
+
+                string bonusDisplay = "Bonus against " + this.selectedWarrior.bonus;
+                this.spriteBatch.DrawString(this.infofont, bonusDisplay, new Vector2(2 + toDrawX + iconWidth + padding, toDrawY), Color.White);
+
                 this.spriteBatch.End();
             }
 
-
+        
         }
     }
 }
