@@ -146,5 +146,9 @@ namespace CapitalStrategy.GUI
                 this.toggleActive();
             }
         }
+        public void changeLabel(String newlabel)
+        {
+            this.label = newlabel;
+        }
     }
 }
