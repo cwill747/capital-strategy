@@ -644,7 +644,7 @@ namespace CapitalStrategy.Windows
                     {
                         int xDiff = (int)(currentTurnWarrior.col - beingAttacked.col);
                         int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
-                        beingAttacked.setDirection(xDiff, yDiff);
+                        //beingAttacked.setDirection(xDiff, yDiff);
                         beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
                     }
                     else
