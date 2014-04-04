@@ -362,7 +362,7 @@ namespace CapitalStrategy.Windows
             this.windowManager.username = username;
             this.windowManager.password = password;
             this.errorMessage = "";
-            this.windowManager.client.Connect("127.0.0.1", 14242);
+            this.windowManager.client.Connect("cwill.us", 14242);
         }
     }
 }
