@@ -125,7 +125,7 @@ namespace CapitalStrategy
 
             Game1.gameFont = Content.Load<SpriteFont>("fonts/gamefont");
             Game1.menuFont = Content.Load<SpriteFont>("fonts/menufont");
-            Game1.smallFont = Content.Load<SpriteFont>("fonts/smallFont");
+            Game1.smallFont = Content.Load<SpriteFont>("fonts/smallfont");
            
             foreach (Windows.Window window in windows)
             {
