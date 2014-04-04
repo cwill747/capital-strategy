@@ -523,12 +523,12 @@ namespace CapitalStrategy
             this.state = State.beenHit;
             this.stateDepth = 0;
         }
-        public void strike(Warrior target)
+        public int strike(Warrior target)
         {
             //only the white mage can hit itself
             if ((target == this) && this.type != "white mage")
             {
-                return;
+                return 0;
             }
             // handle the white mages healing
             else if (target != null && this.type == "white mage")
@@ -537,10 +537,12 @@ namespace CapitalStrategy
                 if ((damage < 0) && ((target.health - damage) > target.maxHealth))
                 {
                     target.health = target.maxHealth;
+                    return 0;
                 }
                 else
                 {
                     target.health -= damage;
+                    return damage;
                 }
             }
             // handle anyone else attacking
@@ -587,9 +589,11 @@ namespace CapitalStrategy
                 if (doesHit)
                 {
                     target.health -= damage;
+                    return damage;
                 }
+                return 0;
             }
-
+            return 0;
             // handle death in motions
         }
         public Boolean isFacingTowards(int thisRow, int thisCol, int targetRow, int targetCol, int targetDir)

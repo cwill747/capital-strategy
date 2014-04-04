@@ -386,7 +386,7 @@ namespace CapitalStrategy.Windows
                         int targetHealthCheck = this.beingAttacked.health;
                         if (this.isYourTurn)
                         {
-                            this.currentTurnWarrior.strike(this.beingAttacked);
+                            this.opponentDamage = this.currentTurnWarrior.strike(this.beingAttacked);
                         }
                         else
                         {
@@ -418,8 +418,21 @@ namespace CapitalStrategy.Windows
                     this.decrementCooldowns();
                     this.isYourTurn = !this.isYourTurn;
                     this.turnProgress = TurnProgress.beginning;
+                    
                     if (!this.isYourTurn)
                     {
+                        Message toSend = new Message();
+                        toSend.attackedLocation = new int[2] { this.targetRow, this.targetCol };
+                        toSend.endLocation = new int[2] { (int)this.currentTurnWarrior.row, (int)this.currentTurnWarrior.col};
+                        toSend.attackerUnitID = this.currentTurnWarrior.id;
+                        toSend.attackedUnitID = 0;
+                        toSend.damageDealt = 0;
+                        if (this.beingAttacked != null)
+                        {
+                            toSend.attackedUnitID = this.beingAttacked.id;
+                            toSend.attackedLocation = new int[2] { (int) this.beingAttacked.row, (int) this.beingAttacked.col};
+                            toSend.damageDealt = this.opponentDamage;
+                        }
                         Message message = new Message();
                         message.attackedLocation = new int[2] { 2, 2 };
                         message.attackedUnitID = 2;
