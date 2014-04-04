@@ -62,7 +62,7 @@ namespace CapitalStrategy.Windows
             this.passwordInput = new InputDialog("password", new Rectangle(leftEdge + 125, startY + 250, 170, 25), mask: true);
             this.confirmPasswordInput = new InputDialog("confirm Password", new Rectangle(leftEdge + 125, startY + 290, 170, 25), mask: true, isVisible: false);
             this.submitButton = new Button("SUBMIT", new Rectangle(leftEdge + 40, startY + 290, 250, 50), Game1.smallFont);
-            this.registerButton = new Button("REGISTER", new Rectangle(leftEdge + 40, startY + 350, 250, 50), Game1.smallFont);
+            this.registerButton = new Button("REGISTER", new Rectangle(leftEdge + 40, startY + 350, 250, 50), Game1.smallFont, isVisible: false);
             this.errorMessageLoc = new Vector2(leftEdge + 25, startY + 360);
         }
 
