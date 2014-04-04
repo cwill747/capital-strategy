@@ -34,8 +34,8 @@ namespace CapitalStrategy.Windows
         public Vector2 errorMessageLoc { get; set; }
         public Rectangle capitalLogoLoc { get; set; }
         public string appsalt = "Ay2cXjA4";
-        //public InputDialog newUserClick { get; set;}
-        //public InputDialog existingUserClick {get; set;}
+        public Button newUserClick { get; set;}
+        public Button existingUserClick {get; set;}
 
 
         public Login(Game1 windowManager)
@@ -66,10 +66,11 @@ namespace CapitalStrategy.Windows
             this.usernameInput = new InputDialog("username", new Rectangle(leftEdge + 125, startY + 210, 170, 25), isActive: true);
             this.passwordInput = new InputDialog("password", new Rectangle(leftEdge + 125, startY + 250, 170, 25), mask: true);
             this.confirmPasswordInput = new InputDialog("Confirm Password", new Rectangle(leftEdge + 125, startY + 290, 170, 25), mask: true, isVisible: false);
-
-            this.submitButton = new Button("SUBMIT", new Rectangle(leftEdge + 40, startY + 330, 250, 50), Game1.smallFont);
-            this.registerButton = new Button("REGISTER", new Rectangle(leftEdge + 40, startY + 380, 250, 50), Game1.smallFont);
+            this.submitButton = new Button("LOGIN", new Rectangle(leftEdge + 40, startY + 290, 250, 50), Game1.smallFont);
+            this.registerButton = new Button("REGISTER", new Rectangle(leftEdge + 40, startY + 320, 250, 50), Game1.smallFont, isVisible: false);
             this.errorMessageLoc = new Vector2(leftEdge + 25, startY + 430);
+            this.newUserClick = new Button ("new user?", new Rectangle(leftEdge + 40, startY + 350, 250, 50), Game1.smallFont);
+            this.existingUserClick = new Button("existing user?", new Rectangle(leftEdge + 40, startY + 380, 250, 50), Game1.smallFont, isVisible: false);
 
         }
 
@@ -84,6 +85,8 @@ namespace CapitalStrategy.Windows
             this.confirmPasswordInput.update(gameTime);
             this.submitButton.update(gameTime);
             this.registerButton.update(gameTime);
+            this.newUserClick.update(gameTime);
+            this.existingUserClick.update(gameTime);
 
             KeyboardState newState = Keyboard.GetState();
             if (!newState.Equals(oldState))
@@ -148,13 +151,21 @@ namespace CapitalStrategy.Windows
                 {
                     Boolean isUserInputClicked = usernameInput.handleClick(newMouseState);
                     Boolean isPasswordInputClicked = passwordInput.handleClick(newMouseState);
+                    Boolean isConfirmPasswordInputClicked = confirmPasswordInput.handleClick(newMouseState);
                     if (isUserInputClicked)
                     {
                         passwordInput.isActive = false;
+                        confirmPasswordInput.isActive = false;
                     }
                     if (isPasswordInputClicked)
                     {
                         usernameInput.isActive = false;
+                        confirmPasswordInput.isActive = false;
+                    }
+                    if (isConfirmPasswordInputClicked)
+                    {
+                        usernameInput.isActive = false;
+                        passwordInput.isActive = false;
                     }
                     if (this.submitButton.checkClick(newMouseState))
                     {
@@ -164,6 +175,15 @@ namespace CapitalStrategy.Windows
                     {
 
                     }
+                    if (this.newUserClick.checkClick(newMouseState))
+                    {
+
+                    }
+                    if (this.existingUserClick.checkClick(newMouseState))
+                    {
+
+                    }
+
                 }
                 if (newMouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
                 {
@@ -175,14 +195,14 @@ namespace CapitalStrategy.Windows
                     {
                         this.register(this.usernameInput.content, this.passwordInput.content, this.confirmPasswordInput.content);
                     }
-                    //else if (this.newUserClick.unClick(newMouseState))
+                    else if (this.newUserClick.unClick(newMouseState))
                     {
-                        showRegister();
+                        this.showRegister();
 
                     }
-                    //else if (this.existingUserClick.unClick(newMouseState))
+                    else if (this.existingUserClick.unClick(newMouseState))
                     {
-                        showSubmit();
+                        this.showSubmit();
                     }
 
                 }
@@ -197,11 +217,13 @@ namespace CapitalStrategy.Windows
             windowManager.spriteBatch.Draw(this.capitalLogo, this.capitalLogoLoc, Color.White);
             windowManager.spriteBatch.DrawString(Game1.smallFont, this.errorMessage, this.errorMessageLoc, Color.Red);
             windowManager.spriteBatch.End();
-            usernameInput.draw(windowManager.spriteBatch);
+            this.usernameInput.draw(windowManager.spriteBatch);
             this.passwordInput.draw(windowManager.spriteBatch);
             this.confirmPasswordInput.draw(windowManager.spriteBatch);
             this.submitButton.draw(windowManager.spriteBatch);
             this.registerButton.draw(windowManager.spriteBatch);
+            this.newUserClick.draw(windowManager.spriteBatch);
+            this.existingUserClick.draw(windowManager.spriteBatch);
 
         }
         public void login(string username, string password)
@@ -254,23 +276,23 @@ namespace CapitalStrategy.Windows
         public void showRegister()
         {
             this.usernameInput.changeLabel("Choose a Username");
-            this.passwordInput.changeLabel("Select a Passwod");
+            this.passwordInput.changeLabel("Select a Password");
             this.confirmPasswordInput.setVisible(true);
             this.submitButton.isVisible = false;
             this.registerButton.isVisible = true;
-            //this.newUserClick.isVisible = false;
-            //this.existingUserClick.isVisible = true;
+            this.newUserClick.isVisible = false;
+            this.existingUserClick.isVisible = true;
         }
 
         public void showSubmit()
         {
             this.usernameInput.changeLabel("Username");
-            this.passwordInput.changeLabel("Passwod");
+            this.passwordInput.changeLabel("Password");
             this.confirmPasswordInput.setVisible(false);
             this.submitButton.isVisible = true;
             this.registerButton.isVisible = false;
-            //this.newUserClick.isVisible = true;
-            //this.existingUserClick.isVisible = false;
+            this.newUserClick.isVisible = true;
+            this.existingUserClick.isVisible = false;
         }
 
         public void register(string username, string password, string confirmPassword)
@@ -296,21 +318,17 @@ namespace CapitalStrategy.Windows
                     availCmd.Parameters.AddWithValue("@username", username);
                     MySqlDataReader availReader = availCmd.ExecuteReader();
                     string comparison = "";
-                    while (availReader.Read())
+                    if (!availReader.Read())
                     {
-                        comparison = (string)availReader["username"];
-                    }
-                    if (comparison == "")
-                    {
-                        string pwdToHash = password + this.appsalt; // ^Y8~JJ is my hard-coded salt
+                        string pwdToHash = password + this.appsalt; 
                         string salt = BCrypt.Net.BCrypt.GenerateSalt();
                         string hashToStoreInDatabase = BCrypt.Net.BCrypt.HashPassword(pwdToHash, salt);
                         string command = "INSERT INTO users VALUES (@username, @password, @salt)";
-                        //MySqlCommand insCmd = new MySqlCommand(command, db.connection);
-                        //insCmd.Parameters.AddWithValue("username", username);
-                        //insCmd.Parameters.AddWithValue("password", hashToStoreInDatabase);
-                        //insCmd.Parameters.AddWithValue("salt", salt);
-                        //insCmd.ExecuteNonQuery();
+                        MySqlCommand insCmd = new MySqlCommand(command, db.connection);
+                        insCmd.Parameters.AddWithValue("username", username);
+                        insCmd.Parameters.AddWithValue("password", hashToStoreInDatabase);
+                        insCmd.Parameters.AddWithValue("salt", salt);
+                        insCmd.ExecuteNonQuery();
                     }
                     else
                     {
@@ -323,10 +341,6 @@ namespace CapitalStrategy.Windows
                 {
                     this.errorMessage = "Could not connect to DB.";
                 }
-            }
-            else
-            {
-                this.errorMessage = "Passwords do not match.";
             }
         }
 

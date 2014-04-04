@@ -59,6 +59,7 @@
     <Compile Include="GameState.cs" />
     <Compile Include="GUI\BackButton.cs" />
     <Compile Include="GUI\Button.cs" />
+    <Compile Include="GUI\ClickableLink.cs" />
     <Compile Include="GUI\InputDialog.cs" />
     <Compile Include="ImageAtlas.cs" />
     <Compile Include="MouseWrapper.cs" />
