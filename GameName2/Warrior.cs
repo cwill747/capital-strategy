@@ -520,9 +520,11 @@ namespace CapitalStrategy
 		}
 		public void strike(Warrior target)
 		{
+            //only the white mage can hit itself
 			if ((target == this) && this.type != "white mage") {
 				return;
 			} 
+            // handle the white mages healing
 			else if (target != null && this.type == "white mage") {
 				int damage = (this.attack * 20) / target.defense;
 				if ((damage < 0) && ((target.health - damage) > target.maxHealth)) {
@@ -531,6 +533,7 @@ namespace CapitalStrategy
 					target.health -= damage;
 				}		
 			}
+            // handle anyone else attacking
 			else if (target != null && this.type != "white mage")
 			{
 				//Random rand = new Random();
@@ -543,9 +546,9 @@ namespace CapitalStrategy
 				int miss = randomNum2 * target.evade;
 				int hit;
 				// bonus check
-				if (this.bonus.Equals (target.type)) {
-					hit = randomNum * (this.accuracy + 50);
-					damage *= 2;
+				if (this.bonus.Equals (target.baseType)) {
+					hit = (randomNum+5) * (this.accuracy + 50);
+					damage *= 3;
 				} else {
 					hit = randomNum * this.accuracy;
 				}

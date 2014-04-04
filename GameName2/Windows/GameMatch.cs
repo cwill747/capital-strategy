@@ -115,21 +115,22 @@ namespace CapitalStrategy.Windows
                 3,          // maxMove
                 3,          // speed
                 "axestan shield", // type 
-                "blue archer", new int[] { 1, 8, 8, 13, 7, 9, 7 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
+                "melee", // baseType
+                "ranged", new int[] { 1, 8, 8, 13, 7, 9, 7 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
                 null, 1, 500, 0);
 			firedragon = new WarriorType(this, 60, 3, 40, 70,
-                80, 60, 4, 5, "firedragon",
-                "crocy", new int[] { 1, 7, 7, 9, 1, 11, 7 }, new int[] { 1000, 400, 1000, 1000, 1000, 1000, 1000 },
+                80, 60, 4, 5, "firedragon", "magic",
+                "melee", new int[] { 1, 7, 7, 9, 1, 11, 7 }, new int[] { 1000, 400, 1000, 1000, 1000, 1000, 1000 },
                 null, 2, 500, 0);
 			blueArcher = new WarriorType(this, 
                 70,
                 3, 40, 50,
-                75, 20, 4, 3, "blue archer",
-                "magier", new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
+                75, 20, 4, 3, "blue archer", "ranged",
+                "magic", new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
                 null, 6, 500, 10);
 			this.whiteMage = new WarriorType(this, 50, 2, -80, 30,
-                100, 0, 4, 3, "white mage",
-                null, new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
+                100, 0, 4, 3, "white mage", "magic",
+                "none", new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
                 new Point[] { new Point(-1,-1), new Point(1,1), 
 					new Point(1,-1), new Point(-1,1), new Point(-2, 0), 
 					new Point(2, 0), new Point(0, 2), new Point(0, -2), 
@@ -137,12 +138,12 @@ namespace CapitalStrategy.Windows
 					new Point(0,-1),new Point(0,0)},
                 null, 500, 0);
 			crocy = new WarriorType(this, 90, 2, 60, 50,
-                50, 50, 2, 2, "crocy",
-                "firedragon", new int[] { 1, 8, 8, 11, 9, 11, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
+                50, 50, 2, 2, "crocy", "melee", 
+                "ranged", new int[] { 1, 8, 8, 11, 9, 11, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
                 null, 1, 500, 0);
 			magier = new WarriorType(this,70, 2, 40, 45,
-                75, 25, 3, 3, "magier",
-                "axestan shield", new int[] { 9, 7, 7, 9, 9, 10, 9 }, new int[] { 1000, 500, 1000, 1500, 1000, 1000, 1000 },
+                75, 25, 3, 3, "magier", "magic",
+                "melee", new int[] { 9, 7, 7, 9, 9, 10, 9 }, new int[] { 1000, 500, 1000, 1500, 1000, 1000, 1000 },
                 null, 3, 500, 10);
 
             PlayerArmy p1 = new PlayerArmy(Direction.N);
@@ -612,7 +613,9 @@ namespace CapitalStrategy.Windows
 
                 // Draw the warriors bonus
                 string bonusDisplay = "Bonus against " + this.selectedWarrior.bonus;
-                this.spriteBatch.DrawString(this.infofont, bonusDisplay, new Vector2(toDrawX- (2*imgPadding), toDrawY + (3 * imgPadding)), Color.White);
+                string baseDisplay = "Base Type: " + this.selectedWarrior.baseType;
+                this.spriteBatch.DrawString(this.infofont, baseDisplay, new Vector2(toDrawX - (2 * imgPadding), toDrawY + (3 * imgPadding)), Color.White);
+                this.spriteBatch.DrawString(this.infofont, bonusDisplay, new Vector2(toDrawX- (2*imgPadding), toDrawY + (4 * imgPadding)), Color.White);
 
                 // Draw the warriors health
                 this.spriteBatch.Draw(heartIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
