@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using CapitalStrategy.Windows;
+using Microsoft.Xna.Framework.Audio;
 #endregion
 
 namespace CapitalStrategy
@@ -519,6 +520,8 @@ namespace CapitalStrategy
 
         public void takeHit(int delay)
         {
+
+
             this.curDelay = delay;
             this.state = State.beenHit;
             this.stateDepth = 0;
@@ -548,6 +551,11 @@ namespace CapitalStrategy
             // handle anyone else attacking
             else if (target != null && this.type != "white mage")
             {
+      
+                
+                
+                
+                
                 //Random rand = new Random();
                 //int damage = (rand.Next(this.attack / 2) + this.attack) * 20 / target.defense;
                 //target.health -= damage;
