@@ -45,6 +45,10 @@ namespace CapitalStrategyServer.Messaging
                             // Tell the server queue that we have a new client looking for a game
                             server.qm.newClientLookingForGame(m.sentFrom);
                         }
+                        else if (m.msg == "CANCEL")
+                        {
+                            server.qm.removeClientFromQueue(m.sentFrom);
+                        }
                         break;
                     case 1: // message is a chat message
                         {
