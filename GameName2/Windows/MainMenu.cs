@@ -103,18 +103,10 @@ namespace CapitalStrategy.Windows
                             this.dialogCancel.isVisible = true;
                             this.dialog.isVisible = true;
                             
-                            NetOutgoingMessage readyForMatch = this.windowManager.client.CreateMessage();
-                            readyForMatch.WritePadBits();
                             Message clientReadyForMatch = new Message(msgType.Matchmaking, this.windowManager.client.UniqueIdentifier, 
                                 this.windowManager.client.ServerConnection.RemoteUniqueIdentifier);
                             clientReadyForMatch.msg = "SEEKING";
-                            clientReadyForMatch.handleMessage(ref readyForMatch);
-                            this.windowManager.client.SendMessage(readyForMatch, NetDeliveryMethod.ReliableUnordered);
-                            /*
-                            this.windowManager.gameState = GameState.gameMatch;
-                            this.windowManager.windows[GameState.gameMatch].Initialize();
-                            Game1.gameStates.Push(GameState.mainMenu);
-                            */
+                            this.windowManager.msgManager.addToOutgoingQueue(clientReadyForMatch);
                         }
                         if (this.customizeArmyButton.unClick(newState))
                         {
@@ -136,6 +128,11 @@ namespace CapitalStrategy.Windows
                             this.dialogCancel.isVisible = false;
                             this.dialog.isVisible = false;
                             this.dialogText.isVisible = false;
+
+                            Message clientCancellingMatch = new Message(msgType.Matchmaking, this.windowManager.client.UniqueIdentifier,
+                                this.windowManager.client.ServerConnection.RemoteUniqueIdentifier);
+                            clientCancellingMatch.msg = "CANCEL";
+                            this.windowManager.msgManager.addToOutgoingQueue(clientCancellingMatch);
                         }
                     }
                 }

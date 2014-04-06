@@ -48,6 +48,7 @@ namespace CapitalStrategy
         public List<WarriorType> warriorTypes = new List<WarriorType>();
         public Client otherPlayer;
         public GameMatch gameMatch;
+        public Messaging.Messaging msgManager;
 
         // List of windows. GameState class determines index of current window
         public Windows.Window[] windows { get; set; }
@@ -103,7 +104,8 @@ namespace CapitalStrategy
 
             client.Start();
             Debug.WriteLine("Client 1: " + client.UniqueIdentifier.ToString());
-
+            msgManager = new Messaging.Messaging(client, this.username);
+            msgManager.game = this;
 		}
 
 		/// <summary>
@@ -206,98 +208,11 @@ namespace CapitalStrategy
                 NetIncomingMessage msg;
                 while ((msg = client.ReadMessage()) != null)
                 {
-                    switch (msg.MessageType)
-                    {
-                        case NetIncomingMessageType.StatusChanged:
-                            NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
-                            if (status == NetConnectionStatus.Connected)
-                            {
-                                Console.WriteLine("Connected! UID: " + msg.SenderConnection.RemoteUniqueIdentifier + " , IP: " + msg.SenderConnection.RemoteEndPoint.ToString());
-                            }
-                            break;
-                        case NetIncomingMessageType.Data:
-                            msgType type = (msgType)msg.ReadInt32();
-                            Message m;
-                            if (type == msgType.Chat)
-                            {
-                                long sentFrom = msg.ReadInt64();
-                                long sendToUUID = msg.ReadInt64();
-                                string message = msg.ReadString();
-                                m = new Message(type, sentFrom, sendToUUID);
-                                m.msg = message;
-
-                                if (m.msg == "SERVER HELLO")
-                                {
-                                    NetOutgoingMessage om = client.CreateMessage();
-                                    om.WritePadBits();
-                                    Message clientHello = new Message(msgType.Chat, client.UniqueIdentifier, client.ServerConnection.RemoteUniqueIdentifier);
-                                    clientHello.msg = "CLIENT HELLO:"+ this.username;
-                                    clientHello.handleMessage(ref om);
-                                    Console.WriteLine("Sending message: " + clientHello.ToString());
-                                    client.SendMessage(om, NetDeliveryMethod.ReliableUnordered);
-
-
-
-                                }
-                            }
-                            else if (type == msgType.Matchmaking)
-                            {
-                                long sentFrom = msg.ReadInt64();
-                                long sentTo = msg.ReadInt64();
-                                string message = msg.ReadString();
-                                m = new Message(type, sentFrom, sentTo);
-                                m.msg = message;
-                                if (m.msg != "SEEKING")
-                                {
-                                    // I have found a new match
-                                    otherPlayer = new Client(m.sentFrom, true, false, m.msg.Substring(0, m.msg.IndexOf(':')));
-                                    bool isMyTurn = Boolean.Parse(m.msg.Substring(m.msg.IndexOf(':')+1));
-                                    Console.WriteLine("Opponent found: " + otherPlayer.username);
-                                    this.gameState = GameState.gameMatch;
-                                    this.windows[GameState.gameMatch].Initialize();
-                                    this.gameMatch.isYourTurn = isMyTurn;
-                                    Game1.gameStates.Push(GameState.mainMenu);
-                                }
-                            }
-                            else
-                            {
-                                m = new Message(
-                                    type,
-                                    msg.ReadInt64(), // UID of the client the message was sent from
-                                    msg.ReadInt64(), // UID of the client the message is sent to (should be us)
-                                    new int[2] { msg.ReadInt32(), msg.ReadInt32() }, // The end location of the piece moved
-                                    new int[2] { msg.ReadInt32(), msg.ReadInt32() }, // Where the piece attacked
-                                    msg.ReadInt32(), // The damage dealt
-                                    msg.ReadInt32(), //The attacked unit ID
-                                    msg.ReadInt32(), // The attacker unit ID
-                                    msg.ReadBoolean() // Whether the unit died or not
-                                );
-
-                                /*
-                                 *             m.Write(this.type);
-                                                m.Write(this.sentFrom);
-                                                m.Write(this.sendToUUID);
-                                                m.Write(this.endLocation[0]);
-                                                m.Write(this.endLocation[1]);
-                                                m.Write(this.attackedLocation[0]);
-                                                m.Write(this.attackedLocation[1]);
-                                                m.Write(this.damageDealt);
-                                                m.Write(this.attackedUnitID);
-                                                m.Write(this.attackerUnitID);
-                                                m.Write(this.unitAttackDied);
-                                 */
-                                this.gameMatch.waitingForTurn = false;
-                                this.gameMatch.handleOpponentMove(m);
-
-                            }
-                            Console.WriteLine(m.ToString());
-
-                            break;
-                    }
+                    msgManager.handleIncomingMessage(msg);
                 }
             }
-            
 
+            this.msgManager.update();
 		}
 
 		/// <summary>

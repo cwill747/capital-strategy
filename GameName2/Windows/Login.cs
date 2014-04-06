@@ -15,6 +15,7 @@ using CapitalStrategy.GUI;
 using System.Data.SqlClient;
 using System.Data;
 using CapitalStrategy.Configuration;
+using Lidgren.Network;
 #endregion
 
 namespace CapitalStrategy.Windows
@@ -365,7 +366,14 @@ namespace CapitalStrategy.Windows
             this.windowManager.username = username;
             this.windowManager.password = password;
             this.errorMessage = "";
-            this.windowManager.client.Connect(ApplicationSettings.serverURL, 14242);
+            try
+            {
+                this.windowManager.client.Connect(ApplicationSettings.serverURL, 14242);
+            }
+            catch(NetException e)
+            {
+
+            }
         }
     }
 }
