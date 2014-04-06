@@ -14,6 +14,7 @@ using MySql.Data.MySqlClient;
 using CapitalStrategy.GUI;
 using System.Data.SqlClient;
 using System.Data;
+using CapitalStrategy.Configuration;
 #endregion
 
 namespace CapitalStrategy.Windows
@@ -33,10 +34,8 @@ namespace CapitalStrategy.Windows
         public String errorMessage { get; set; }
         public Vector2 errorMessageLoc { get; set; }
         public Rectangle capitalLogoLoc { get; set; }
-        public string appsalt = "Ay2cXjA4";
         public Button newUserClick { get; set;}
         public Button existingUserClick {get; set;}
-
 
         public Login(Game1 windowManager)
         {
@@ -247,7 +246,7 @@ namespace CapitalStrategy.Windows
                     passwordQuery = (string)dataReader["password"];
                 }
                 
-                if (BCrypt.Net.BCrypt.Verify(password + this.appsalt, passwordQuery))
+                if (BCrypt.Net.BCrypt.Verify(password + ApplicationSettings.appsalt, passwordQuery))
                 {
                     this.postLogin(username, password);
 
@@ -317,7 +316,7 @@ namespace CapitalStrategy.Windows
                     if (!availReader.Read())
                     {
                         availReader.Close();
-                        string pwdToHash = password + this.appsalt; // add hard-coded salt based on the app
+                        string pwdToHash = password + ApplicationSettings.appsalt; // add hard-coded salt based on the app
                         string salt = BCrypt.Net.BCrypt.GenerateSalt();
                         string hashToStoreInDatabase = BCrypt.Net.BCrypt.HashPassword(pwdToHash, salt);
 
@@ -366,7 +365,7 @@ namespace CapitalStrategy.Windows
             this.windowManager.username = username;
             this.windowManager.password = password;
             this.errorMessage = "";
-            this.windowManager.client.Connect("cwill.us", 14242);
+            this.windowManager.client.Connect(ApplicationSettings.serverURL, 14242);
         }
     }
 }

@@ -53,6 +53,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Board.cs" />
+    <Compile Include="Configuration\ApplicationSettings.cs" />
     <Compile Include="DBConnect.cs" />
     <Compile Include="Direction.cs" />
     <Compile Include="Game1.cs" />
