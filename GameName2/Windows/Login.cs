@@ -247,7 +247,7 @@ namespace CapitalStrategy.Windows
                     passwordQuery = (string)dataReader["password"];
                 }
                 
-                if (passwordQuery == password)
+                if (BCrypt.Net.BCrypt.Verify(password + this.appsalt, passwordQuery))
                 {
                     this.postLogin(username, password);
 
@@ -317,10 +317,14 @@ namespace CapitalStrategy.Windows
                     if (!availReader.Read())
                     {
                         availReader.Close();
+                        string pwdToHash = password + this.appsalt; // add hard-coded salt based on the app
+                        string salt = BCrypt.Net.BCrypt.GenerateSalt();
+                        string hashToStoreInDatabase = BCrypt.Net.BCrypt.HashPassword(pwdToHash, salt);
+
                         string command = "INSERT INTO users (username, password) VALUES (@username, @password)";
                         MySqlCommand insCmd = new MySqlCommand(command, db.connection);
                         insCmd.Parameters.AddWithValue("username", username);
-                        insCmd.Parameters.AddWithValue("password", password);
+                        insCmd.Parameters.AddWithValue("password", hashToStoreInDatabase);
                         if (insCmd.ExecuteNonQuery() == 1)
                         {
                             // set up initial configuration by inserting default lineup into db
