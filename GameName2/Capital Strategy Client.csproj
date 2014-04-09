@@ -64,6 +64,7 @@
     <Compile Include="GUI\InputDialog.cs" />
     <Compile Include="GUI\TextAnimation.cs" />
     <Compile Include="ImageAtlas.cs" />
+    <Compile Include="Messaging\Messaging.cs" />
     <Compile Include="MouseWrapper.cs" />
     <Compile Include="PlayerArmy.cs" />
     <Compile Include="State.cs" />
