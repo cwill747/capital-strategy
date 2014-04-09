@@ -69,8 +69,8 @@ namespace CapitalStrategy.Windows
             this.submitButton = new Button("LOGIN", new Rectangle(leftEdge + 40, startY + 290, 250, 50), Game1.smallFont);
             this.registerButton = new Button("REGISTER", new Rectangle(leftEdge + 40, startY + 320, 250, 50), Game1.smallFont, isVisible: false);
             this.errorMessageLoc = new Vector2(leftEdge + 25, startY + 430);
-            this.newUserClick = new Button ("new user?", new Rectangle(leftEdge + 40, startY + 350, 250, 50), Game1.smallFont);
-            this.existingUserClick = new Button("existing user?", new Rectangle(leftEdge + 40, startY + 380, 250, 50), Game1.smallFont, isVisible: false);
+            this.newUserClick = new Button ("REGISTER", new Rectangle(leftEdge + 40, startY + 350, 250, 50), Game1.smallFont);
+            this.existingUserClick = new Button("RETURN TO LOGIN", new Rectangle(leftEdge + 40, startY + 380, 250, 50), Game1.smallFont, isVisible: false);
 
         }
 
