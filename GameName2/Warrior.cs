@@ -83,19 +83,19 @@ namespace CapitalStrategy
             Color color;
             if (this.cooldown > 0 && this.isYours)
             {
-                color = Color.Purple;
+                color = Color.Yellow;
             }
             else if (this.cooldown > 0 && !this.isYours)
             {
-                color = Color.Yellow;
+                color = Color.Red;
             }
             else if (this.isYours && this.cooldown == 0)
             {
-                color = Color.MediumPurple;
+                color = Color.White;
             }
             else if (!this.isYours && this.cooldown == 0)
             {
-                color = Color.LightYellow;
+                color = Color.IndianRed;
             }
             else
             {
