@@ -249,18 +249,20 @@ namespace CapitalStrategy.Windows
                 this.windowManager.spriteBatch.End();
             }
             int padding2 = 10;
+            int padding3 = 10;
             this.windowManager.spriteBatch.Begin();
             String rangeDisplay;
             if (!aRange.isDisabled)
             {
                 rangeDisplay = "Movement ";
+                padding2 = 5;
             }
             else
             {
                 rangeDisplay = "Attack ";
             }
             this.windowManager.spriteBatch.DrawString(this.smallfont, rangeDisplay+"Range", new Vector2(this.pageContent.X + this.pageContent.Width - padding2 - (3 * saveButtonWidth),
-            this.pageContent.Y + this.pageContent.Height - this.saveButtonHeight + padding2), Color.Chocolate);
+            this.pageContent.Y + this.pageContent.Height - this.saveButtonHeight + padding3), Color.Chocolate);
             this.windowManager.spriteBatch.End();
           
             if (this.currentWarrior != null)
