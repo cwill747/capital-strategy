@@ -867,8 +867,16 @@ namespace CapitalStrategy.Windows
             this.targetRow = message.attackedLocation[0];
             this.targetCol = message.attackedLocation[1];
 
+
+            
+
             this.beingAttacked = attackedWarrior;
             this.opponentDamage = message.damageDealt;
+
+            string attackSound = this.currentTurnWarrior.attackSound;
+            SoundEffect effect;
+            effect = Content.Load<SoundEffect>(attackSound);
+            effect.Play();
             
             return true;
         }
