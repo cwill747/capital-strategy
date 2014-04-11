@@ -249,6 +249,7 @@ namespace CapitalStrategy.Windows
                 
                 if (BCrypt.Net.BCrypt.Verify(password + ApplicationSettings.appsalt, passwordQuery))
                 {
+                    this.passwordInput.clear();
                     this.postLogin(username, password);
 
                     //System.Diagnostics.Debug.WriteLine(dataReader["username"]);
