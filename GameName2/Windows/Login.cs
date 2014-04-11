@@ -246,20 +246,26 @@ namespace CapitalStrategy.Windows
                 {
                     passwordQuery = (string)dataReader["password"];
                 }
-                
-                if (BCrypt.Net.BCrypt.Verify(password + ApplicationSettings.appsalt, passwordQuery))
-                {
-                    this.passwordInput.clear();
-                    this.postLogin(username, password);
 
-                    //System.Diagnostics.Debug.WriteLine(dataReader["username"]);
-                    //System.Diagnostics.Debug.WriteLine(dataReader["password"]);
-                }
-                else
+                try
                 {
-                    this.errorMessage = "Invalid username or password.";
-                }
+                    if (BCrypt.Net.BCrypt.Verify(password + ApplicationSettings.appsalt, passwordQuery))
+                    {
+                        this.passwordInput.clear();
+                        this.postLogin(username, password);
 
+                        //System.Diagnostics.Debug.WriteLine(dataReader["username"]);
+                        //System.Diagnostics.Debug.WriteLine(dataReader["password"]);
+                    }
+                    else
+                    {
+                        this.errorMessage = "Invalid username or password.";
+                    }
+                }
+                catch (ArgumentException ae)
+                {
+                    this.errorMessage = "This is not a registered user.";
+                }
                 dataReader.Close();
 
             }
