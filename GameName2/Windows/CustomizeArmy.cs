@@ -238,16 +238,20 @@ namespace CapitalStrategy.Windows
                 
             }
             this.backButton.drawBackButton(this.windowManager.spriteBatch);
-            this.save.draw(this.windowManager.spriteBatch);
             this.aRange.draw(this.windowManager.spriteBatch);
             this.mRange.draw(this.windowManager.spriteBatch);
             if (recentlySaved)
             {
+                /*
                 this.windowManager.spriteBatch.Begin();
                 this.windowManager.spriteBatch.DrawString(this.infofont, "Successfully Saved!", new Vector2(this.pageContent.X + this.pageContent.Width,
                 this.pageContent.Y + this.pageContent.Height - this.saveButtonHeight), Color.Chocolate);
                 this.windowManager.spriteBatch.End();
+                 */
+                this.save.label = "Saved!";
+
             }
+            this.save.draw(this.windowManager.spriteBatch);
             int padding2 = 10;
             int padding3 = 10;
             this.windowManager.spriteBatch.Begin();
