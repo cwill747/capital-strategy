@@ -1,0 +1,38 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="capital-strategy-linux/Messaging/Messaging.cs">
+    <Files>
+      <File FileName="capital-strategy-linux/Game1.cs" Line="21" Column="21" />
+      <File FileName="capital-strategy-linux/Windows/Window.cs" Line="1" Column="1" />
+      <File FileName="capital-strategy-linux/Program.cs" Line="11" Column="24" />
+      <File FileName="capital-strategy-linux/Windows/CustomizeArmy.cs" Line="10" Column="12" />
+      <File FileName="capital-strategy-linux/Windows/Login.cs" Line="15" Column="1" />
+      <File FileName="capital-strategy-linux/GUI/BackButton.cs" Line="35" Column="20" />
+      <File FileName="capital-strategy-linux/Messaging/Messaging.cs" Line="28" Column="10" />
+      <File FileName="capital-strategy-linux/GameState.cs" Line="1" Column="1" />
+      <File FileName="capital-strategy-linux/WarriorType.cs" Line="92" Column="1" />
+      <File FileName="capital-strategy-linux/Windows/MainMenu.cs" Line="106" Column="1" />
+      <File FileName="CapitalStrategyServerLinux/Program.cs" Line="24" Column="4" />
+      <File FileName="CapitalStrategyServerLinux/Main.cs" Line="7" Column="36" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="capital-strategy-linux" expanded="True">
+            <Node name="References" expanded="True" />
+            <Node name="GUI" expanded="True" />
+            <Node name="Messaging" expanded="True">
+              <Node name="Messaging.cs" selected="True" />
+            </Node>
+            <Node name="Windows" expanded="True" />
+          </Node>
+          <Node name="CapitalStrategyServerLinux" expanded="True" />
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

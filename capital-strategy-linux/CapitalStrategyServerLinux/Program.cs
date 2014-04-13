@@ -22,6 +22,7 @@ namespace CapitalStrategyServer
             // schedule initial sending of position updates
             double nextSendUpdates = NetTime.Now;
 
+			Console.Out.WriteLine("Server stated. Waiting for connections...");
             // run until escape is pressed
             while (!Console.KeyAvailable || Console.ReadKey().Key != ConsoleKey.Escape)
             {

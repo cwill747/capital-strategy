@@ -32,7 +32,7 @@ namespace CapitalStrategy.Messaging
                     NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
                     if (status == NetConnectionStatus.Connected)
                     {
-                        Console.WriteLine("Connected! UID: " + msg.SenderConnection.RemoteUniqueIdentifier + " , IP: " + msg.SenderConnection.RemoteEndPoint.ToString());
+                        Console.WriteLine("Connected! UID: " + msg.SenderConnection.RemoteUniqueIdentifier + " , IP: " + msg.SenderConnection.RemoteEndpoint.ToString());
                     }
                     break;
                 case NetIncomingMessageType.Data:

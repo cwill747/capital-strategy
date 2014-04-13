@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "capital-strategy-linux", "capital-strategy-linux\capital-strategy-linux.csproj", "{E735984F-7C97-4483-9D1C-5117D45B9F94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapitalStrategyServerLinux", "CapitalStrategyServerLinux\CapitalStrategyServerLinux.csproj", "{A2AB5560-EB1E-4A1D-A4C3-04A3891FA3D0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A2AB5560-EB1E-4A1D-A4C3-04A3891FA3D0}.Debug|x86.ActiveCfg = Debug|x86
+		{A2AB5560-EB1E-4A1D-A4C3-04A3891FA3D0}.Debug|x86.Build.0 = Debug|x86
+		{A2AB5560-EB1E-4A1D-A4C3-04A3891FA3D0}.Release|x86.ActiveCfg = Release|x86
+		{A2AB5560-EB1E-4A1D-A4C3-04A3891FA3D0}.Release|x86.Build.0 = Release|x86
+		{E735984F-7C97-4483-9D1C-5117D45B9F94}.Debug|x86.ActiveCfg = Debug|x86
+		{E735984F-7C97-4483-9D1C-5117D45B9F94}.Debug|x86.Build.0 = Debug|x86
+		{E735984F-7C97-4483-9D1C-5117D45B9F94}.Release|x86.ActiveCfg = Release|x86
+		{E735984F-7C97-4483-9D1C-5117D45B9F94}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = capital-strategy-linux\capital-strategy-linux.csproj
+	EndGlobalSection
+EndGlobal
