@@ -58,5 +58,13 @@ namespace CapitalStrategyServer
                 clientsLookingForAGame.RemoveAll(x => x.lookingForGame == false);
             }
         }
+
+        public void removeClientFromQueue(long identifier)
+        {
+            Client c = clientsConnected.Find(x => x.uniqueIdentifier == identifier);
+            c.lookingForGame = false;
+            clientsLookingForAGame.RemoveAll(x => x.lookingForGame == false);
+
+        }
     }
 }

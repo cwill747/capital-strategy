@@ -14,6 +14,8 @@ using MySql.Data.MySqlClient;
 using CapitalStrategy.GUI;
 using System.Data.SqlClient;
 using System.Data;
+using CapitalStrategy.Configuration;
+using Lidgren.Network;
 #endregion
 
 namespace CapitalStrategy.Windows
@@ -33,10 +35,8 @@ namespace CapitalStrategy.Windows
         public String errorMessage { get; set; }
         public Vector2 errorMessageLoc { get; set; }
         public Rectangle capitalLogoLoc { get; set; }
-        public string appsalt = "Ay2cXjA4";
         public Button newUserClick { get; set;}
         public Button existingUserClick {get; set;}
-
 
         public Login(Game1 windowManager)
         {
@@ -69,8 +69,8 @@ namespace CapitalStrategy.Windows
             this.submitButton = new Button("LOGIN", new Rectangle(leftEdge + 40, startY + 290, 250, 50), Game1.smallFont);
             this.registerButton = new Button("REGISTER", new Rectangle(leftEdge + 40, startY + 320, 250, 50), Game1.smallFont, isVisible: false);
             this.errorMessageLoc = new Vector2(leftEdge + 25, startY + 430);
-            this.newUserClick = new Button ("new user?", new Rectangle(leftEdge + 40, startY + 350, 250, 50), Game1.smallFont);
-            this.existingUserClick = new Button("existing user?", new Rectangle(leftEdge + 40, startY + 380, 250, 50), Game1.smallFont, isVisible: false);
+            this.newUserClick = new Button ("REGISTER", new Rectangle(leftEdge + 40, startY + 350, 250, 50), Game1.smallFont);
+            this.existingUserClick = new Button("RETURN TO LOGIN", new Rectangle(leftEdge + 40, startY + 380, 250, 50), Game1.smallFont, isVisible: false);
 
         }
 
@@ -246,19 +246,26 @@ namespace CapitalStrategy.Windows
                 {
                     passwordQuery = (string)dataReader["password"];
                 }
-                
-                if (passwordQuery == password)
-                {
-                    this.postLogin(username, password);
 
-                    //System.Diagnostics.Debug.WriteLine(dataReader["username"]);
-                    //System.Diagnostics.Debug.WriteLine(dataReader["password"]);
-                }
-                else
+                try
                 {
-                    this.errorMessage = "Invalid username or password.";
-                }
+                    if (BCrypt.Net.BCrypt.Verify(password + ApplicationSettings.appsalt, passwordQuery))
+                    {
+                        this.passwordInput.clear();
+                        this.postLogin(username, password);
 
+                        //System.Diagnostics.Debug.WriteLine(dataReader["username"]);
+                        //System.Diagnostics.Debug.WriteLine(dataReader["password"]);
+                    }
+                    else
+                    {
+                        this.errorMessage = "Invalid username or password.";
+                    }
+                }
+                catch (ArgumentException ae)
+                {
+                    this.errorMessage = "This is not a registered user.";
+                }
                 dataReader.Close();
 
             }
@@ -317,10 +324,14 @@ namespace CapitalStrategy.Windows
                     if (!availReader.Read())
                     {
                         availReader.Close();
+                        string pwdToHash = password + ApplicationSettings.appsalt; // add hard-coded salt based on the app
+                        string salt = BCrypt.Net.BCrypt.GenerateSalt();
+                        string hashToStoreInDatabase = BCrypt.Net.BCrypt.HashPassword(pwdToHash, salt);
+
                         string command = "INSERT INTO users (username, password) VALUES (@username, @password)";
                         MySqlCommand insCmd = new MySqlCommand(command, db.connection);
                         insCmd.Parameters.AddWithValue("username", username);
-                        insCmd.Parameters.AddWithValue("password", password);
+                        insCmd.Parameters.AddWithValue("password", hashToStoreInDatabase);
                         if (insCmd.ExecuteNonQuery() == 1)
                         {
                             // set up initial configuration by inserting default lineup into db
@@ -362,7 +373,14 @@ namespace CapitalStrategy.Windows
             this.windowManager.username = username;
             this.windowManager.password = password;
             this.errorMessage = "";
-            this.windowManager.client.Connect("127.0.0.1", 14242);
+            try
+            {
+                this.windowManager.client.Connect(ApplicationSettings.serverURL, 14242);
+            }
+            catch(NetException e)
+            {
+
+            }
         }
     }
 }

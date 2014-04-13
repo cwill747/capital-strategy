@@ -31,12 +31,20 @@ namespace CapitalStrategy.Windows
         public Texture2D moveIcon;
         public SpriteFont menufont;
         public SpriteFont infofont;
+        public SpriteFont smallfont;
         public Texture2D hourglass;
         private Rectangle pageContent = new Rectangle();
         private int boardHeight;
         private int boardWidth;
         private int tileWidth;
         private int tileHeight;
+        public Boolean recentlySaved { get; set; }
+        public int saveButtonHeight { get; set; }
+        public int saveButtonWidth { get; set; }
+        public Button aRange { get; set; }
+        public Button mRange { get; set; }
+
+        MouseWrapper mouseState;
         public CustomizeArmy(Game1 windowManager)
         {
             this.windowManager = windowManager;
@@ -55,15 +63,19 @@ namespace CapitalStrategy.Windows
             this.oldMouseState = new MouseState();
             this.warriorWrappers = this.board.loadWarriors(this.windowManager, true);
 
-            int saveButtonWidth = 100;
-            int saveButtonHeight = 50;
+            saveButtonWidth = 100;
+            this.saveButtonHeight = 50;
             int padding = 10;
             this.save = new Button("SAVE", new Rectangle(this.pageContent.X + this.pageContent.Width - padding - saveButtonWidth,
                 this.pageContent.Y + this.pageContent.Height + padding, saveButtonWidth, saveButtonHeight), Game1.smallFont, isDisabled: true);
             tileWidth = this.boardWidth / this.board.cols;
             tileHeight = this.boardHeight / this.board.rows;
             this.pageContent.Height = this.pageContent.Height + padding + saveButtonHeight;
-            
+            this.recentlySaved = false;
+            this.aRange = new Button("Attack", new Rectangle(this.pageContent.X + this.pageContent.Width - padding - (2*saveButtonWidth),
+                this.pageContent.Y + this.pageContent.Height + padding, saveButtonWidth, saveButtonHeight), Game1.smallFont, isDisabled: false);
+            this.mRange = new Button("Movement", new Rectangle(this.pageContent.X + this.pageContent.Width - padding - (3 * saveButtonWidth),
+                this.pageContent.Y + this.pageContent.Height + padding, saveButtonWidth, saveButtonHeight), Game1.smallFont, isDisabled: true);
         }
 
         public void LoadContent()
@@ -78,6 +90,8 @@ namespace CapitalStrategy.Windows
             red = this.windowManager.Content.Load<Texture2D>("colors/red");
             white = this.windowManager.Content.Load<Texture2D>("colors/white");
             hourglass = this.windowManager.Content.Load<Texture2D>("icons/hourglass");
+            mouseState = new MouseWrapper(board, Mouse.GetState());
+            smallfont = this.windowManager.Content.Load<SpriteFont>("fonts/smallfont");
         }
 
         public void Update(GameTime gameTime)
@@ -90,8 +104,8 @@ namespace CapitalStrategy.Windows
                 {
                     this.backButton.checkClick(newMouseState);
                     this.save.checkClick(newMouseState);
-                    
-                    
+                    this.aRange.checkClick(newMouseState);
+                    this.mRange.checkClick(newMouseState);
                     if (board.isClickOverGrid(newMouseState.X, newMouseState.Y))
                     {
                         Vector2 coord = board.clickOverGrid(newMouseState.X, newMouseState.Y);
@@ -125,6 +139,23 @@ namespace CapitalStrategy.Windows
                     if (this.save.unClick(newMouseState))
                     {
                         this.saveArmy();
+                        this.recentlySaved = true;
+                    }
+                    if (this.aRange.unClick(newMouseState))
+                    {
+                        if (!this.aRange.isDisabled)
+                        {
+                            this.aRange.isDisabled = true;
+                            this.mRange.isDisabled = false;
+                        }
+                    }
+                    if (this.mRange.unClick(newMouseState))
+                    {
+                        if (!this.mRange.isDisabled)
+                        {
+                            this.aRange.isDisabled = false;
+                            this.mRange.isDisabled = true;
+                        }
                     }
                     if (currentWarrior != null)
                     {
@@ -147,7 +178,7 @@ namespace CapitalStrategy.Windows
                         }
                         currentWarrior = null;
                         this.save.isDisabled = false;
-                        
+                        this.recentlySaved = false;
                     }
                 }
             }
@@ -177,13 +208,67 @@ namespace CapitalStrategy.Windows
                     }
                 }
             }
+            if (currentWarrior == null)
+            {
+                board.resetTints();
+
+            }
             if (currentWarrior != null)
             {
                 currentWarrior.drawToLocation();
+                if (aRange.isDisabled)
+                {
+                    currentWarrior.drawAttackRange();
+                }
+                else
+                {
+                    Boolean[][] discovered = currentWarrior.bredthFirst((int)currentWarrior.row, (int)currentWarrior.col, currentWarrior.maxMove);
+                for (int i = 0; i < discovered.Length; i++)
+                {
+                    for (int j = 0; j < discovered[i].Length; j++)
+                    {
+                        if (discovered[i][j])
+                        {
+                            board.tileTints[i][j] = Warrior.yourMoveColor;
+                        }
+                    }
+
+                }
+            }
+                
             }
             this.backButton.drawBackButton(this.windowManager.spriteBatch);
-            this.save.draw(this.windowManager.spriteBatch);
+            this.aRange.draw(this.windowManager.spriteBatch);
+            this.mRange.draw(this.windowManager.spriteBatch);
+            if (recentlySaved)
+            {
+                /*
+                this.windowManager.spriteBatch.Begin();
+                this.windowManager.spriteBatch.DrawString(this.infofont, "Successfully Saved!", new Vector2(this.pageContent.X + this.pageContent.Width,
+                this.pageContent.Y + this.pageContent.Height - this.saveButtonHeight), Color.Chocolate);
+                this.windowManager.spriteBatch.End();
+                 */
+                this.save.label = "Saved!";
 
+            }
+            this.save.draw(this.windowManager.spriteBatch);
+            int padding2 = 10;
+            int padding3 = 10;
+            this.windowManager.spriteBatch.Begin();
+            String rangeDisplay;
+            if (!aRange.isDisabled)
+            {
+                rangeDisplay = "Movement ";
+                padding2 = 5;
+            }
+            else
+            {
+                rangeDisplay = "Attack ";
+            }
+            this.windowManager.spriteBatch.DrawString(this.smallfont, rangeDisplay+"Range", new Vector2(this.pageContent.X + this.pageContent.Width - padding2 - (3 * saveButtonWidth),
+            this.pageContent.Y + this.pageContent.Height - this.saveButtonHeight + padding3), Color.Chocolate);
+            this.windowManager.spriteBatch.End();
+          
             if (this.currentWarrior != null)
             {
                 Warrior displayWarrior = new Warrior(this.currentWarrior);
@@ -254,10 +339,12 @@ namespace CapitalStrategy.Windows
             if (result == 1)
             {
                 this.save.isDisabled = true;
+                this.recentlySaved = false;
             }
             else
             {
                 this.save.isDisabled = false;
+                this.recentlySaved = true;
             }
            
             /*

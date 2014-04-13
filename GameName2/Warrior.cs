@@ -83,19 +83,19 @@ namespace CapitalStrategy
             Color color;
             if (this.cooldown > 0 && this.isYours)
             {
-                color = Color.Purple;
+                color = Color.Yellow;
             }
             else if (this.cooldown > 0 && !this.isYours)
             {
-                color = Color.Yellow;
+                color = Color.Red;
             }
             else if (this.isYours && this.cooldown == 0)
             {
-                color = Color.MediumPurple;
+                color = Color.White;
             }
             else if (!this.isYours && this.cooldown == 0)
             {
-                color = Color.LightYellow;
+                color = Color.IndianRed;
             }
             else
             {
@@ -107,7 +107,7 @@ namespace CapitalStrategy
         public void drawToLocation()
         {
             SpriteBatch spriteBatch = this.game.spriteBatch;
-            Vector2 destinationLoc = new Vector2(this.x, this.y);
+            Vector2 destinationLoc = new Vector2(this.x - (this.board.WARRIORWIDTH/4), this.y);
             //string EntityInfo = "This is a warrior";
             SpriteFont menufont = this.game.menufont;
             Rectangle destination = new Rectangle((int)destinationLoc.X - (board.WARRIORWIDTH - board.location.Width / board.cols) / 2, (int)destinationLoc.Y - (board.WARRIORHEIGHT - board.location.Height / board.rows) / 2 - board.location.Height / board.rows / 3, board.WARRIORWIDTH, board.WARRIORHEIGHT);
