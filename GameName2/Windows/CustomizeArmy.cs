@@ -267,7 +267,9 @@ namespace CapitalStrategy.Windows
                 this.windowManager.spriteBatch.End();
                  */
                 this.save.label = "Saved!";
-
+            }
+            else{
+                this.save.label = "SAVE";
             }
             this.save.draw(this.windowManager.spriteBatch);
             int padding2 = 10;
