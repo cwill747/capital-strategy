@@ -139,17 +139,17 @@ namespace CapitalStrategy.Windows
                 3,          // speed
                 "axestan shield", // type 
                 "melee", // baseType
-                "ranged", new int[] { 1, 8, 8, 13, 7, 9, 7 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
+                "magic", new int[] { 1, 8, 8, 13, 7, 9, 7 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
                 null, 1, 500, 0, "swordStrike");
 			firedragon = new WarriorType(this, 60, 3, 40, 70,
                 80, 60, 4, 5, "firedragon", "magic",
-                "melee", new int[] { 1, 7, 7, 9, 1, 11, 7 }, new int[] { 1000, 400, 1000, 1000, 1000, 1000, 1000 },
+                "ranged", new int[] { 1, 7, 7, 9, 1, 11, 7 }, new int[] { 1000, 400, 1000, 1000, 1000, 1000, 1000 },
                 null, 2, 500, 0, "dragonRoar");
 			blueArcher = new WarriorType(this, 
                 70,
                 3, 40, 50,
                 75, 20, 4, 3, "blue archer", "ranged",
-                "magic", new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
+                "melee", new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
                 null, 6, 500, 10, "bowShot");
 			this.whiteMage = new WarriorType(this, 50, 2, -80, 30,
                 100, 0, 4, 3, "white mage", "magic",
@@ -162,11 +162,11 @@ namespace CapitalStrategy.Windows
                 null, 500, 0, "heal");
 			crocy = new WarriorType(this, 90, 2, 60, 50,
                 50, 50, 2, 2, "crocy", "melee", 
-                "ranged", new int[] { 1, 8, 8, 11, 9, 11, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
+                "magic", new int[] { 1, 8, 8, 11, 9, 11, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
                 null, 1, 500, 0, "swordStrike");
 			magier = new WarriorType(this,70, 2, 40, 45,
                 75, 25, 3, 3, "magier", "magic",
-                "melee", new int[] { 9, 7, 7, 9, 9, 10, 9 }, new int[] { 1000, 500, 1000, 1500, 1000, 1000, 1000 },
+                "ranged", new int[] { 9, 7, 7, 9, 9, 10, 9 }, new int[] { 1000, 500, 1000, 1500, 1000, 1000, 1000 },
                 null, 3, 500, 10, "thunder");
 
             PlayerArmy p1 = new PlayerArmy(Direction.N);

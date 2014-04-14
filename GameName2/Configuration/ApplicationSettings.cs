@@ -14,6 +14,7 @@ namespace CapitalStrategy.Configuration
         {
             appsalt = "Ay2cXjA4";
             serverURL = "cwill.us";
+            // cwill.us
         }
     }
 }
