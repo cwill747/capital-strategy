@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework.Input.Touch;
 using MySql.Data.MySqlClient;
 using CapitalStrategy.GUI;
 
+
 namespace CapitalStrategy.Windows
 {
     class CustomizeArmy : Window
@@ -185,6 +186,7 @@ namespace CapitalStrategy.Windows
             this.oldMouseState = newMouseState;
         }
 
+
         public void Draw()
         {
 
@@ -201,10 +203,26 @@ namespace CapitalStrategy.Windows
                     //System.Diagnostics.Debug.WriteLine("draw");
                     if (warrior != null)
                     {
-                        //this.windowManager.spriteBatch.Begin();
-                        //this.windowManager.spriteBatch.DrawString(Game1.smallFont, "hi", board.getLocation(row, col), Color.White);
-                        //this.windowManager.spriteBatch.End();
+                       
                         warrior.draw();
+
+                        //draws their maxcooldown
+                        this.windowManager.spriteBatch.Begin();
+                        //this.windowManager.spriteBatch.DrawString(Game1.smallFont, "hi", board.getLocation(row, col), Color.White);
+                        int tileWidth = this.boardWidth / this.board.cols;
+                        int tileHeight = this.boardHeight / this.board.rows;
+                        int xLoc = (int)(warrior.col * tileWidth + board.location.X);
+                        int yLoc = (int)(warrior.row * tileHeight + board.location.Y);
+                        int iconHeight = tileHeight / 2;
+                        int toDrawY = yLoc + (iconHeight / 2);
+                        int toDrawX = xLoc;
+                        int iconWidth = tileWidth / 2;
+                        int cool = warrior.maxCooldown;
+                        string coolString = cool.ToString();
+                        this.windowManager.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
+                        this.windowManager.spriteBatch.DrawString(this.infofont, coolString, new Vector2(xLoc + iconWidth, yLoc + (iconHeight / 3)), Color.White);
+                        this.windowManager.spriteBatch.End();
+
                     }
                 }
             }

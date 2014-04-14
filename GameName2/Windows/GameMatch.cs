@@ -579,12 +579,23 @@ namespace CapitalStrategy.Windows
                                     int toDrawY = yLoc + (iconHeight / 2);
                                     int toDrawX = xLoc;
                                     int iconWidth = tileWidth / 2;
-                                    if (warrior.cooldown != 0)
+                                    //modifed to constantly show their cooldown
+                                    //if (warrior.cooldown != 0)
+                                    //{
+                                    int cool = warrior.cooldown;
+                                    string coolString = cool.ToString();
+                                    this.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
+                                    this.spriteBatch.DrawString(this.infofont, coolString, new Vector2(xLoc + iconWidth, yLoc + (iconHeight / 3)), Color.White);
+                                    //}
+                                    //draw the health of the warrior being attacked
+                                    if (warrior == beingAttacked && (this.turnProgress == TurnProgress.targetAcquired 
+                                        ||this.turnProgress == TurnProgress.attacking|| this.turnProgress == TurnProgress.attacked))
                                     {
-                                        int cool = warrior.cooldown;
-                                        string coolString = cool.ToString();
-                                        this.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                                        this.spriteBatch.DrawString(this.infofont, coolString, new Vector2(xLoc + iconWidth, yLoc + (iconHeight / 3)), Color.White);
+                                        int healthBarY = yLoc - tileHeight / 2; // most warriors are taller than the tile
+                                        double widthPerHP = ((double)tileWidth) / 100;
+                                        this.spriteBatch.Draw(Game1.charcoal, new Rectangle(xLoc - 2, healthBarY - 2, (int)(widthPerHP * warrior.maxHealth) + 4, tileHeight / 10 + 4), Color.WhiteSmoke);
+                                        this.spriteBatch.Draw(white, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.maxHealth), tileHeight / 10), Color.WhiteSmoke);
+                                        this.spriteBatch.Draw(red, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.health), tileHeight / 10), Color.WhiteSmoke);
                                     }
                                 }
                             }
