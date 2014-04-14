@@ -13,7 +13,7 @@ namespace CapitalStrategy.Configuration
         static ApplicationSettings()
         {
             appsalt = "Ay2cXjA4";
-            serverURL = "cwill.us";
+            serverURL = "localhost";
         }
     }
 }
