@@ -21,6 +21,6 @@ Global
 		{E735984F-7C97-4483-9D1C-5117D45B9F94}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = capital-strategy-linux\capital-strategy-linux.csproj
+		StartupItem = CapitalStrategyServerLinux\CapitalStrategyServerLinux.csproj
 	EndGlobalSection
 EndGlobal
