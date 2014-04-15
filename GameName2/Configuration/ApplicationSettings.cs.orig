@@ -13,13 +13,12 @@ namespace CapitalStrategy.Configuration
         static ApplicationSettings()
         {
             appsalt = "Ay2cXjA4";
+<<<<<<< HEAD
             serverURL = "localhost";
+=======
+            serverURL = "cwill.us";
             // cwill.us
-        }
-
-        public static bool IsRunningOnMono()
-        {
-            return Type.GetType("Mono.Runtime") != null;
+>>>>>>> master
         }
     }
 }

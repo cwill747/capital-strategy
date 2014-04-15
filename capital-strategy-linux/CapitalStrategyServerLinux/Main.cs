@@ -1,0 +1,1 @@
+../../CapitalStrategyServer/Main.cs
