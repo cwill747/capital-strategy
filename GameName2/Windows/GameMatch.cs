@@ -552,6 +552,8 @@ namespace CapitalStrategy.Windows
                 SoundEffect song;
                 song = Content.Load<SoundEffect>("Music/intoBattle");
                 song.Play();
+                SoundEffectInstance instance = song.CreateInstance();
+                instance.IsLooped = true;
                 this.hasWindowBeenDrawn = true;
             }
         }
