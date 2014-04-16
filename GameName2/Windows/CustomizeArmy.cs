@@ -294,7 +294,7 @@ namespace CapitalStrategy.Windows
                 currentWarrior.drawToLocation();
                 if (aRange.isDisabled)
                 {
-                    currentWarrior.drawAttackRange();
+                    currentWarrior.drawAttackRange(true);
                 }
                 else
                 {

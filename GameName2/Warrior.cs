@@ -419,7 +419,7 @@ namespace CapitalStrategy
         }
         #endregion
 
-        public void drawAttackRange()
+        public void drawAttackRange(bool isInCustomizeArmy = false)
         {
             if (this.attackRange.HasValue)
             {
@@ -429,9 +429,20 @@ namespace CapitalStrategy
                 {
                     for (int j = 0; j < cordsInRange[i].Length; j++)
                     {
-                        if (cordsInRange[i][j] && isStrikable((int)this.row, (int)this.col, i, j) && (i != (int)this.row || j != (int)this.col))
+                        if (cordsInRange[i][j] && isStrikable((int)this.row, (int)this.col, i, j) && (i != (int)this.row || j != (int)this.col) && !isInCustomizeArmy)
                         {
                             board.tileTints[i][j] = Warrior.attackColor;
+                        }
+                        else if (cordsInRange[i][j] && isStrikable((int)this.row, (int)this.col, i, j) && (i != (int)this.row || j != (int)this.col) && isInCustomizeArmy)
+                        {
+                            if (i >= 5)
+                            {
+                                board.tileTints[i][j] = Warrior.attackColor;
+                            }
+                            else
+                            {
+                                board.tileTints[i][j] = Color.DarkRed;
+                            }
                         }
                     }
                 }
