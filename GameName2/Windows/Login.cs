@@ -343,8 +343,8 @@ namespace CapitalStrategy.Windows
                         {
                             // set up initial configuration by inserting default lineup into db
                             /* */
-                            String query = @"INSERT INTO Warriors (username, warriorType, row, col)
-                                                SELECT @username, warriorType, row, col
+                            String query = @"INSERT INTO Warriors (username, warrior_type_id, row, col)
+                                                SELECT @username, warrior_type_id, row, col
                                             FROM Warriors
                                             WHERE username='initial'";
                             MySqlCommand cmd = new MySqlCommand(query, db.connection);
