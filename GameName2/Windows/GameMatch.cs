@@ -558,6 +558,7 @@ namespace CapitalStrategy.Windows
             this.drawInfoFrame(this.selectedWarrior);
             this.spriteBatch.Begin();
             string turnInfo = (this.isYourTurn) ? "It is your turn" : "Waiting for opponent";
+            //+ this.windowManager.otherPlayer.username
             this.spriteBatch.DrawString(this.infofont, turnInfo, new Vector2(SELECTED_WARRIOR_INFO_X, SELECTED_WARRIOR_INFO_Y), Color.White);
 
 
