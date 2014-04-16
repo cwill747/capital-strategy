@@ -271,7 +271,7 @@ namespace CapitalStrategy.Windows
     new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y), Color.White);
 
             this.windowManager.spriteBatch.Draw(this.infoBoxBackground,
-new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + 192), Color.White);
+new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + this.welcomeBackground.Height), Color.White);
 
             string welcomeString1 = "Welcome to the custom warrior page. This is \n" + 
                                     "where you set up your army for battle. Drag\n" +
