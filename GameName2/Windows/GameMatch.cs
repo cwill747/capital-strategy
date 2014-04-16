@@ -41,8 +41,7 @@ namespace CapitalStrategy.Windows
         public SpriteFont menufont;
         public SpriteFont infofont;
         public Texture2D hourglass;
-
-
+        public bool hasWindowBeenDrawn = false;
         Texture2D background;
         Rectangle backgroundRec;
         public Board board { get; set; }
@@ -111,9 +110,7 @@ namespace CapitalStrategy.Windows
             menufont = Content.Load<SpriteFont>("fonts/gamefont");
             this.infofont = Content.Load<SpriteFont>("fonts/menufont");
 
-            SoundEffect song;
-            song = Content.Load<SoundEffect>("Music/intoBattle");
-            song.Play();
+
 
 
             background = Content.Load<Texture2D>("stars");
@@ -210,6 +207,7 @@ namespace CapitalStrategy.Windows
 
 
             mouseState = new MouseWrapper(board, Mouse.GetState());
+
         }
         public void Update(GameTime gameTime)
         {
@@ -547,6 +545,14 @@ namespace CapitalStrategy.Windows
             if (displayWarrior != null)
             {
                 displayWarrior.update(gameTime, this);
+            }
+
+            if (this.hasWindowBeenDrawn == false)
+            {
+                SoundEffect song;
+                song = Content.Load<SoundEffect>("Music/intoBattle");
+                song.Play();
+                this.hasWindowBeenDrawn = true;
             }
         }
         public void decrementCooldowns()
