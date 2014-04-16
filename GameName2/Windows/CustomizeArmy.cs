@@ -49,11 +49,11 @@ namespace CapitalStrategy.Windows
         public Button aRange { get; set; }
         public Button mRange { get; set; }
         private PrimitiveBatch primitiveBatch;
-        private Vector2 oldWarriorXY;
         private bool isMousedOver = false;
         private long nextCheckMouseover = 0L;
         MouseWrapper mouseState;
         Boolean warriorIsPickedUp { get; set; }
+        Vector2 offsetPickedUpWarrior { get; set; }
         public CustomizeArmy(Game1 windowManager)
         {
             this.windowManager = windowManager;
@@ -86,6 +86,7 @@ namespace CapitalStrategy.Windows
             this.mRange = new Button("Movement", new Rectangle(this.pageContent.X + this.pageContent.Width - padding - (3 * saveButtonWidth),
                 this.pageContent.Y + this.pageContent.Height + padding, saveButtonWidth, saveButtonHeight), Game1.smallFont, isDisabled: true);
             this.warriorIsPickedUp = false;
+            this.offsetPickedUpWarrior = Vector2.Zero;
         }
 
         public void LoadContent()
@@ -129,9 +130,10 @@ namespace CapitalStrategy.Windows
                         board.warriors[(int)coord.X][(int)coord.Y] = null;
                         if (currentWarrior != null)
                         {
-                            oldWarriorXY = new Vector2(currentWarrior.x, currentWarrior.y);
-                            currentWarrior.x = newMouseState.X;
-                            currentWarrior.y = newMouseState.Y;
+                            Vector2 oldWarriorXY = this.board.getLocation(this.currentWarrior.row, this.currentWarrior.col);
+                            this.currentWarrior.x = oldWarriorXY.X;
+                            this.currentWarrior.y = oldWarriorXY.Y;
+                            this.offsetPickedUpWarrior = new Vector2(newMouseState.X - currentWarrior.x, newMouseState.Y - currentWarrior.y);
                             this.warriorIsPickedUp = true;
                         }
                     }
@@ -141,8 +143,8 @@ namespace CapitalStrategy.Windows
                     // update current warrior location
                     if (currentWarrior != null)
                     {
-                        currentWarrior.x = newMouseState.X;
-                        currentWarrior.y = newMouseState.Y;
+                        currentWarrior.x = newMouseState.X - this.offsetPickedUpWarrior.X;
+                        currentWarrior.y = newMouseState.Y - this.offsetPickedUpWarrior.Y;
                     }
                 }
                 if (newMouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton != ButtonState.Released)
@@ -178,10 +180,10 @@ namespace CapitalStrategy.Windows
                     if (currentWarrior != null)
                     {
                         this.warriorIsPickedUp = false;
-                        Vector2 rowCol = board.clickOverGrid(currentWarrior.x, currentWarrior.y);
+                        Vector2 rowCol = board.clickOverGrid(newMouseState.X, newMouseState.Y);
                         int row = (int)rowCol.X;
                         int col = (int)rowCol.Y;
-                        if (board.isClickOverGrid(currentWarrior.x, currentWarrior.y) && board.warriors[row][col] == null && row >= 5)
+                        if (board.isClickOverGrid(newMouseState.X, newMouseState.Y) && board.warriors[row][col] == null && row >= 5)
                         {
                             currentWarrior.row = row;
                             currentWarrior.col = col;
