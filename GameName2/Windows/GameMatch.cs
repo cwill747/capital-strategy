@@ -126,7 +126,8 @@ namespace CapitalStrategy.Windows
             // Game1 game, int maxHealth, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate)
 
             XmlTextReader reader = new XmlTextReader("Configuration/WarriorTypes.xml");
-
+            
+            /*
             axestanShield = new WarriorType(
                 this,       // game
                 80,         // maxhealth
@@ -183,7 +184,7 @@ namespace CapitalStrategy.Windows
             p2.AddWarrior(blueArcher);
             p2.AddWarrior(crocy);
             p2.AddWarrior(magier);
-            
+            */
             /*for (int i = 1; i < 2; i++)
             {
                 //board.warriors[i == 0 ? 7 : 9 - 7][3] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 3, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
@@ -845,11 +846,11 @@ namespace CapitalStrategy.Windows
                 toDrawY += (int)((double)iconHeight * 1.5);
 
                 // Draw the warriors bonus
-                string baseDisplay = "Base Type: " + this.selectedWarrior.baseType;
+                string baseDisplay = "Class: " + this.selectedWarrior.warriorClass.warriorClassName;
                 this.spriteBatch.DrawString(this.infofont, baseDisplay, new Vector2(toDrawX, toDrawY), Color.White);
                 toDrawY += (int)((double)iconHeight * 1.5);
 
-                string bonusDisplay = "Bonus against " + this.selectedWarrior.bonus;
+                string bonusDisplay = "Bonus against: " + this.windowManager.warriorClasses[this.selectedWarrior.warriorClass.indexOfAdvantageAgainst].warriorClassName;
                 this.spriteBatch.DrawString(this.infofont, bonusDisplay, new Vector2(toDrawX, toDrawY), Color.White);
 
 

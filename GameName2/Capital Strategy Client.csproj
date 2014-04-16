@@ -58,6 +58,7 @@
     <Compile Include="Direction.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="GameState.cs" />
+    <Compile Include="GUI\AttackInfoPane.cs" />
     <Compile Include="GUI\BackButton.cs" />
     <Compile Include="GUI\Button.cs" />
     <Compile Include="GUI\Dialog.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="Tests\Windows\LoginTest.cs" />
     <Compile Include="TurnProgress.cs" />
     <Compile Include="Warrior.cs" />
+    <Compile Include="WarriorClass.cs" />
     <Compile Include="WarriorType.cs" />
     <Compile Include="WarriorWrapper.cs" />
     <Compile Include="Windows\CustomizeArmy.cs" />

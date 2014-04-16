@@ -536,7 +536,7 @@ namespace CapitalStrategy
             // handle the white mages healing
             else if (target != null && this.type == "white mage")
             {
-                int damage = (this.attack * 20) / target.defense;
+                int damage = (this.attack * 40) / target.defense;
                 if ((damage < 0) && ((target.health - damage) > target.maxHealth))
                 {
                     target.health = target.maxHealth;
@@ -551,46 +551,35 @@ namespace CapitalStrategy
             // handle anyone else attacking
             else if (target != null && this.type != "white mage")
             {
-      
-                
-                
-                
-                
                 //Random rand = new Random();
                 //int damage = (rand.Next(this.attack / 2) + this.attack) * 20 / target.defense;
                 //target.health -= damage;
                 Random rand = new Random();
                 int randomNum = rand.Next(0, 101);
-                int damage = (this.attack * 20) / target.defense;
+                int damage = (this.attack * 35) / target.defense;
                 bool doesHit = true;
                 // bonus check
-                if (this.bonus.Equals(target.baseType))
+                if (this.warriorClass.indexOfAdvantageAgainst == target.warriorClass.index)
                 {
-                    damage *= 2;
+                    damage = (int)(damage * 1.5);
                 }
 
                 if (this.isFacingTowards((int)this.row, (int)this.col, (int)target.row, (int)target.col, target.direction))
                 {
                     //if target is facing towards from attacking unit, 80% chance of hitting
-                    if (randomNum <= 80)
-                        doesHit = true;
+                    doesHit = randomNum <= 80;
                 }
                 else if (this.isFacingAway((int)this.row, (int)this.col, (int)target.row, (int)target.col, target.direction))
                 {
-                    //if target is facing away from attacking unit, does 2* damage and always hits
-                    damage *= 2;
+                    //if target is facing away from attacking unit, does 1.5* damage and always hits
+                    damage = (int)(damage * 1.5);
                     doesHit = true;
                 }
                 else if (this.isFacingSide((int)this.row, (int)this.col, (int)target.row, (int)target.col, target.direction))
                 {
                     //if target's side is towards attacking unit, 90% chance to hit
-                    if (randomNum <= 90)
-                        doesHit = true;
-                }
-                else
-                {
-                    if (randomNum <= 20)
-                        doesHit = false;
+                    doesHit = randomNum <= 90;
+                    
                 }
 
                 //accuracy check

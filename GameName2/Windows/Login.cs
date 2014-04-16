@@ -379,7 +379,7 @@ namespace CapitalStrategy.Windows
             }
             catch(NetException e)
             {
-
+                
             }
         }
     }

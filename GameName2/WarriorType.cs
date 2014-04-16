@@ -26,8 +26,7 @@ namespace CapitalStrategy
 		public double speed { get; set; }
 		public ImageAtlas[] states { get; set; }
 		public String type { get; set; }
-        public String baseType { get; set; }
-		public String bonus { get; set;}
+        public WarriorClass warriorClass { get; set; }
 		public int[] stateDurations { get; set; } // time to complete a state (in millis)
 		public Point[] attackPoints { get; set; }
 		public int? attackRange { get; set; }
@@ -37,7 +36,7 @@ namespace CapitalStrategy
 
 		// note: will need to add way of showing attack area
 
-		public WarriorType(GameMatch game, int maxHealth, int maxCooldown, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, String baseType, String bonus, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate, String attackSound)
+		public WarriorType(GameMatch game, int maxHealth, int maxCooldown, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, WarriorClass warriorClass, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate, String attackSound)
 		{
 			this.game = game;
 			this.maxHealth = maxHealth;
@@ -49,8 +48,7 @@ namespace CapitalStrategy
 			this.maxMove = maxMove;
 			this.speed = speed;
 			this.type = type;
-            this.baseType = baseType;
-			this.bonus = bonus;
+            this.warriorClass = warriorClass;
 			this.states = loadStates(type, imageDimensions);
 			this.stateDurations = stateDurations;
 			this.attackPoints = attackPoints;
@@ -72,8 +70,7 @@ namespace CapitalStrategy
 			this.maxMove = warriorType.maxMove;
 			this.speed = warriorType.speed;
 			this.type = warriorType.type;
-            this.baseType = warriorType.baseType;
-			this.bonus = warriorType.bonus;
+            this.warriorClass = warriorType.warriorClass;
 			this.states = warriorType.states;
 			this.stateDurations = warriorType.stateDurations;
 			this.attackPoints = warriorType.attackPoints;

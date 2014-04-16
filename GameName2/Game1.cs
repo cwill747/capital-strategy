@@ -16,6 +16,7 @@ using Lidgren.Network;
 using System.Diagnostics;
 using CapitalStrategyServer.Messaging;
 using CapitalStrategyServer;
+using MySql.Data.MySqlClient;
 #endregion
 
 namespace CapitalStrategy
@@ -28,6 +29,7 @@ namespace CapitalStrategy
 
 		public GraphicsDeviceManager graphics;
 		public SpriteBatch spriteBatch { get; set; }
+
 
 		
         public int gameState { get; set; }
@@ -45,7 +47,8 @@ namespace CapitalStrategy
         public static Texture2D tileImage;
         public static Texture2D charcoal;
         public NetClient client;
-        public List<WarriorType> warriorTypes = new List<WarriorType>();
+        public WarriorType[] warriorTypes { get; set; }
+        public WarriorClass[] warriorClasses { get; set; }
         public Client otherPlayer;
         public GameMatch gameMatch;
         public Messaging.Messaging msgManager;
@@ -65,6 +68,7 @@ namespace CapitalStrategy
 
             NetPeerConfiguration config = new NetPeerConfiguration("xnaapp");
             client = new NetClient(config);
+
 		}
 
 
@@ -137,47 +141,8 @@ namespace CapitalStrategy
                 }
             }
             GameMatch game = (GameMatch)this.windows[GameState.gameMatch];
-            warriorTypes.Add(new WarriorType(
-                game,       // game
-                80,         // maxhealth
-				2,			// maxCool (number of turns + 1)
-                50,         // attack
-                40,         // defense
-                100,        // accuracy
-                30,         // evade
-                3,          // maxMove
-                3,          // speed
-                "axestan shield", // type 
-                "melee",
-                "ranged", new int[] { 1, 8, 8, 13, 7, 9, 7 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
-                null, 1, 500, 0, "swordStrike"));
-			warriorTypes.Add(new WarriorType(game, 60, 3, 40, 70,
-                80, 60, 4, 5, "firedragon", "magic",
-                "melee", new int[] { 1, 7, 7, 9, 1, 11, 7 }, new int[] { 1000, 400, 1000, 1000, 1000, 1000, 1000 },
-                null, 2, 500, 0, "dragonRoar"));
-			warriorTypes.Add(new WarriorType(game, 70, 3, 40, 50,
-                75, 20, 4, 3, "blue archer", "ranged",
-                "magic", new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
-                null, 6, 500, 10, "bowShot"));
-			warriorTypes.Add(new WarriorType(game, 50, 2, -80, 30,
-                100, 0, 4, 3, "white mage", "magic",
-                "none", new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
-                new Point[] { new Point(-1,-1), new Point(1,1), 
-					new Point(1,-1), new Point(-1,1), new Point(-2, 0), 
-					new Point(2, 0), new Point(0, 2), new Point(0, -2), 
-					new Point(1,0), new Point(-1,0),new Point(0,1),
-					new Point(0,-1),new Point(0,0)},
-                null, 500, 0, "heal"));
-			warriorTypes.Add(new WarriorType(game, 90, 2, 60, 50,
-                50, 50, 2, 2, "crocy", "melee",
-                "ranged", new int[] { 1, 8, 8, 11, 9, 11, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
-                null, 1, 500, 0, "swordStrike"));
-			warriorTypes.Add(new WarriorType(game, 70, 2, 40, 45,
-                75, 25, 3, 3, "magier","magic",
-                "melee", new int[] { 9, 7, 7, 9, 9, 10, 9 }, new int[] { 1000, 500, 1000, 1500, 1000, 1000, 1000 },
-                null, 3, 500, 10, "thunder"));
-
-            
+            this.warriorClasses = this.loadWarriorClasses();
+            this.warriorTypes = this.loadWarriorTypes();
 		}
 
 		/// <summary>
@@ -226,32 +191,119 @@ namespace CapitalStrategy
 			base.Draw(gameTime);
 		}
 
-        public WarriorType getWarriorType(String warriorType) {
-            if (warriorType.Equals("axestan warrior")) 
+        
+
+        // returns list of warrior classes populated from db
+        public WarriorClass[] loadWarriorClasses()
+        {
+            // first get count of warrior classes
+            int numClasses = this.countTableRows("warrior_classes");
+
+            DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
+            if (db.OpenConnection() == true)
             {
-                return warriorTypes[0];
+                // under assumption results are indexed 0,1,2.. with no numbers missing
+                
+                WarriorClass[] warriorClasses = new WarriorClass[numClasses];
+                string query = "SELECT warrior_class_id, warrior_class_name, warrior_class_advantage_id FROM warrior_classes ORDER BY warrior_class_id ASC";
+                MySqlCommand cmd = new MySqlCommand(query, db.connection);
+                //Create a data reader and Execute the command
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                //Read the data and store them in the list
+                while (dataReader.Read())
+                {
+                    int warriorClassId = Int32.Parse(dataReader["warrior_class_id"].ToString());
+                    string warriorClassName = dataReader["warrior_class_name"].ToString();
+                    int warriorClassAdvantageIndex = Int32.Parse(dataReader["warrior_class_advantage_id"].ToString());
+                    WarriorClass wc = new WarriorClass(warriorClassId, warriorClassName, warriorClassAdvantageIndex);
+                    warriorClasses[warriorClassId] = wc;
+                }
+
+                //close Data Reader
+                dataReader.Close();
+                return warriorClasses;
             }
-            if (warriorType.Equals("firedragon")) 
+            return null;
+        }
+
+        public int countTableRows(string tableName)
+        {
+            DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
+            if (db.OpenConnection() == true)
             {
-                return warriorTypes[1];
+                String query = "SELECT COUNT(*) as count FROM " + tableName;
+                MySqlCommand cmd = new MySqlCommand(query, db.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                if (dataReader.Read())
+                {
+                    int count = Int32.Parse(dataReader["count"].ToString());
+                    dataReader.Close();
+                    return count;
+                }
             }
-            if (warriorType.Equals("blue archer")) 
+            return 0;
+        }
+
+        // returns list of warrior types populated from db
+        public WarriorType[] loadWarriorTypes()
+        {
+            // first get count of warrior classes
+            int numTypes = this.countTableRows("warrior_types");
+
+            DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
+            if (db.OpenConnection() == true)
             {
-                return warriorTypes[2];
+                // under assumption results are indexed 0,1,2.. with no numbers missing
+
+                WarriorType[] warriorTypes = new WarriorType[numTypes];
+                string query = @"SELECT warrior_type_id, GROUP_CONCAT( depth ) as depths , GROUP_CONCAT( duration ) as durations,
+                                    name, img_name, max_health, attack, defense, cooldown, accuracy, evade, move_range, move_speed,
+                                    warrior_class_id, attack_range, attack_delay_const, attack_delay_rate, attack_sound
+                                 FROM warrior_types AS wt
+                                 NATURAL JOIN warrior_type_states
+                                 GROUP BY wt.warrior_type_id
+                ";
+                MySqlCommand cmd = new MySqlCommand(query, db.connection);
+                //Create a data reader and Execute the command
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                //Read the data and store them in the list
+                while (dataReader.Read())
+                {
+                    WarriorClass warriorClass = this.warriorClasses[Int32.Parse(dataReader["warrior_class_id"].ToString())];
+                    string[] depthStrings = dataReader["depths"].ToString().Split(new char[]{','});
+                    string[] durationStrings = dataReader["durations"].ToString().Split(new char[] { ',' });
+                    int[] depths = new int[depthStrings.Length];
+                    int[] durations = new int[durationStrings.Length];
+                    for (int i = 0; i < depthStrings.Length; i++)
+                    {
+                        depths[i] = Int32.Parse(depthStrings[i]);
+                        durations[i] = Int32.Parse(durationStrings[i]);
+                    }
+                    //img_name, max_health, attack, defense, cooldown, accuracy, evade, move_range, move_speed,
+                     //               warrior_class_id, attack_range, attack_delay_const, attack_delay_rate, attack_sound
+                    string imgName = dataReader["img_name"].ToString();
+                    int maxHealth = Int32.Parse(dataReader["max_health"].ToString());
+                    int attack = Int32.Parse(dataReader["attack"].ToString());
+                    int defense = Int32.Parse(dataReader["defense"].ToString());
+                    int cooldown = Int32.Parse(dataReader["cooldown"].ToString());
+                    int accuracy = Int32.Parse(dataReader["accuracy"].ToString());
+                    int evade = Int32.Parse(dataReader["evade"].ToString());
+                    int moveRange = Int32.Parse(dataReader["move_range"].ToString());
+                    int moveSpeed = Int32.Parse(dataReader["move_speed"].ToString());
+                    int attackRange = Int32.Parse(dataReader["attack_range"].ToString());
+                    int attackDelayConst = Int32.Parse(dataReader["attack_delay_const"].ToString());
+                    int attackDelayRate = Int32.Parse(dataReader["attack_delay_rate"].ToString());
+                    string attackSound = dataReader["attack_sound"].ToString();
+                    WarriorType wt = new WarriorType(this.gameMatch, maxHealth, cooldown, attack, defense, accuracy, evade, moveRange,
+                        moveSpeed, imgName, warriorClass, depths, durations, null, attackRange, attackDelayConst, attackDelayRate, attackSound);
+                    warriorTypes[Int32.Parse(dataReader["warrior_type_id"].ToString())-1] = wt;
+                }
+
+                //close Data Reader
+                dataReader.Close();
+                return warriorTypes;
             }
-            if (warriorType.Equals("white mage")) 
-            {
-                return warriorTypes[3];
-            }
-            if (warriorType.Equals("crocy")) 
-            {
-                return warriorTypes[4];
-            }
-            if (warriorType.Equals("magier")) 
-            {
-                return warriorTypes[5];
-            }
-            return warriorTypes[1];
+            return null;
         }
 
 
