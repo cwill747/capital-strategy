@@ -53,6 +53,7 @@ namespace CapitalStrategy.Windows
         private bool isMousedOver = false;
         private long nextCheckMouseover = 0L;
         MouseWrapper mouseState;
+        Boolean warriorIsPickedUp { get; set; }
         public CustomizeArmy(Game1 windowManager)
         {
             this.windowManager = windowManager;
@@ -84,7 +85,7 @@ namespace CapitalStrategy.Windows
                 this.pageContent.Y + this.pageContent.Height + padding, saveButtonWidth, saveButtonHeight), Game1.smallFont, isDisabled: false);
             this.mRange = new Button("Movement", new Rectangle(this.pageContent.X + this.pageContent.Width - padding - (3 * saveButtonWidth),
                 this.pageContent.Y + this.pageContent.Height + padding, saveButtonWidth, saveButtonHeight), Game1.smallFont, isDisabled: true);
-
+            this.warriorIsPickedUp = false;
         }
 
         public void LoadContent()
@@ -131,10 +132,7 @@ namespace CapitalStrategy.Windows
                             oldWarriorXY = new Vector2(currentWarrior.x, currentWarrior.y);
                             currentWarrior.x = newMouseState.X;
                             currentWarrior.y = newMouseState.Y;
-                        }
-                        else
-                        {
-                            oldWarriorXY = Vector2.Zero;
+                            this.warriorIsPickedUp = true;
                         }
                     }
                 }
@@ -179,22 +177,25 @@ namespace CapitalStrategy.Windows
                     }
                     if (currentWarrior != null)
                     {
+                        this.warriorIsPickedUp = false;
                         Vector2 rowCol = board.clickOverGrid(currentWarrior.x, currentWarrior.y);
                         int row = (int)rowCol.X;
                         int col = (int)rowCol.Y;
-                        if (!board.isClickOverGrid(currentWarrior.x, currentWarrior.y))
-                        {
-                            board.warriors[(int)currentWarrior.row][(int)currentWarrior.col] = currentWarrior;
-                        }
-                        else if (board.warriors[row][col] == null && row >= 5)
+                        if (board.isClickOverGrid(currentWarrior.x, currentWarrior.y) && board.warriors[row][col] == null && row >= 5)
                         {
                             currentWarrior.row = row;
                             currentWarrior.col = col;
                             board.warriors[row][col] = currentWarrior;
+                            Vector2 loc = this.board.getLocation(row, col);
+                            this.currentWarrior.x = loc.X;
+                            this.currentWarrior.y = loc.Y;
                         }
                         else
                         {
                             board.warriors[(int)currentWarrior.row][(int)currentWarrior.col] = currentWarrior;
+                            Vector2 loc = this.board.getLocation(currentWarrior.row, (int)currentWarrior.col);
+                            this.currentWarrior.x = loc.X;
+                            this.currentWarrior.y = loc.Y;
                         }
                         currentWarrior = null;
                         this.save.isDisabled = false;
@@ -299,24 +300,6 @@ new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + this
                     {
                        
                         warrior.draw();
-
-                        //draws their maxcooldown
-                        this.windowManager.spriteBatch.Begin();
-                        //this.windowManager.spriteBatch.DrawString(Game1.smallFont, "hi", board.getLocation(row, col), Color.White);
-                        int tileWidth = this.boardWidth / this.board.cols;
-                        int tileHeight = this.boardHeight / this.board.rows;
-                        int xLoc = (int)(warrior.col * tileWidth + board.location.X);
-                        int yLoc = (int)(warrior.row * tileHeight + board.location.Y);
-                        int iconHeight = tileHeight / 2;
-                        int toDrawY = yLoc + (iconHeight / 2);
-                        int toDrawX = xLoc;
-                        int iconWidth = tileWidth / 2;
-                        int cool = warrior.maxCooldown;
-                        string coolString = cool.ToString();
-                        this.windowManager.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                        this.windowManager.spriteBatch.DrawString(this.infofont, coolString, new Vector2(xLoc + iconWidth, yLoc + (iconHeight / 3)), Color.White);
-                        this.windowManager.spriteBatch.End();
-
                     }
                 }
             }
@@ -339,11 +322,11 @@ new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + this
 
             if (currentWarrior != null)
             {
-                if (isMousedOver == false)
+                if (this.warriorIsPickedUp)
                 {
                     currentWarrior.drawToLocation();
                 }
-                if (aRange.isDisabled)
+                if (aRange.isDisabled && !this.warriorIsPickedUp)
                 {
                     currentWarrior.drawAttackRange(true);
                 }
