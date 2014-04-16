@@ -544,35 +544,20 @@ namespace CapitalStrategy
             {
                 return 0;
             }
-            // handle the white mages healing
-            else if (target != null && this.type == "white mage")
-            {
-                int damage = (this.attack * 40) / target.defense;
-                if ((damage < 0) && ((target.health - damage) > target.maxHealth))
-                {
-                    target.health = target.maxHealth;
-                    return damage;
-                }
-                else
-                {
-                    target.health -= damage;
-                    return damage;
-                }
-            }
             // handle anyone else attacking
-            else if (target != null && this.type != "white mage")
+            else if (target != null)
             {
                 //Random rand = new Random();
                 //int damage = (rand.Next(this.attack / 2) + this.attack) * 20 / target.defense;
                 //target.health -= damage;
                 Random rand = new Random();
                 int randomNum = rand.Next(0, 101);
-                int damage = (this.attack * 35) / target.defense;
+                int damage = (this.attack * 25) / target.defense;
                 bool doesHit = true;
                 // bonus check
                 if (this.warriorClass.indexOfAdvantageAgainst == target.warriorClass.index)
                 {
-                    damage = (int)(damage * 1.5);
+                    damage = (int)(damage * 1.33);
                 }
 
                 if (this.isFacingTowards((int)this.row, (int)this.col, (int)target.row, (int)target.col, target.direction))
@@ -583,7 +568,7 @@ namespace CapitalStrategy
                 else if (this.isFacingAway((int)this.row, (int)this.col, (int)target.row, (int)target.col, target.direction))
                 {
                     //if target is facing away from attacking unit, does 1.5* damage and always hits
-                    damage = (int)(damage * 1.5);
+                    damage = (int)(damage * 1.33);
                     doesHit = true;
                 }
                 else if (this.isFacingSide((int)this.row, (int)this.col, (int)target.row, (int)target.col, target.direction))
@@ -597,6 +582,10 @@ namespace CapitalStrategy
                 if (doesHit)
                 {
                     target.health -= damage;
+                    if (target.health > target.maxHealth)
+                    {
+                        target.health = target.maxHealth;
+                    }
                     return damage;
                 }
                 return 0;
