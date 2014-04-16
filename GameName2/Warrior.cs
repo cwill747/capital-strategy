@@ -551,7 +551,7 @@ namespace CapitalStrategy
                 if ((damage < 0) && ((target.health - damage) > target.maxHealth))
                 {
                     target.health = target.maxHealth;
-                    return 0;
+                    return damage;
                 }
                 else
                 {
