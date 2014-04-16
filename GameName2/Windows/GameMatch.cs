@@ -293,6 +293,10 @@ namespace CapitalStrategy.Windows
                         else
                         {
                             this.beingAttacked.health -= this.opponentDamage;
+                            if (this.beingAttacked.health > this.beingAttacked.maxHealth)
+                            {
+                                this.beingAttacked.health = this.beingAttacked.maxHealth;
+                            }
                         }
                         
                         if (targetHealthCheck != this.beingAttacked.health)
