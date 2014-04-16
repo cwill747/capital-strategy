@@ -309,10 +309,8 @@ new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + this
 
 
 
-            if (currentWarrior == null || isMousedOver == true)
-            {
-                board.resetTints();
-            }
+            board.resetTints();
+            
 
             for (int i = 0; i < 5; i++)
             {
@@ -334,18 +332,16 @@ new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + this
                 }
                 else
                 {
-                    Boolean[][] discovered = currentWarrior.bredthFirst((int)currentWarrior.row, (int)currentWarrior.col, currentWarrior.maxMove);
+                    // get warriors current location
+                    Vector2 currentLocation = board.clickOverGrid(this.oldMouseState.X, this.oldMouseState.Y);
+                    Boolean[][] discovered = currentWarrior.bredthFirst((int)currentLocation.X, (int)currentLocation.Y, currentWarrior.maxMove, passThroughTeam: true);
                     for (int i = 0; i < discovered.Length; i++)
                     {
                         for (int j = 0; j < discovered[i].Length; j++)
                         {
-                            if (discovered[i][j] && i >= 5)
+                            if (discovered[i][j] && this.board.warriors[i][j] == null)
                             {
-                                board.tileTints[i][j] = Warrior.yourMoveColor;
-                            }
-                            else if (discovered[i][j])
-                            {
-                                board.tileTints[i][j] = Color.DarkSlateBlue;
+                                board.tileTints[i][j] = i >= 5 ? Warrior.yourMoveColor : Color.DarkSlateBlue;
                             }
                         }
 

@@ -196,12 +196,17 @@ namespace CapitalStrategy
         }
         public Boolean[][] bredthFirst(int startRow, int startCol, int maxDepth, Boolean ignoreWarriors = false, bool passThroughTeam = false)
         {
+            
             List<BredthFirstNode> bfns = new List<BredthFirstNode>();
             bfns.Add(new BredthFirstNode(startRow, startCol, 0));
             Boolean[][] discovered = new Boolean[board.rows][];
             for (int i = 0; i < discovered.Length; i++)
             {
                 discovered[i] = new Boolean[board.cols];
+            }
+            if (startRow < 0 || startRow >= this.board.rows || startCol < 0 || startCol >= this.board.cols)
+            {
+                return discovered;
             }
             discovered[startRow][startCol] = true;
             while (bfns.Count != 0)
