@@ -44,13 +44,10 @@ namespace CapitalStrategy.Windows
         public bool hasWindowBeenDrawn = false;
         Texture2D background;
         Rectangle backgroundRec;
+
         public Board board { get; set; }
-        WarriorType axestanShield;
-        WarriorType whiteMage;
-        WarriorType firedragon;
-        WarriorType blueArcher;
-        WarriorType crocy;
-        WarriorType magier;
+        public List<Warrior> opponentWarriors { get; set; }
+        public List<Warrior> yourWarriors { get; set; }
         Warrior selectedWarrior;
         Warrior currentTurnWarrior;
         public Boolean isYourTurn { get; set; }
@@ -89,8 +86,8 @@ namespace CapitalStrategy.Windows
             this.turnProgress = TurnProgress.beginning;
             if (board != null)
             {
-                this.board.loadWarriors(this.windowManager, true);
-                this.board.loadWarriors(this.windowManager, false);
+                this.yourWarriors = this.board.loadWarriors(this.windowManager, true);
+                this.opponentWarriors = this.board.loadWarriors(this.windowManager, false);
             }
             this.oldMouseState = new MouseState();
 
@@ -128,78 +125,7 @@ namespace CapitalStrategy.Windows
             // Game1 game, int maxHealth, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate)
 
             XmlTextReader reader = new XmlTextReader("Configuration/WarriorTypes.xml");
-            
-            /*
-            axestanShield = new WarriorType(
-                this,       // game
-                80,         // maxhealth
-				2,			// maxCool (number of turns + 1)
-                50,         // attack
-                40,         // defense
-                100,        // accuracy
-                30,         // evade
-                3,          // maxMove
-                3,          // speed
-                "axestan shield", // type 
-                "melee", // baseType
-                "magic", new int[] { 1, 8, 8, 13, 7, 9, 7 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
-                null, 1, 500, 0, "swordStrike");
-			firedragon = new WarriorType(this, 60, 3, 40, 70,
-                80, 60, 4, 5, "firedragon", "magic",
-                "ranged", new int[] { 1, 7, 7, 9, 1, 11, 7 }, new int[] { 1000, 400, 1000, 1000, 1000, 1000, 1000 },
-                null, 2, 500, 0, "dragonRoar");
-			blueArcher = new WarriorType(this, 
-                70,
-                3, 40, 50,
-                75, 20, 4, 3, "blue archer", "ranged",
-                "melee", new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
-                null, 6, 500, 10, "bowShot");
-			this.whiteMage = new WarriorType(this, 50, 2, -80, 30,
-                100, 0, 4, 3, "white mage", "magic",
-                "none", new int[] { 1, 8, 8, 13, 9, 13, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
-                new Point[] { new Point(-1,-1), new Point(1,1), 
-					new Point(1,-1), new Point(-1,1), new Point(-2, 0), 
-					new Point(2, 0), new Point(0, 2), new Point(0, -2), 
-					new Point(1,0), new Point(-1,0),new Point(0,1),
-					new Point(0,-1),new Point(0,0)},
-                null, 500, 0, "heal");
-			crocy = new WarriorType(this, 90, 2, 60, 50,
-                50, 50, 2, 2, "crocy", "melee", 
-                "magic", new int[] { 1, 8, 8, 11, 9, 11, 9 }, new int[] { 1000, 700, 1000, 1000, 1000, 1000, 1000 },
-                null, 1, 500, 0, "swordStrike");
-			magier = new WarriorType(this,70, 2, 40, 45,
-                75, 25, 3, 3, "magier", "magic",
-                "ranged", new int[] { 9, 7, 7, 9, 9, 10, 9 }, new int[] { 1000, 500, 1000, 1500, 1000, 1000, 1000 },
-                null, 3, 500, 10, "thunder");
-
-            PlayerArmy p1 = new PlayerArmy(Direction.N);
-            p1.AddWarrior(axestanShield);
-            p1.AddWarrior(whiteMage);
-            p1.AddWarrior(firedragon);
-            p1.AddWarrior(crocy);
-            p1.AddWarrior(magier);
-            p1.AddWarrior(blueArcher);
-
-            PlayerArmy p2 = new PlayerArmy(Direction.S);
-            p2.AddWarrior(axestanShield);
-            p2.AddWarrior(whiteMage);
-            p2.AddWarrior(blueArcher);
-            p2.AddWarrior(crocy);
-            p2.AddWarrior(magier);
-            */
-            /*for (int i = 1; i < 2; i++)
-            {
-                //board.warriors[i == 0 ? 7 : 9 - 7][3] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 3, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
-                board.warriors[i == 0 ? 7 : 9 - 7][5] = new Warrior(this.board, 100, i == 0 ? 7 : 9 - 7, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, axestanShield);
-                board.warriors[i == 0 ? 9 : 9 - 9][5] = new Warrior(this.board, 101, i == 0 ? 9 : 9 - 9, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, whiteMage);
-               // board.warriors[i == 0 ? 9 : 9 - 9][2] = new Warrior(this.board, i == 0 ? 9 : 9 - 9, 2, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, whiteMage);
-                board.warriors[i == 0 ? 6 : 9 - 6][7] = new Warrior(this.board, 102, i == 0 ? 6 : 9 - 6, 7, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, firedragon);
-                //board.warriors[i == 0 ? 7 : 9 - 7][6] = new Warrior(this.board, i == 0 ? 7 : 9 - 7, 6, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, blueArcher);
-               board.warriors[i == 0 ? 7 : 9 - 7][4] = new Warrior(this.board, 103,  i == 0 ? 7 : 9 - 7, 4, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, crocy);
-                //board.warriors[i == 0 ? 8 : 9 - 8][3] = new Warrior(this.board, i == 0 ? 8 : 9 - 8, 3, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, magier);
-                board.warriors[i == 0 ? 8 : 9 - 8][5] = new Warrior(this.board, 104, i == 0 ? 8 : 9 - 8, 5, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, magier);
-                board.warriors[i == 0 ? 7 : 9 - 7][2] = new Warrior(this.board, 105, i == 0 ? 7 : 9 - 7, 2, i == 0 ? Direction.N : Direction.S, State.stopped, i == 0, blueArcher);
-            }*/
+       
 
             movementBtn = new Button("MOVEMENT", new Rectangle(SELECTED_WARRIOR_INFO_X, 300, 100, 25), Game1.smallFont);
             attackBtn = new Button("ATTACK", new Rectangle(movementBtn.location.X + movementBtn.location.Width, 300, 100, 25), Game1.smallFont);
@@ -302,42 +228,6 @@ namespace CapitalStrategy.Windows
                     // end of end game
                 
             }
-
-
-            /*
-            if (this.turnProgress == TurnProgress.beginning && this.cooldownCounter == 0)
-            {
-
-
-				if (this.isYourTurn) {
-					for (int i = 0; i < ROWS; i++) {
-						for (int j = 0; j < COLS; j++) {
-							Warrior unitC = board.warriors [i] [j];
-							if (unitC != null && unitC.isYours && unitC.cooldown > 0) {
-								unitC.cooldown -= 1;
-							}
-						}
-					}
-                }
-                else if (!this.isYourTurn)
-                {
-                    for (int i = 0; i < ROWS; i++)
-                    {
-                        for (int j = 0; j < COLS; j++)
-                        {
-                            Warrior unitC = board.warriors[i][j];
-                            if (unitC != null && !unitC.isYours && unitC.cooldown > 0)
-                            {
-                                unitC.cooldown -= 1;
-                            }
-                        }
-                    }
-                }
-				cooldownCounter = 1;
-			}
-            */
-
-
             if (this.currentTurnWarrior != null)
             {
                 if (this.turnProgress == TurnProgress.moving)
@@ -556,6 +446,14 @@ namespace CapitalStrategy.Windows
                 instance.IsLooped = true;
                 this.hasWindowBeenDrawn = true;
             }
+            foreach (Warrior w in yourWarriors)
+            {
+                this.board.warriors[(int)w.row][(int)w.col] = w;
+            }
+            foreach (Warrior w in opponentWarriors)
+            {
+                this.board.warriors[(int)w.row][(int)w.col] = w;
+            }
         }
         public void decrementCooldowns()
         {
@@ -640,17 +538,15 @@ namespace CapitalStrategy.Windows
 
             spriteBatch.End();
             board.drawTiles(spriteBatch);
-            for (int row = 0; row < board.warriors.Length; row++)
+            foreach (Warrior w in this.yourWarriors)
             {
-                for (int col = 0; col < board.warriors[row].Length; col++)
-                {
-                    Warrior warrior = board.warriors[row][col];
-                    if (warrior != null)
-                    {
-                        warrior.draw();
-                    }
-                }
+                w.draw();
             }
+            foreach (Warrior w in this.opponentWarriors)
+            {
+                w.draw();
+            }
+
             if (mouseState.isOverGrid && board.warriors[mouseState.row][mouseState.col] != null)
             {
                 this.drawHealthBar(mouseState.row, mouseState.col);

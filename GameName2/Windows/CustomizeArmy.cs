@@ -24,7 +24,7 @@ namespace CapitalStrategy.Windows
         public Board board { get; set; }
         public Warrior currentWarrior { get; set; }
         public Button save { get; set; }
-        public List<WarriorWrapper> warriorWrappers { get; set; }
+        public List<Warrior> warriors { get; set; }
         public Texture2D red;
         public Texture2D white;
         public Texture2D heartIcon;
@@ -66,7 +66,7 @@ namespace CapitalStrategy.Windows
             this.pageContent.Width = boardWidth;
             board = new Board(10, 10, new Rectangle(this.pageContent.X, this.pageContent.Y, boardWidth, boardHeight), Game1.tileImage);
             this.oldMouseState = new MouseState();
-            this.warriorWrappers = this.board.loadWarriors(this.windowManager, true);
+            this.warriors = this.board.loadWarriors(this.windowManager, true);
 
             saveButtonWidth = 100;
             this.saveButtonHeight = 50;
@@ -409,19 +409,19 @@ namespace CapitalStrategy.Windows
             DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
             if (db.OpenConnection() == true)
             {
-                foreach (WarriorWrapper ww in this.warriorWrappers)
+                foreach (Warrior w in this.warriors)
                 {
-                    this.updateWarriorInDB(ww, db);
+                    this.updateWarriorInDB(w, db);
                 }
             }
         }
-        public void updateWarriorInDB(WarriorWrapper ww, DBConnect db)
+        public void updateWarriorInDB(Warrior w, DBConnect db)
         {
             String query = "UPDATE Warriors SET row=@row, col=@col WHERE warrior_id=@warrior_id";
             MySqlCommand cmd = new MySqlCommand(query, db.connection);
-            cmd.Parameters.AddWithValue("@row", this.board.rows - ww.warrior.row - 1);
-            cmd.Parameters.AddWithValue("@col", ww.warrior.col);
-            cmd.Parameters.AddWithValue("@warrior_id", ww.id);
+            cmd.Parameters.AddWithValue("@row", this.board.rows - w.row - 1);
+            cmd.Parameters.AddWithValue("@col", w.col);
+            cmd.Parameters.AddWithValue("@warrior_id", w.id);
             int result = cmd.ExecuteNonQuery();
             if (result == 1)
             {

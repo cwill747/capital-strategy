@@ -156,6 +156,8 @@ namespace CapitalStrategy
                     {
                         //death!
                         this.board.warriors[(int)this.row][(int)this.col] = null;
+                        this.game.yourWarriors.Remove(this);
+                        this.game.opponentWarriors.Remove(this);
                     }
                     this.curDelay = 500;
                     this.state = State.tippingOver;
@@ -175,12 +177,12 @@ namespace CapitalStrategy
             if (this.state == State.stopped)
             {
 
-                Boolean[][] discovered = this.bredthFirst((int)this.row, (int)this.col, this.maxMove);
+                Boolean[][] discovered = this.bredthFirst((int)this.row, (int)this.col, this.maxMove, passThroughTeam: true);
                 for (int i = 0; i < discovered.Length; i++)
                 {
                     for (int j = 0; j < discovered[i].Length; j++)
                     {
-                        if (discovered[i][j])
+                        if (discovered[i][j] && board.warriors[i][j] == null)
                         {
                             board.tileTints[i][j] = (this.isYours && isYourTurn) ? Warrior.yourMoveColor : Warrior.notYourMoveColor;
                         }
@@ -192,7 +194,7 @@ namespace CapitalStrategy
             {
             }
         }
-        public Boolean[][] bredthFirst(int startRow, int startCol, int maxDepth, Boolean ignoreWarriors = false)
+        public Boolean[][] bredthFirst(int startRow, int startCol, int maxDepth, Boolean ignoreWarriors = false, bool passThroughTeam = false)
         {
             List<BredthFirstNode> bfns = new List<BredthFirstNode>();
             bfns.Add(new BredthFirstNode(startRow, startCol, 0));
@@ -213,25 +215,29 @@ namespace CapitalStrategy
                 int row = bfn.row;
                 int col = bfn.col;
                 int depth = bfn.depth;
-                if (row + 1 < board.rows && !discovered[row + 1][col] && (board.warriors[row + 1][col] == null || ignoreWarriors))
+                if (row + 1 < board.rows && !discovered[row + 1][col] && (board.warriors[row + 1][col] == null || ignoreWarriors ||
+                    (board.warriors[row + 1][col] != null && board.warriors[row + 1][col].isYours && passThroughTeam)))
                 {
                     //board.tileTints[row + 1][col] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row + 1][col] = true;
                     bfns.Add(new BredthFirstNode(row + 1, col, depth + 1));
                 }
-                if (row - 1 > -1 && !discovered[row - 1][col] && (board.warriors[row - 1][col] == null || ignoreWarriors))
+                if (row - 1 > -1 && !discovered[row - 1][col] && (board.warriors[row - 1][col] == null || ignoreWarriors ||
+                    (row - 1 > -1 && board.warriors[row - 1][col] != null && board.warriors[row - 1][col].isYours && passThroughTeam)))
                 {
                     // board.tileTints[row - 1][col] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row - 1][col] = true;
                     bfns.Add(new BredthFirstNode(row - 1, col, depth + 1));
                 }
-                if (col + 1 < board.cols && !discovered[row][col + 1] && (board.warriors[row][col + 1] == null || ignoreWarriors))
+                if (col + 1 < board.cols && !discovered[row][col + 1] && (board.warriors[row][col + 1] == null || ignoreWarriors ||
+                    (board.warriors[row][col + 1] != null && board.warriors[row][col + 1].isYours && passThroughTeam)))
                 {
                     // board.tileTints[row][col + 1] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row][col + 1] = true;
                     bfns.Add(new BredthFirstNode(row, col + 1, depth + 1));
                 }
-                if (col - 1 > -1 && !discovered[row][col - 1] && (board.warriors[row][col - 1] == null || ignoreWarriors))
+                if (col - 1 > -1 && !discovered[row][col - 1] && (board.warriors[row][col - 1] == null || ignoreWarriors ||
+                    (board.warriors[row][col - 1] != null && board.warriors[row][col - 1].isYours && passThroughTeam)))
                 {
                     //board.tileTints[row][col - 1] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row][col - 1] = true;
@@ -243,7 +249,7 @@ namespace CapitalStrategy
 
         public Boolean isValidMove(Board board, int moveRow, int moveCol)
         {
-            return bredthFirst((int)this.row, (int)this.col, this.maxMove)[moveRow][moveCol];
+            return bredthFirst((int)this.row, (int)this.col, this.maxMove, passThroughTeam: true)[moveRow][moveCol] && this.board.warriors[moveRow][moveCol] == null;
         }
         public void moveTo(int destRow, int destCol)
         {
@@ -251,13 +257,12 @@ namespace CapitalStrategy
             this.stateDepth = 0;
             this.destRow = destRow;
             this.destCol = destCol;
-            this.currentStep = this.dijkstra((int)this.row, (int)this.col, destRow, destCol);
+            this.currentStep = this.dijkstra((int)this.row, (int)this.col, destRow, destCol, passThroughTeam: true);
         }
 
-        public DijkstraNode dijkstra(int startRow, int startCol, int destRow, int destCol)
+        public DijkstraNode dijkstra(int startRow, int startCol, int destRow, int destCol, bool passThroughTeam = false)
         {
             DijkstraNode start = new DijkstraNode(startRow, startCol, 0, null, null);
-
             List<DijkstraNode> dijkstras = new List<DijkstraNode>();
             dijkstras.Add(start);
             Boolean[][] discovered = new Boolean[board.rows][];
@@ -279,25 +284,29 @@ namespace CapitalStrategy
                 int row = dijkstraNode.row;
                 int col = dijkstraNode.col;
                 int depth = dijkstraNode.depth;
-                if (row + 1 < board.rows && !discovered[row + 1][col] && board.warriors[row + 1][col] == null)
+                if (row + 1 < board.rows && !discovered[row + 1][col] && (board.warriors[row + 1][col] == null ||
+                    (board.warriors[row + 1][col] != null && board.warriors[row + 1][col].isYours == this.isYours && passThroughTeam)))
                 {
                     //board.tileTints[row + 1][col] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row + 1][col] = true;
                     dijkstras.Add(new DijkstraNode(row + 1, col, depth + 1, dijkstraNode, null));
                 }
-                if (row - 1 > -1 && !discovered[row - 1][col] && board.warriors[row - 1][col] == null)
+                if (row - 1 > -1 && !discovered[row - 1][col] && (board.warriors[row - 1][col] == null ||
+                    (board.warriors[row - 1][col] != null && board.warriors[row - 1][col].isYours == this.isYours && passThroughTeam)))
                 {
                     // board.tileTints[row - 1][col] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row - 1][col] = true;
                     dijkstras.Add(new DijkstraNode(row - 1, col, depth + 1, dijkstraNode, null));
                 }
-                if (col + 1 < board.cols && !discovered[row][col + 1] && board.warriors[row][col + 1] == null)
+                if (col + 1 < board.cols && !discovered[row][col + 1] && (board.warriors[row][col + 1] == null ||
+                    (board.warriors[row][col + 1] != null && board.warriors[row][col + 1].isYours == this.isYours && passThroughTeam)))
                 {
                     // board.tileTints[row][col + 1] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row][col + 1] = true;
                     dijkstras.Add(new DijkstraNode(row, col + 1, depth + 1, dijkstraNode, null));
                 }
-                if (col - 1 > -1 && !discovered[row][col - 1] && board.warriors[row][col - 1] == null)
+                if (col - 1 > -1 && !discovered[row][col - 1] && (board.warriors[row][col - 1] == null ||
+                    (board.warriors[row][col - 1] != null && board.warriors[row][col - 1].isYours == this.isYours && passThroughTeam)))
                 {
                     //board.tileTints[row][col - 1] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row][col - 1] = true;
@@ -644,6 +653,16 @@ namespace CapitalStrategy
                     return true;
                 }
 
+            }
+            return false;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj.GetType() == typeof(Warrior))
+            {
+                Warrior w = (Warrior)obj;
+                return this.id == w.id;
             }
             return false;
         }

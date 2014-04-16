@@ -94,9 +94,9 @@ namespace CapitalStrategy
             return x - this.location.X < this.location.Width && y - this.location.Y < this.location.Height && x - this.location.X >= 0 && y - this.location.Y >= 0;
         }
 
-        public List<WarriorWrapper> loadWarriors(Game1 windowManager, Boolean isPlayer1)
+        public List<Warrior> loadWarriors(Game1 windowManager, Boolean isPlayer1)
         {
-            List<WarriorWrapper> retVal = new List<WarriorWrapper>();
+            List<Warrior> retVal = new List<Warrior>();
             DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
             if (db.OpenConnection() == true)
             {
@@ -121,10 +121,9 @@ namespace CapitalStrategy
                     int id = Int32.Parse(dataReader["warrior_id"].ToString());
                     Warrior w = new Warrior(this, id, curRow, curCol, isPlayer1 ? Direction.N : Direction.S, State.stopped, isPlayer1, windowManager.warriorTypes[Int32.Parse(dataReader["warrior_type_id"].ToString()) - 1]);
                     this.warriors[curRow][curCol] = w;
-                    WarriorWrapper ww = new WarriorWrapper(w, Int32.Parse(dataReader["warrior_id"].ToString()));
                     //System.Diagnostics.Debug.WriteLine(dataReader["username"]);
                     //System.Diagnostics.Debug.WriteLine(dataReader["password"]);
-                    retVal.Add(ww);
+                    retVal.Add(w);
                 }
 
                 //close Data Reader
