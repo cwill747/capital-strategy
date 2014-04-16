@@ -68,6 +68,8 @@
     <Compile Include="Messaging\Messaging.cs" />
     <Compile Include="MouseWrapper.cs" />
     <Compile Include="PlayerArmy.cs" />
+    <Compile Include="Primitives\Lines.cs" />
+    <Compile Include="Primitives\PrimitiveBatch.cs" />
     <Compile Include="State.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -127,6 +129,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\GUI\back_button.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\GUI\customizearrow.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\GUI\inputPane.jpg">

@@ -598,6 +598,21 @@ namespace CapitalStrategy.Windows
                                         this.spriteBatch.Draw(white, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.maxHealth), tileHeight / 10), Color.WhiteSmoke);
                                         this.spriteBatch.Draw(red, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.health), tileHeight / 10), Color.WhiteSmoke);
                                     }
+                                    //draw MISS or HIT! over the attacked warrior
+                                    if (warrior == beingAttacked && this.turnProgress == TurnProgress.attacked)
+                                    {
+                                        while (warrior.state == State.beenHit)
+                                        {
+                                            if (this.opponentDamage == 0)
+                                            {
+                                                this.windowManager.spriteBatch.DrawString(this.menufont, "MISS", new Vector2(xLoc - (tileWidth / 2), yLoc - tileHeight), Color.DarkMagenta);
+                                            }
+                                            else
+                                            {
+                                                this.windowManager.spriteBatch.DrawString(this.menufont, "HIT!", new Vector2(xLoc - (tileWidth / 3), yLoc - tileHeight), Color.Gold);
+                                            }
+                                        }
+                                    }
                                 }
                             }
                        

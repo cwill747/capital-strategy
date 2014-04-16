@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg:svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.0"
+   width="364.72"
+   height="903"
+   viewBox="0 0 902.25049 364.71875"
+   id="svg2868"
+   xml:space="preserve"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="Arrow_south.svg"
+   inkscape:export-filename="C:\Users\cameron\Documents\GitHub\capital-strategy\GameName2\Content\GUI\customizearrow.png"
+   inkscape:export-xdpi="4.9574451"
+   inkscape:export-ydpi="4.9574451"><svg:metadata
+   id="metadata8"><rdf:RDF><cc:Work
+       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></svg:metadata><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="1680"
+   inkscape:window-height="997"
+   id="namedview6"
+   showgrid="false"
+   inkscape:zoom="0.26135105"
+   inkscape:cx="182.36"
+   inkscape:cy="451.5"
+   inkscape:window-x="-8"
+   inkscape:window-y="-8"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="svg2868" /><svg:defs
+   id="defs2874" />
+	
+		
+			<namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1.0"
+   pageopacity="0.0"
+   pageshadow="2"
+   window-width="640"
+   window-height="541"
+   zoom="0.34493828"
+   cx="372.04722"
+   cy="256.66814"
+   window-x="75"
+   window-y="152"
+   current-layer="svg2033">
+			</namedview>
+		<svg:g
+   transform="matrix(0,-2.4390522,2.4390522,0,7.7693439,1270.6714)"
+   id="Ebene_1"
+   style="fill:#d40000"
+   inkscape:export-filename="C:\Users\cameron\Documents\GitHub\capital-strategy\GameName2\Content\GUI\CustomizeArrow.png"
+   inkscape:export-xdpi="10.016063"
+   inkscape:export-ydpi="10.016063">
+			<svg:polygon
+   points="902.25049,222.98633 233.17773,222.98633 233.17773,364.71875 0,182.35938 233.17773,0 233.17773,141.73242 902.25049,141.73242 902.25049,222.98633 "
+   id="path2050"
+   style="fill:#d40000" />
+		</svg:g>
+	</svg:svg>

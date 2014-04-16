@@ -133,7 +133,14 @@ namespace CapitalStrategy.Windows
                         }
                         else if (key.Equals(Keys.Enter))
                         {
-                            this.login(this.usernameInput.content, this.passwordInput.content);
+                            if (confirmPasswordInput.isVisible == false)
+                            {
+                                this.login(this.usernameInput.content, this.passwordInput.content);
+                            }
+                            else
+                            {
+                                this.register(this.usernameInput.content, this.passwordInput.content, this.confirmPasswordInput.content);
+                            }
                         }
                         else
                         {

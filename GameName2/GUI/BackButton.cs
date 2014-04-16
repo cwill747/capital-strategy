@@ -14,7 +14,7 @@ namespace CapitalStrategy.GUI
 {
     public class BackButton : Button
     {
-        public BackButton() : base("", new Rectangle(30, 30, 100, 100), Game1.smallFont)
+        public BackButton() : base("", new Rectangle(20, 20, 50, 50), Game1.smallFont)
         {
             
         }

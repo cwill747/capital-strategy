@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Input.Touch;
 using MySql.Data.MySqlClient;
 using CapitalStrategy.GUI;
+using CapitalStrategy.Primitives;
 
 
 namespace CapitalStrategy.Windows
@@ -34,6 +35,7 @@ namespace CapitalStrategy.Windows
         public SpriteFont infofont;
         public SpriteFont smallfont;
         public Texture2D hourglass;
+        private Texture2D arrowDown;
         private Rectangle pageContent = new Rectangle();
         private int boardHeight;
         private int boardWidth;
@@ -44,6 +46,8 @@ namespace CapitalStrategy.Windows
         public int saveButtonWidth { get; set; }
         public Button aRange { get; set; }
         public Button mRange { get; set; }
+        private PrimitiveBatch primitiveBatch;
+        private Vector2 oldWarriorXY;
 
         MouseWrapper mouseState;
         public CustomizeArmy(Game1 windowManager)
@@ -54,13 +58,13 @@ namespace CapitalStrategy.Windows
 
         public void Initialize()
         {
-            this.pageContent.X = 20;
-            this.pageContent.Y = 150;
-            boardHeight = 350 - 50;
+            this.pageContent.X = 70;
+            this.pageContent.Y = 50;
+            boardHeight = 450;
             this.pageContent.Height = boardHeight;
-            boardWidth = 700 - 100;
+            boardWidth = 500;
             this.pageContent.Width = boardWidth;
-            board = new Board(5, 10, new Rectangle(this.pageContent.X, this.pageContent.Y, boardWidth, boardHeight), Game1.tileImage);
+            board = new Board(10, 10, new Rectangle(this.pageContent.X, this.pageContent.Y, boardWidth, boardHeight), Game1.tileImage);
             this.oldMouseState = new MouseState();
             this.warriorWrappers = this.board.loadWarriors(this.windowManager, true);
 
@@ -77,6 +81,7 @@ namespace CapitalStrategy.Windows
                 this.pageContent.Y + this.pageContent.Height + padding, saveButtonWidth, saveButtonHeight), Game1.smallFont, isDisabled: false);
             this.mRange = new Button("Movement", new Rectangle(this.pageContent.X + this.pageContent.Width - padding - (3 * saveButtonWidth),
                 this.pageContent.Y + this.pageContent.Height + padding, saveButtonWidth, saveButtonHeight), Game1.smallFont, isDisabled: true);
+
         }
 
         public void LoadContent()
@@ -93,6 +98,9 @@ namespace CapitalStrategy.Windows
             hourglass = this.windowManager.Content.Load<Texture2D>("icons/hourglass");
             mouseState = new MouseWrapper(board, Mouse.GetState());
             smallfont = this.windowManager.Content.Load<SpriteFont>("fonts/smallfont");
+            this.arrowDown = this.windowManager.Content.Load<Texture2D>("GUI/customizearrow");
+            primitiveBatch = new PrimitiveBatch(this.windowManager.GraphicsDevice);
+
         }
 
         public void Update(GameTime gameTime)
@@ -114,8 +122,13 @@ namespace CapitalStrategy.Windows
                         board.warriors[(int)coord.X][(int)coord.Y] = null;
                         if (currentWarrior != null)
                         {
+                            oldWarriorXY = new Vector2(currentWarrior.x, currentWarrior.y);
                             currentWarrior.x = newMouseState.X;
                             currentWarrior.y = newMouseState.Y;
+                        }
+                        else
+                        {
+                            oldWarriorXY = Vector2.Zero;
                         }
                     }
                 }
@@ -167,7 +180,7 @@ namespace CapitalStrategy.Windows
                         {
                             board.warriors[(int)currentWarrior.row][(int)currentWarrior.col] = currentWarrior;
                         }
-                        else if (board.warriors[row][col] == null)
+                        else if (board.warriors[row][col] == null && row >= 5)
                         {
                             currentWarrior.row = row;
                             currentWarrior.col = col;
@@ -194,6 +207,38 @@ namespace CapitalStrategy.Windows
             windowManager.spriteBatch.Draw(Game1.background, new Rectangle(0, 0, this.windowManager.Window.ClientBounds.Width, this.windowManager.Window.ClientBounds.Height), Color.White);
             this.windowManager.spriteBatch.End();
             this.board.drawTiles(this.windowManager.spriteBatch);
+
+            primitiveBatch.Begin(PrimitiveType.LineList);
+            primitiveBatch.AddVertex(
+                new Vector2(this.pageContent.X, this.pageContent.Y + boardHeight / 2), Color.Red);
+            primitiveBatch.AddVertex(
+                new Vector2(this.pageContent.X + boardWidth, this.pageContent.Y + boardHeight / 2), Color.Red);
+            primitiveBatch.End();
+            this.windowManager.spriteBatch.Begin();
+            string label = "The enemies will appear on the top half of the board.";
+            Vector2 labelDim = Game1.smallFont.MeasureString(label);
+            // X location + (the width of the location - the width of the string) / 2
+            float x = this.pageContent.X + (boardWidth / 10) * 1 - (this.windowManager.GraphicsDevice.Viewport.Width - this.pageContent.Width - labelDim.X) / 4;
+            float y = this.pageContent.Y + (boardHeight / 10) * 2 - (20 - labelDim.Y) / 2;
+            this.windowManager.spriteBatch.DrawString(Game1.smallFont, label,
+                new Vector2(x, y),
+                Color.Yellow, 0, Vector2.Zero, .9f, SpriteEffects.None, 1f
+                );
+
+            string label2 = "Your army goes below the line!";
+            Vector2 labelDim2 = Game1.smallFont.MeasureString(label2);
+            this.windowManager.spriteBatch.DrawString(Game1.smallFont, label2,
+                new Vector2(x, y + labelDim.Y),
+                Color.Yellow, 0, Vector2.Zero, .9f, SpriteEffects.None, 1f
+                );
+
+            this.windowManager.spriteBatch.Draw(this.arrowDown, 
+                new Vector2(this.pageContent.X + (boardWidth / 10) * 2.5f, this.pageContent.Y + (boardHeight / 2) - this.arrowDown.Height), Color.White);
+            this.windowManager.spriteBatch.Draw(this.arrowDown,
+                new Vector2(this.pageContent.X + (boardWidth / 10) * 5f, this.pageContent.Y + (boardHeight / 2) - this.arrowDown.Height), Color.White);
+            this.windowManager.spriteBatch.Draw(this.arrowDown,
+                new Vector2(this.pageContent.X + (boardWidth / 10) * 7.5f, this.pageContent.Y + (boardHeight / 2) - this.arrowDown.Height), Color.White);
+            this.windowManager.spriteBatch.End();
             for (int row = 0; row < board.warriors.Length; row++)
             {
                 for (int col = 0; col < board.warriors[row].Length; col++)
@@ -226,35 +271,54 @@ namespace CapitalStrategy.Windows
                     }
                 }
             }
+
+
+
+
             if (currentWarrior == null)
             {
                 board.resetTints();
 
             }
+
+            for (int i = 0; i < 5; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    board.tileTints[i][j] = Color.DarkGray;
+                }
+            }
+
             if (currentWarrior != null)
             {
                 currentWarrior.drawToLocation();
                 if (aRange.isDisabled)
                 {
-                    currentWarrior.drawAttackRange();
+                    currentWarrior.drawAttackRange(true);
                 }
                 else
                 {
                     Boolean[][] discovered = currentWarrior.bredthFirst((int)currentWarrior.row, (int)currentWarrior.col, currentWarrior.maxMove);
-                for (int i = 0; i < discovered.Length; i++)
-                {
-                    for (int j = 0; j < discovered[i].Length; j++)
+                    for (int i = 0; i < discovered.Length; i++)
                     {
-                        if (discovered[i][j])
+                        for (int j = 0; j < discovered[i].Length; j++)
                         {
-                            board.tileTints[i][j] = Warrior.yourMoveColor;
+                            if (discovered[i][j] && i >= 5)
+                            {
+                                board.tileTints[i][j] = Warrior.yourMoveColor;
+                            }
+                            else if (discovered[i][j])
+                            {
+                                board.tileTints[i][j] = Color.DarkSlateBlue;
+                            }
                         }
-                    }
 
+                    }
                 }
-            }
                 
             }
+
+
             this.backButton.drawBackButton(this.windowManager.spriteBatch);
             this.aRange.draw(this.windowManager.spriteBatch);
             this.mRange.draw(this.windowManager.spriteBatch);
@@ -287,8 +351,11 @@ namespace CapitalStrategy.Windows
             }
             this.windowManager.spriteBatch.DrawString(this.smallfont, rangeDisplay+"Range", new Vector2(this.pageContent.X + this.pageContent.Width - padding2 - (3 * saveButtonWidth),
             this.pageContent.Y + this.pageContent.Height - this.saveButtonHeight + padding3), Color.Chocolate);
+
             this.windowManager.spriteBatch.End();
-          
+
+
+
             if (this.currentWarrior != null)
             {
                 Warrior displayWarrior = new Warrior(this.currentWarrior);
