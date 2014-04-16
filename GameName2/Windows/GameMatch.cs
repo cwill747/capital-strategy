@@ -598,6 +598,9 @@ namespace CapitalStrategy.Windows
                                         this.spriteBatch.Draw(white, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.maxHealth), tileHeight / 10), Color.WhiteSmoke);
                                         this.spriteBatch.Draw(red, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.health), tileHeight / 10), Color.WhiteSmoke);
                                     }
+                                    /* COMMENTED OUT BECAUSE THIS CAUSED OUT OF MEMORY ERROR
+                                     * INFINITE WHILE LOOP
+                                     * CHECK YO CODE BEFORE YOU COMMIT!
                                     //draw MISS or HIT! over the attacked warrior
                                     if (warrior == beingAttacked && this.turnProgress == TurnProgress.attacked)
                                     {
@@ -613,6 +616,7 @@ namespace CapitalStrategy.Windows
                                             }
                                         }
                                     }
+                                    */
                                 }
                             }
                        
