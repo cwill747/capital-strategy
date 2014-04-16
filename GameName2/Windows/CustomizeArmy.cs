@@ -31,6 +31,8 @@ namespace CapitalStrategy.Windows
         public Texture2D attackIcon;
         public Texture2D shieldIcon;
         public Texture2D moveIcon;
+        public Texture2D welcomeBackground;
+        public Texture2D infoBoxBackground;
         public SpriteFont menufont;
         public SpriteFont infofont;
         public SpriteFont smallfont;
@@ -100,6 +102,8 @@ namespace CapitalStrategy.Windows
             mouseState = new MouseWrapper(board, Mouse.GetState());
             smallfont = this.windowManager.Content.Load<SpriteFont>("fonts/smallfont");
             this.arrowDown = this.windowManager.Content.Load<Texture2D>("GUI/customizearrow");
+            this.welcomeBackground = this.windowManager.Content.Load<Texture2D>("GUI/welcome_box_background");
+            this.infoBoxBackground = this.windowManager.Content.Load<Texture2D>("GUI/info_box_background");
             primitiveBatch = new PrimitiveBatch(this.windowManager.GraphicsDevice);
 
         }
@@ -244,7 +248,7 @@ namespace CapitalStrategy.Windows
                 new Vector2(this.pageContent.X + boardWidth, this.pageContent.Y + boardHeight / 2), Color.Red);
             primitiveBatch.End();
             this.windowManager.spriteBatch.Begin();
-            string label = "The enemies will appear on the top half of the board.";
+            string label = "The enemies will appear on the top half of the board.\nYour army goes below the line";
             Vector2 labelDim = Game1.smallFont.MeasureString(label);
             // X location + (the width of the location - the width of the string) / 2
             float x = this.pageContent.X + (boardWidth / 10) * 1 - (this.windowManager.GraphicsDevice.Viewport.Width - this.pageContent.Width - labelDim.X) / 4;
@@ -254,12 +258,6 @@ namespace CapitalStrategy.Windows
                 Color.Yellow, 0, Vector2.Zero, .9f, SpriteEffects.None, 1f
                 );
 
-            string label2 = "Your army goes below the line!";
-            Vector2 labelDim2 = Game1.smallFont.MeasureString(label2);
-            this.windowManager.spriteBatch.DrawString(Game1.smallFont, label2,
-                new Vector2(x, y + labelDim.Y),
-                Color.Yellow, 0, Vector2.Zero, .9f, SpriteEffects.None, 1f
-                );
 
             this.windowManager.spriteBatch.Draw(this.arrowDown, 
                 new Vector2(this.pageContent.X + (boardWidth / 10) * 2.5f, this.pageContent.Y + (boardHeight / 2) - this.arrowDown.Height), Color.White);
@@ -267,6 +265,28 @@ namespace CapitalStrategy.Windows
                 new Vector2(this.pageContent.X + (boardWidth / 10) * 5f, this.pageContent.Y + (boardHeight / 2) - this.arrowDown.Height), Color.White);
             this.windowManager.spriteBatch.Draw(this.arrowDown,
                 new Vector2(this.pageContent.X + (boardWidth / 10) * 7.5f, this.pageContent.Y + (boardHeight / 2) - this.arrowDown.Height), Color.White);
+
+
+            this.windowManager.spriteBatch.Draw(this.welcomeBackground,
+    new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y), Color.White);
+
+            this.windowManager.spriteBatch.Draw(this.infoBoxBackground,
+new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + 192), Color.White);
+
+            string welcomeString1 = "Welcome to the custom warrior page. This is \n" + 
+                                    "where you set up your army for battle. Drag\n" +
+                                    "your warriors to set them up for battle,\n" + 
+                                    "mouse over a warrior for more information\n" +
+                                    "about that warrior. Click save to save your\n" + 
+                                    "configuration for battle.";
+            Vector2 welcomeStringDim1 = Game1.smallFont.MeasureString(welcomeString1);
+            this.windowManager.spriteBatch.DrawString(Game1.smallFont, welcomeString1,
+                new Vector2(this.pageContent.X + this.boardWidth + 30, this.pageContent.Y + 40),
+                Color.Yellow, 0, Vector2.Zero, .9f, SpriteEffects.None, 1f
+                );
+
+
+
             this.windowManager.spriteBatch.End();
             for (int row = 0; row < board.warriors.Length; row++)
             {
@@ -393,8 +413,8 @@ namespace CapitalStrategy.Windows
                 Warrior displayWarrior = new Warrior(this.currentWarrior);
                 int imgPadding = 20;
                 
-                int toDrawX = this.pageContent.X + this.boardWidth + 10;
-                int toDrawY = this.pageContent.Y;
+                int toDrawX = this.pageContent.X + this.boardWidth + 20;
+                int toDrawY = this.pageContent.Y + this.boardHeight / 2;
            
                 int iconWidth = tileWidth / 2;
                 int iconHeight = iconWidth;
