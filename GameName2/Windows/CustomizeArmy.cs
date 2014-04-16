@@ -48,7 +48,8 @@ namespace CapitalStrategy.Windows
         public Button mRange { get; set; }
         private PrimitiveBatch primitiveBatch;
         private Vector2 oldWarriorXY;
-
+        private bool isMousedOver = false;
+        private long nextCheckMouseover = 0L;
         MouseWrapper mouseState;
         public CustomizeArmy(Game1 windowManager)
         {
@@ -105,6 +106,7 @@ namespace CapitalStrategy.Windows
 
         public void Update(GameTime gameTime)
         {
+            isMousedOver = false;
             this.save.update(gameTime);
             MouseState newMouseState = Mouse.GetState();
             if (!newMouseState.Equals(this.oldMouseState))
@@ -194,6 +196,33 @@ namespace CapitalStrategy.Windows
                         this.save.isDisabled = false;
                         this.recentlySaved = false;
                     }
+
+                }
+            }
+            else
+            {
+                isMousedOver = false;
+
+                if (newMouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Released)
+                {
+                    // Lets check if we're moused over a warrior
+                    if(board.isClickOverGrid(newMouseState.X, newMouseState.Y))
+                    {
+                        Vector2 coord = board.clickOverGrid(newMouseState.X, newMouseState.Y);
+                        currentWarrior = board.warriors[(int)coord.X][(int)coord.Y];
+                        if (currentWarrior != null)
+                        {
+                            isMousedOver = true;
+                        }
+                        else if (currentWarrior == null)
+                        {
+                            isMousedOver = false;
+                        }
+                    }
+                    else
+                    {
+                        isMousedOver = false;
+                    }
                 }
             }
             this.oldMouseState = newMouseState;
@@ -275,10 +304,9 @@ namespace CapitalStrategy.Windows
 
 
 
-            if (currentWarrior == null)
+            if (currentWarrior == null || isMousedOver == true)
             {
                 board.resetTints();
-
             }
 
             for (int i = 0; i < 5; i++)
@@ -291,7 +319,10 @@ namespace CapitalStrategy.Windows
 
             if (currentWarrior != null)
             {
-                currentWarrior.drawToLocation();
+                if (isMousedOver == false)
+                {
+                    currentWarrior.drawToLocation();
+                }
                 if (aRange.isDisabled)
                 {
                     currentWarrior.drawAttackRange(true);
@@ -315,13 +346,14 @@ namespace CapitalStrategy.Windows
 
                     }
                 }
-                
+
+                this.aRange.draw(this.windowManager.spriteBatch);
+                this.mRange.draw(this.windowManager.spriteBatch);
             }
 
 
             this.backButton.drawBackButton(this.windowManager.spriteBatch);
-            this.aRange.draw(this.windowManager.spriteBatch);
-            this.mRange.draw(this.windowManager.spriteBatch);
+
             if (recentlySaved)
             {
                 /*
