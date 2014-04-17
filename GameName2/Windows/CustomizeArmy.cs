@@ -434,6 +434,7 @@ namespace CapitalStrategy.Windows
                 int frameWidth = 9;
                 int frameHeight = 18;
 
+                // Draw attack strength bars
                 if (this.currentWarrior.attack >= 10)
                 {
                     Rectangle source = new Rectangle(0, 0, frameWidth, frameHeight);
@@ -449,6 +450,8 @@ namespace CapitalStrategy.Windows
                     }
                 }
 
+
+                // Draw defensive bars
                 if (this.currentWarrior.defense >= 10)
                 {
                     Rectangle source = new Rectangle(0, 19, frameWidth, frameHeight);
@@ -459,16 +462,26 @@ namespace CapitalStrategy.Windows
                     int total10Blocks = (int)(this.currentWarrior.defense / 10);
                     for (int i = 1; i <= total10Blocks; i++)
                     {
-                        Rectangle source = new Rectangle(frameWidth + 1, 19, frameWidth * 2 + 1, 19 + frameHeight);
-                        this.windowManager.spriteBatch.Draw(bars, new Vector2(708 + 10 * i, 312), source, Color.White);
+                        Rectangle source = new Rectangle(frameWidth + 1, 19, frameWidth * 2 + 1, frameHeight);
+                        this.windowManager.spriteBatch.Draw(bars, new Vector2(708 + 10 * i, 312), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
                     }
                 }
-                
+
 
                 // Draw the warriors cooldown
-                string coolDisplay = this.currentWarrior.maxCooldown.ToString();
-                this.windowManager.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.windowManager.spriteBatch.DrawString(this.infofont, coolDisplay, new Vector2(2 + toDrawX + iconWidth + padding, toDrawY), Color.White);
+                if (this.currentWarrior.maxCooldown >= 1)
+                {
+                    Rectangle source = new Rectangle(0, 19 * 2, frameWidth, frameHeight);
+                    this.windowManager.spriteBatch.Draw(bars, new Vector2(708, 336), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                }
+                if (this.currentWarrior.maxCooldown > 1)
+                {
+                    for (int i = 1; i <= this.currentWarrior.maxCooldown; i++)
+                    {
+                        Rectangle source = new Rectangle(frameWidth, 19 * 2, frameWidth, frameHeight);
+                        this.windowManager.spriteBatch.Draw(bars, new Vector2(708 + 10 * i, 336), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                    }
+                }
 
                 this.windowManager.spriteBatch.End(); 
             }
