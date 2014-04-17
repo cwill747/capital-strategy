@@ -413,6 +413,7 @@ namespace CapitalStrategy.Windows
 							{
 								this.turnProgress = TurnProgress.turnOver;
                                 this.currentTurnWarrior.updateUserOptions(false);
+                                this.beingAttacked = null;
                                 board.resetTints();
 							}
 						}
