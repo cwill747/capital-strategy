@@ -227,28 +227,40 @@ namespace CapitalStrategy
                 {
                     //board.tileTints[row + 1][col] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row + 1][col] = true;
-                    bfns.Add(new BredthFirstNode(row + 1, col, depth + 1));
+                    if (!ignoreWarriors || board.warriors[row + 1][col] == null)
+                    {
+                        bfns.Add(new BredthFirstNode(row + 1, col, depth + 1));
+                    }
                 }
                 if (row - 1 > -1 && !discovered[row - 1][col] && (board.warriors[row - 1][col] == null || ignoreWarriors ||
                     (row - 1 > -1 && board.warriors[row - 1][col] != null && board.warriors[row - 1][col].isYours && passThroughTeam)))
                 {
                     // board.tileTints[row - 1][col] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row - 1][col] = true;
-                    bfns.Add(new BredthFirstNode(row - 1, col, depth + 1));
+                    if (!ignoreWarriors || board.warriors[row - 1][col] == null)
+                    {
+                        bfns.Add(new BredthFirstNode(row - 1, col, depth + 1));
+                    }
                 }
                 if (col + 1 < board.cols && !discovered[row][col + 1] && (board.warriors[row][col + 1] == null || ignoreWarriors ||
                     (board.warriors[row][col + 1] != null && board.warriors[row][col + 1].isYours && passThroughTeam)))
                 {
                     // board.tileTints[row][col + 1] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row][col + 1] = true;
-                    bfns.Add(new BredthFirstNode(row, col + 1, depth + 1));
+                    if (!ignoreWarriors || board.warriors[row][col + 1] == null)
+                    {
+                        bfns.Add(new BredthFirstNode(row, col + 1, depth + 1));
+                    }
                 }
                 if (col - 1 > -1 && !discovered[row][col - 1] && (board.warriors[row][col - 1] == null || ignoreWarriors ||
                     (board.warriors[row][col - 1] != null && board.warriors[row][col - 1].isYours && passThroughTeam)))
                 {
                     //board.tileTints[row][col - 1] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row][col - 1] = true;
-                    bfns.Add(new BredthFirstNode(row, col - 1, depth + 1));
+                    if (!ignoreWarriors || board.warriors[row][col - 1] == null)
+                    {
+                        bfns.Add(new BredthFirstNode(row, col - 1, depth + 1));
+                    }
                 }
             }
             return discovered;
