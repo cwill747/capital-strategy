@@ -70,20 +70,12 @@ namespace CapitalStrategy.Windows
         Button attackBtn;
         Button skipBtn;
 
-        
-
         public Boolean waitingForTurn { get; set; }
 
         //for after match
         public Boolean armyStillAround = false;
 
         public int opponentDamage { get; set; }
-
-
-
-        //Song instance
-        public SoundEffect song;
-        public SoundEffectInstance instance;
 
         public GameMatch(Game1 windowManager)
         {
@@ -117,6 +109,7 @@ namespace CapitalStrategy.Windows
 
 
 
+
             background = Content.Load<Texture2D>("stars");
             red = Content.Load<Texture2D>("colors/red");
             white = Content.Load<Texture2D>("colors/white");
@@ -140,11 +133,6 @@ namespace CapitalStrategy.Windows
 
 
             mouseState = new MouseWrapper(board, Mouse.GetState());
-
-            song = Content.Load<SoundEffect>("Music/MenuMusic");
-            instance = song.CreateInstance();
-            instance.IsLooped = true;
-            instance.Play();
 
         }
         public void Update(GameTime gameTime)
@@ -454,19 +442,15 @@ namespace CapitalStrategy.Windows
                 displayWarrior.update(gameTime, this);
             }
 
-            
-
             if (this.hasWindowBeenDrawn == false)
             {
-
+                SoundEffect song;
                 song = Content.Load<SoundEffect>("Music/intoBattle");
-                instance = song.CreateInstance();
+                song.Play();
+                SoundEffectInstance instance = song.CreateInstance();
                 instance.IsLooped = true;
-                instance.Play();
                 this.hasWindowBeenDrawn = true;
             }
-
-            
             foreach (Warrior w in yourWarriors)
             {
                 this.board.warriors[(int)w.row][(int)w.col] = w;
