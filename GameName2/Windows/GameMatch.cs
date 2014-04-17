@@ -639,10 +639,10 @@ namespace CapitalStrategy.Windows
                         int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
                         //beingAttacked.setDirection(xDiff, yDiff);
 
-                        string attackSound = currentTurnWarrior.attackSound;
-                        SoundEffect effect;     
-                        effect = Content.Load<SoundEffect>(attackSound);
-                        effect.Play();
+                        //string attackSound = currentTurnWarrior.attackSound;
+                        //SoundEffect effect;     
+                        //effect = Content.Load<SoundEffect>(attackSound);
+                        //effect.Play();
                         
                         beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
                     }

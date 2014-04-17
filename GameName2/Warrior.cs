@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework;
 using CapitalStrategy.Windows;
 using Microsoft.Xna.Framework.Audio;
@@ -38,6 +39,7 @@ namespace CapitalStrategy
         public string description;
         public float x { get; set; }
         public float y { get; set; }
+        public ContentManager Content { get; set; }
 
 
         public Warrior(Board board, int id, double row, double col, int direction, int state, Boolean isYours, WarriorType warriorType)
@@ -582,6 +584,13 @@ namespace CapitalStrategy
                 int randomNum = rand.Next(0, 101);
                 int damage = (this.attack * 25) / target.defense;
                 bool doesHit = true;
+
+                string attackSound = this.attackSound;
+                SoundEffect effect;
+                effect = Content.Load<SoundEffect>(attackSound);
+                effect.Play();
+
+
                 // bonus check
                 if (this.warriorClass.indexOfAdvantageAgainst == target.warriorClass.index)
                 {
