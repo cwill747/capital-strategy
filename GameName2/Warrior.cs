@@ -35,7 +35,7 @@ namespace CapitalStrategy
         public DijkstraNode currentStep { get; set; }
         public Board board { get; set; }
         public int curDelay { get; set; }
-
+        public string description;
         public float x { get; set; }
         public float y { get; set; }
 
@@ -54,6 +54,7 @@ namespace CapitalStrategy
             this.cooldown = 0;
             this.stateDepth = 0;
             this.curDelay = 0;
+            this.description = warriorType.description;
         }
 
         public Warrior(Warrior previousWarrior)
@@ -69,6 +70,7 @@ namespace CapitalStrategy
             this.stateDepth = 0;
             this.curDelay = 0;
             this.isYours = previousWarrior.isYours;
+            this.description = previousWarrior.description;
         }
         public void draw()
         {

@@ -258,7 +258,7 @@ namespace CapitalStrategy
                 WarriorType[] warriorTypes = new WarriorType[numTypes];
                 string query = @"SELECT warrior_type_id, GROUP_CONCAT( depth ) as depths , GROUP_CONCAT( duration ) as durations,
                                     name, img_name, max_health, attack, defense, cooldown, accuracy, evade, move_range, move_speed,
-                                    warrior_class_id, attack_range, attack_delay_const, attack_delay_rate, attack_sound
+                                    warrior_class_id, attack_range, attack_delay_const, attack_delay_rate, attack_sound, description
                                  FROM warrior_types AS wt
                                  NATURAL JOIN warrior_type_states
                                  GROUP BY wt.warrior_type_id
@@ -294,8 +294,9 @@ namespace CapitalStrategy
                     int attackDelayConst = Int32.Parse(dataReader["attack_delay_const"].ToString());
                     int attackDelayRate = Int32.Parse(dataReader["attack_delay_rate"].ToString());
                     string attackSound = dataReader["attack_sound"].ToString();
+                    string description = dataReader["description"].ToString();
                     WarriorType wt = new WarriorType(this.gameMatch, maxHealth, cooldown, attack, defense, accuracy, evade, moveRange,
-                        moveSpeed, imgName, warriorClass, depths, durations, null, attackRange, attackDelayConst, attackDelayRate, attackSound);
+                        moveSpeed, imgName, warriorClass, depths, durations, null, attackRange, attackDelayConst, attackDelayRate, attackSound, description);
                     warriorTypes[Int32.Parse(dataReader["warrior_type_id"].ToString())-1] = wt;
                 }
 

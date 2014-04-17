@@ -38,6 +38,8 @@ namespace CapitalStrategy.Windows
         public SpriteFont smallfont;
         public Texture2D hourglass;
         private Texture2D arrowDown;
+        private Texture2D background;
+        private Texture2D bars;
         private Rectangle pageContent = new Rectangle();
         private int boardHeight;
         private int boardWidth;
@@ -106,6 +108,8 @@ namespace CapitalStrategy.Windows
             this.arrowDown = this.windowManager.Content.Load<Texture2D>("GUI/customizearrow");
             this.welcomeBackground = this.windowManager.Content.Load<Texture2D>("GUI/welcome_box_background");
             this.infoBoxBackground = this.windowManager.Content.Load<Texture2D>("GUI/info_box_background");
+            this.background = this.windowManager.Content.Load<Texture2D>("GUI/customize_army_background");
+            this.bars = this.windowManager.Content.Load<Texture2D>("GUI/bars");
             primitiveBatch = new PrimitiveBatch(this.windowManager.GraphicsDevice);
 
         }
@@ -241,6 +245,7 @@ namespace CapitalStrategy.Windows
 
             this.windowManager.spriteBatch.Begin();
             windowManager.spriteBatch.Draw(Game1.background, new Rectangle(0, 0, this.windowManager.Window.ClientBounds.Width, this.windowManager.Window.ClientBounds.Height), Color.White);
+            this.windowManager.spriteBatch.Draw(this.background, Vector2.Zero, Color.White);
             this.windowManager.spriteBatch.End();
             this.board.drawTiles(this.windowManager.spriteBatch);
 
@@ -270,23 +275,18 @@ namespace CapitalStrategy.Windows
                 new Vector2(this.pageContent.X + (boardWidth / 10) * 7.5f, this.pageContent.Y + (boardHeight / 2) - this.arrowDown.Height), Color.White);
 
 
-            this.windowManager.spriteBatch.Draw(this.welcomeBackground,
-    new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y), Color.White);
+            //this.windowManager.spriteBatch.Draw(this.welcomeBackground,
+            //new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y), Color.White);
 
-            this.windowManager.spriteBatch.Draw(this.infoBoxBackground,
-new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + this.welcomeBackground.Height), Color.White);
+            //this.windowManager.spriteBatch.Draw(this.infoBoxBackground,
+            //new Vector2(this.pageContent.X, this.pageContent.Y), Color.White);
 
-            string welcomeString1 = "Welcome to the custom warrior page. This is \n" + 
-                                    "where you set up your army for battle. Drag\n" +
-                                    "your warriors to set them up for battle,\n" + 
-                                    "mouse over a warrior for more information\n" +
-                                    "about that warrior. Click save to save your\n" + 
-                                    "configuration for battle.";
-            Vector2 welcomeStringDim1 = Game1.smallFont.MeasureString(welcomeString1);
-            this.windowManager.spriteBatch.DrawString(Game1.smallFont, welcomeString1,
-                new Vector2(this.pageContent.X + this.boardWidth + 30, this.pageContent.Y + 40),
-                Color.Yellow, 0, Vector2.Zero, .9f, SpriteEffects.None, 1f
-                );
+            string welcomeString1 = "Welcome to the custom warrior page. This is " +
+            "where you set up your army for battle. Drag " +
+            "your warriors to set them up for battle, " +
+            "mouse over a warrior for more information " +
+            "about that warrior. Click save to save your " +
+            "configuration for battle. ";
 
 
 
@@ -391,11 +391,24 @@ new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + this
 
             if (this.currentWarrior != null)
             {
+
+
                 Warrior displayWarrior = new Warrior(this.currentWarrior);
+
+                // replace the tutorial string with this warrior's description
+
+                if (this.currentWarrior.description != null)
+                {
+                    welcomeString1 = this.currentWarrior.description;
+                }
+                else
+                {
+                    welcomeString1 = "Description missing.";
+                }
                 int imgPadding = 20;
                 
-                int toDrawX = this.pageContent.X + this.boardWidth + 20;
-                int toDrawY = this.pageContent.Y + this.boardHeight / 2;
+                int toDrawX = 625;
+                int toDrawY = 300;
            
                 int iconWidth = tileWidth / 2;
                 int iconHeight = iconWidth;
@@ -404,35 +417,75 @@ new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + this
                 double widthPerPoint = ((double)tileWidth) / 100;
 
                 displayWarrior.drawInArbitraryLocation(toDrawX, toDrawY);
-                displayWarrior.drawWarriorType(toDrawX + board.WARRIORWIDTH / 2 + imgPadding, toDrawY - imgPadding);
+
                 toDrawX = toDrawX + board.WARRIORWIDTH / 2 + imgPadding;
                 toDrawY += iconHeight + padding;
 
 
                 this.windowManager.spriteBatch.Begin();
 
-                // Draw the warriors attack strength
-                this.windowManager.spriteBatch.Draw(attackIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.windowManager.spriteBatch.Draw(Game1.charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
-                this.windowManager.spriteBatch.Draw(white, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * 100), barHeight), Color.WhiteSmoke);
-                this.windowManager.spriteBatch.Draw(red, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * currentWarrior.attack), barHeight), Color.WhiteSmoke);
-                toDrawY += iconHeight + padding;
 
-                // Draw the warriors defense strength
-                // @TODO: Change the 2+ on this to be a resolution-independent value
-                this.windowManager.spriteBatch.Draw(shieldIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.windowManager.spriteBatch.Draw(Game1.charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
-                this.windowManager.spriteBatch.Draw(white, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * 100), barHeight), Color.WhiteSmoke);
-                this.windowManager.spriteBatch.Draw(red, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * currentWarrior.defense), barHeight), Color.WhiteSmoke);
-                toDrawY += iconHeight + padding;
+                string selwarrior = this.currentWarrior.type.ToUpperInvariant();
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, selwarrior,
+                    new Vector2(690, 268),
+                    Color.Brown, 0, Vector2.Zero, .9f, SpriteEffects.None, 1f
+                    );
+
+                int frameWidth = 9;
+                int frameHeight = 18;
+
+                if (this.currentWarrior.attack >= 10)
+                {
+                    Rectangle source = new Rectangle(0, 0, frameWidth, frameHeight);
+                    this.windowManager.spriteBatch.Draw(bars, new Vector2(708, 290), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                }
+                if (Math.Abs(this.currentWarrior.attack) > 10 && Math.Abs(this.currentWarrior.attack) <= 100)
+                {
+                    int total10Blocks = (int) (this.currentWarrior.attack / 10);
+                    for(int i = 1; i <= total10Blocks; i++)
+                    {
+                        Rectangle source = new Rectangle(frameWidth + 1, 0, frameWidth * 2 + 1, frameHeight);
+                        this.windowManager.spriteBatch.Draw(bars, new Vector2(708 + 10 * i, 290), source, Color.White);
+                    }
+                }
+
+                if (this.currentWarrior.defense >= 10)
+                {
+                    Rectangle source = new Rectangle(0, 19, frameWidth, frameHeight);
+                    this.windowManager.spriteBatch.Draw(bars, new Vector2(708, 312), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                }
+                if (Math.Abs(this.currentWarrior.defense) > 10 && Math.Abs(this.currentWarrior.defense) <= 100)
+                {
+                    int total10Blocks = (int)(this.currentWarrior.defense / 10);
+                    for (int i = 1; i <= total10Blocks; i++)
+                    {
+                        Rectangle source = new Rectangle(frameWidth + 1, 19, frameWidth * 2 + 1, 19 + frameHeight);
+                        this.windowManager.spriteBatch.Draw(bars, new Vector2(708 + 10 * i, 312), source, Color.White);
+                    }
+                }
+                
 
                 // Draw the warriors cooldown
                 string coolDisplay = this.currentWarrior.maxCooldown.ToString();
                 this.windowManager.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
                 this.windowManager.spriteBatch.DrawString(this.infofont, coolDisplay, new Vector2(2 + toDrawX + iconWidth + padding, toDrawY), Color.White);
 
-                this.windowManager.spriteBatch.End();
+                this.windowManager.spriteBatch.End(); 
             }
+
+            this.windowManager.spriteBatch.Begin();
+
+            // Make sure the string fits on the screen
+
+            int characterWidthOfBox = 40;
+            List<String> splitString = StringHelper.SplitString(welcomeString1, characterWidthOfBox);
+            welcomeString1 = string.Join("\n", splitString);
+            Vector2 welcomeStringDim1 = Game1.smallFont.MeasureString(welcomeString1);
+            this.windowManager.spriteBatch.DrawString(Game1.smallFont, welcomeString1,
+                new Vector2(this.pageContent.X + this.boardWidth + 42, this.pageContent.Y + 40),
+                Color.Brown, 0, Vector2.Zero, .9f, SpriteEffects.None, 1f
+                );
+            this.windowManager.spriteBatch.End();
         }
 
         
