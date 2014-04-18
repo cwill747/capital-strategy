@@ -552,9 +552,9 @@ namespace CapitalStrategy.Windows
             {
                 SoundEffect song;
                 song = Content.Load<SoundEffect>("Music/intoBattle");
-                song.Play();
                 SoundEffectInstance instance = song.CreateInstance();
                 instance.IsLooped = true;
+                instance.Play();
                 this.hasWindowBeenDrawn = true;
             }
             foreach (Warrior w in yourWarriors)
