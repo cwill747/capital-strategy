@@ -62,6 +62,7 @@ namespace CapitalStrategy.Windows
         public int targetCol { get; set; }
         public int targetRow { get; set; }
         public Warrior beingAttacked { get; set; }
+        private Warrior justAttacked { get; set; } // for displaying health bar after warrior is attacked
         Warrior displayWarrior;
         MouseWrapper mouseState;
         MouseState oldMouseState;
@@ -138,6 +139,7 @@ namespace CapitalStrategy.Windows
         }
         public void Update(GameTime gameTime)
         {
+            this.healthBarFadeDelay -= gameTime.ElapsedGameTime.Milliseconds;
             if (isYourTurn)
             {
                 //for end game
@@ -282,7 +284,8 @@ namespace CapitalStrategy.Windows
                     
                     
                     // calculate damage
-
+                    this.justAttacked = this.beingAttacked;
+                    this.healthBarFadeDelay = 1500;
                     if (this.beingAttacked != null)
                     {
 
@@ -361,6 +364,7 @@ namespace CapitalStrategy.Windows
                         this.currentTurnWarrior = null;
                         this.beingAttacked = null;
                     }
+                    this.beingAttacked = null;
                     
                 }
             }
@@ -555,6 +559,10 @@ namespace CapitalStrategy.Windows
             if (this.beingAttacked != null)
             {
                 this.drawHealthBar((int)beingAttacked.row, (int)beingAttacked.col);
+            }
+            else if (this.justAttacked != null && healthBarFadeDelay > 0)
+            {
+                this.drawHealthBar((int)this.justAttacked.row, (int)this.justAttacked.col);
             }
             this.drawInfoFrame(this.selectedWarrior);
             this.spriteBatch.Begin();
