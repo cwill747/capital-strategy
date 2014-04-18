@@ -443,13 +443,18 @@ namespace CapitalStrategy.Windows
                 if (Math.Abs(this.currentWarrior.attack) > 10 && Math.Abs(this.currentWarrior.attack) <= 100)
                 {
                     int total10Blocks = (int) (this.currentWarrior.attack / 10);
-                    for(int i = 1; i <= total10Blocks; i++)
+                    for(int i = 1; i < total10Blocks - 1; i++)
                     {
                         Rectangle source = new Rectangle(frameWidth + 1, 0, frameWidth * 2 + 1, frameHeight);
                         this.windowManager.spriteBatch.Draw(bars, new Vector2(708 + 10 * i, 290), source, Color.White);
                     }
                 }
 
+                string warriorAttack = this.currentWarrior.attack.ToString() + "/100";
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, warriorAttack,
+                    new Vector2(708 + 30, 290),
+                    Color.Yellow, 0, Vector2.Zero, .7f, SpriteEffects.None, 1f
+                    );
 
                 // Draw defensive bars
                 if (this.currentWarrior.defense >= 10)
@@ -460,12 +465,18 @@ namespace CapitalStrategy.Windows
                 if (Math.Abs(this.currentWarrior.defense) > 10 && Math.Abs(this.currentWarrior.defense) <= 100)
                 {
                     int total10Blocks = (int)(this.currentWarrior.defense / 10);
-                    for (int i = 1; i <= total10Blocks; i++)
+                    for (int i = 1; i < total10Blocks - 1; i++)
                     {
                         Rectangle source = new Rectangle(frameWidth + 1, 19, frameWidth * 2 + 1, frameHeight);
                         this.windowManager.spriteBatch.Draw(bars, new Vector2(708 + 10 * i, 312), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
                     }
                 }
+
+                string warriorDefense = this.currentWarrior.defense.ToString() + "/100";
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, warriorDefense,
+                    new Vector2(708 + 30, 312),
+                    Color.Yellow, 0, Vector2.Zero, .7f, SpriteEffects.None, 1f
+                    );
 
 
                 // Draw the warriors cooldown
@@ -476,12 +487,18 @@ namespace CapitalStrategy.Windows
                 }
                 if (this.currentWarrior.maxCooldown > 1)
                 {
-                    for (int i = 1; i <= this.currentWarrior.maxCooldown; i++)
+                    for (int i = 1; i < this.currentWarrior.maxCooldown; i++)
                     {
                         Rectangle source = new Rectangle(frameWidth, 19 * 2, frameWidth, frameHeight);
                         this.windowManager.spriteBatch.Draw(bars, new Vector2(708 + 10 * i, 336), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
                     }
                 }
+
+                string warriorCooldown = this.currentWarrior.maxCooldown.ToString();
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, warriorCooldown,
+                    new Vector2(708 + 45, 336),
+                    Color.Yellow, 0, Vector2.Zero, .7f, SpriteEffects.None, 1f
+                    );
 
                 this.windowManager.spriteBatch.End(); 
             }
