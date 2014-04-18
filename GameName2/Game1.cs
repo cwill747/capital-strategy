@@ -46,6 +46,7 @@ namespace CapitalStrategy
         public static Texture2D backButton;
         public static Texture2D tileImage;
         public static Texture2D charcoal;
+        public static Texture2D infoBackground { get; set; }
         public NetClient client;
         public WarriorType[] warriorTypes { get; set; }
         public WarriorClass[] warriorClasses { get; set; }
@@ -128,6 +129,7 @@ namespace CapitalStrategy
             Game1.background = Content.Load<Texture2D>("login/loginBackground");
             Game1.tileImage = Content.Load<Texture2D>("floortileatlas.jpg");
             Game1.charcoal = Content.Load<Texture2D>("colors/charcoal");
+            Game1.infoBackground = Content.Load<Texture2D>("GUI/info_background2.png");
 
             Game1.gameFont = Content.Load<SpriteFont>("fonts/gamefont");
             Game1.menuFont = Content.Load<SpriteFont>("fonts/menufont");

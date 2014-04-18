@@ -112,7 +112,7 @@
   <ItemGroup>
     <Content Include="Configuration\WarriorTypes.xml" />
     <Content Include="Content\colors\charcoal.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\colors\red.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -143,6 +143,9 @@
     </Content>
     <Content Include="Content\GUI\gamematch_background.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\GUI\info_background2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\GUI\info_box_background.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

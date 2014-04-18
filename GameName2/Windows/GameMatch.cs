@@ -166,8 +166,8 @@ namespace CapitalStrategy.Windows
 
             this.missFadingMessage = new FadingMessage(0, 0, "Miss!", Game1.menuFont, 2000, Color.White);
             this.btnMisuseFadingMessage = new FadingMessage(attackBtn.location.X + attackBtn.location.Width / 2, btn_Y - 20, "You must select a warrior first.", Game1.smallFont, 2000, Color.Red);
-            this.yourTurnFadingMessage = new FadingMessage(this.BOARDWIDTH / 2, this.BOARDHEIGHT / 2, "Your turn!", Game1.menuFont, 2500, Color.White);
-            this.attackInfoPane = new AttackInfoPane(200, 200);
+            this.yourTurnFadingMessage = new FadingMessage(this.BOARDWIDTH / 2, this.BOARDHEIGHT / 2, "Your turn!", Game1.menuFont, 2000, Color.White);
+            this.attackInfoPane = new AttackInfoPane(this, 300, 140);
         }
         public void Update(GameTime gameTime)
         {

@@ -73,6 +73,7 @@ namespace CapitalStrategy
             this.curDelay = 0;
             this.isYours = previousWarrior.isYours;
             this.description = previousWarrior.description;
+            this.health = previousWarrior.health;
         }
         public void draw()
         {
@@ -569,7 +570,7 @@ namespace CapitalStrategy
                 //target.health -= damage;
                 Random rand = new Random();
                 int randomNum = rand.Next(0, 101);
-                int damage = (this.attack * 25) / target.defense;
+                int damage = (this.attack * 20) / target.defense;
                 bool doesHit = true;
 
                 string attackSound = this.attackSound;
@@ -587,7 +588,7 @@ namespace CapitalStrategy
                 if (direction == target.direction || direction == (target.direction + 1) % 8 || direction == (target.direction - 1) % 8)
                 {
                     //if target is facing towards from attacking unit, 80% chance of hitting
-                    doesHit = randomNum <= 80;
+                    doesHit = randomNum <= 70;
                 }
                 else if (direction == (target.direction + 4) % 8)
                 {
@@ -598,7 +599,7 @@ namespace CapitalStrategy
                 else
                 {
                     //if target's side is towards attacking unit, 90% chance to hit
-                    doesHit = randomNum <= 90;
+                    doesHit = randomNum <= 85;
                     
                 }
 
