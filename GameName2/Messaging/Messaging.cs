@@ -69,6 +69,10 @@ namespace CapitalStrategy.Messaging
                             this.game.gameState = GameState.gameMatch;
                             this.game.windows[GameState.gameMatch].Initialize();
                             this.game.gameMatch.isYourTurn = isMyTurn;
+                            if (isMyTurn)
+                            {
+                                this.game.gameMatch.yourTurnFadingMessage.show();
+                            }
                             Game1.gameStates.Push(GameState.mainMenu);
                         }
                     }

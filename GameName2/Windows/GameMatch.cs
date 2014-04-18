@@ -89,6 +89,7 @@ namespace CapitalStrategy.Windows
         // fading messages
         FadingMessage missFadingMessage;
         FadingMessage btnMisuseFadingMessage;
+        public FadingMessage yourTurnFadingMessage { get; set; }
 
         public Boolean waitingForTurn { get; set; }
         public Boolean didSkipTurn = false;
@@ -165,6 +166,7 @@ namespace CapitalStrategy.Windows
 
             this.missFadingMessage = new FadingMessage(0, 0, "Miss!", Game1.menuFont, 2000, Color.White);
             this.btnMisuseFadingMessage = new FadingMessage(attackBtn.location.X + attackBtn.location.Width / 2, btn_Y - 20, "You must select a warrior first.", Game1.smallFont, 2000, Color.Red);
+            this.yourTurnFadingMessage = new FadingMessage(this.BOARDWIDTH / 2, this.BOARDHEIGHT / 2, "Your turn!", Game1.menuFont, 1000, Color.White);
             this.attackInfoPane = new AttackInfoPane(100, 100);
         }
         public void Update(GameTime gameTime)
@@ -172,6 +174,7 @@ namespace CapitalStrategy.Windows
             this.healthBarFadeDelay -= gameTime.ElapsedGameTime.Milliseconds;
             this.missFadingMessage.update(gameTime);
             this.btnMisuseFadingMessage.update(gameTime);
+            this.yourTurnFadingMessage.update(gameTime);
 
             // manages button states
             if (this.isYourTurn)
@@ -383,6 +386,10 @@ namespace CapitalStrategy.Windows
                 // add message here
                 this.decrementCooldowns();
                 this.isYourTurn = !this.isYourTurn;
+                if (this.isYourTurn)
+                {
+                    this.yourTurnFadingMessage.show();
+                }
                 this.turnProgress = TurnProgress.beginning;
                 this.selectedWarrior = null;
                 if (!this.isYourTurn)
@@ -694,7 +701,7 @@ namespace CapitalStrategy.Windows
             this.skipBtn.draw(windowManager.spriteBatch);
 
             this.attackInfoPane.draw(this.spriteBatch);
-
+            this.yourTurnFadingMessage.draw(this.spriteBatch);
             
             this.dialogEnd.draw2();
             this.dialogOK.draw(this.windowManager.spriteBatch);
