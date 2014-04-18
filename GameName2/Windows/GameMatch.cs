@@ -843,7 +843,7 @@ namespace CapitalStrategy.Windows
                 int imgPadding = 40;
                 toDrawX = SELECTED_WARRIOR_INFO_X;
                 toDrawY = SELECTED_WARRIOR_INFO_Y + 80;
-                displayWarrior.drawInArbitraryLocation(656, 318);
+                displayWarrior.drawInArbitraryLocation(645, 318);
                 toDrawX = toDrawX + board.WARRIORWIDTH / 2 + imgPadding;
                 int xoffset = (int) iconHeight * 2;
                 padding = (int) iconHeight * 2;
