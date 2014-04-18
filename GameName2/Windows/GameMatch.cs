@@ -197,9 +197,12 @@ namespace CapitalStrategy.Windows
                             this.dialogWinner.isVisible = false;
                             this.dialogOK.isVisible = false;
                             this.dialogOK.isDisabled = false;
+                            this.Initialize();
+                            this.LoadContent();
                             int newGameState = Game1.gameStates.Pop();
                             this.windowManager.gameState = newGameState;
                             this.windowManager.windows[newGameState].Initialize();
+
                         }
                     }
                     // manages button states
@@ -288,7 +291,7 @@ namespace CapitalStrategy.Windows
                                 this.turnProgress = TurnProgress.attacking;
                                 int xDiff = (int)(currentTurnWarrior.col - beingAttacked.col);
                                 int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
-                                beingAttacked.setDirection(xDiff, yDiff);
+                                //beingAttacked.setDirection(xDiff, yDiff);
                                 beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
                                 this.currentTurnWarrior.beginAttack(this.targetRow, this.targetCol);
                             }
@@ -403,7 +406,7 @@ namespace CapitalStrategy.Windows
                         0,
                         this.currentTurnWarrior.id,
                         false,
-                        0);
+                        this.currentTurnWarrior.direction);
                     }
 
 
@@ -1023,7 +1026,7 @@ namespace CapitalStrategy.Windows
             {
                 return false;
             }
-            this.finalFacing = message.facing;
+            this.finalFacing = Direction.flipOverX(message.facing);
             // they skipped their turn
             if(message.attackerUnitID == -1)
             {

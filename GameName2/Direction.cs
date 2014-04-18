@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CapitalStrategy
 {
-    class Direction
+    public class Direction
     {
         public const int N = 0;
         public const int NE = 1;
@@ -15,5 +15,26 @@ namespace CapitalStrategy
         public const int SW = 5;
         public const int W = 6;
         public const int NW = 7;
+
+        public static int flipOverX(int direction)
+        {
+            if (direction <= 4)
+            {
+                return 4 - direction;
+            }
+            else
+            {
+                return 4 + 8 - direction;
+            }
+            // 0 -> 4
+            // 1 -> 3
+            // 2 -> 2
+            // 3 -> 1
+            // 4 -> 0
+            // 5 -> 7
+            // 6 -> 6
+            // 7 -> 5
+
+        }
     }
 }

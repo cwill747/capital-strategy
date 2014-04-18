@@ -47,7 +47,7 @@ namespace CapitalStrategyServer
                 client2.lookingForGame = false;
                 Random random = new Random();
                
-                bool isClient1First = random.Next(0,2) == 0 ? true : true;
+                bool isClient1First = random.Next(0,2) == 0 ? true : false;
                 Message sendToClient1 = new Message(msgType.Matchmaking, client2.uniqueIdentifier, client1.uniqueIdentifier);
                 sendToClient1.msg = client2.username + ":" + isClient1First.ToString();
                 sendToClient1.waitingToSend = true;
