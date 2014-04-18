@@ -10,6 +10,8 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Storage;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Input.Touch;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 using MySql.Data.MySqlClient;
 using CapitalStrategy.GUI;
 using System.Data.SqlClient;
@@ -37,6 +39,9 @@ namespace CapitalStrategy.Windows
         public Rectangle capitalLogoLoc { get; set; }
         public Button newUserClick { get; set;}
         public Button existingUserClick {get; set;}
+        public ContentManager Content { get; set; }
+
+        public SoundEffect click;
 
         public Login(Game1 windowManager)
         {
@@ -71,6 +76,9 @@ namespace CapitalStrategy.Windows
             this.errorMessageLoc = new Vector2(leftEdge + 25, startY + 430);
             this.newUserClick = new Button ("REGISTER", new Rectangle(leftEdge + 40, startY + 350, 250, 50), Game1.smallFont);
             this.existingUserClick = new Button("RETURN TO LOGIN", new Rectangle(leftEdge + 40, startY + 380, 250, 50), Game1.smallFont, isVisible: false);
+
+            click = windowManager.Content.Load<SoundEffect>("soundEffects/daClick");
+
 
         }
 
@@ -133,6 +141,7 @@ namespace CapitalStrategy.Windows
                         }
                         else if (key.Equals(Keys.Enter))
                         {
+                            click.Play();
                             if (confirmPasswordInput.isVisible == false)
                             {
                                 this.login(this.usernameInput.content, this.passwordInput.content);
@@ -176,19 +185,19 @@ namespace CapitalStrategy.Windows
                     }
                     if (this.submitButton.checkClick(newMouseState))
                     {
-
+                        click.Play();
                     }
                     if (this.registerButton.checkClick(newMouseState))
                     {
-
+                        click.Play();
                     }
                     if (this.newUserClick.checkClick(newMouseState))
                     {
-
+                        click.Play();
                     }
                     if (this.existingUserClick.checkClick(newMouseState))
                     {
-
+                        click.Play();
                     }
 
                 }

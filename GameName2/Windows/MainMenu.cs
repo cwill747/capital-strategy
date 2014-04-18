@@ -34,6 +34,7 @@ namespace CapitalStrategy.Windows
 
         public Boolean musicIsPlaying = false;
         public SoundEffectInstance instance;
+        public SoundEffect click;
         
         public MainMenu(Game1 windowManager)
         {
@@ -73,6 +74,10 @@ namespace CapitalStrategy.Windows
             music = Content.Load<SoundEffect>("Music/MenuMusic");
             instance = music.CreateInstance();
             instance.IsLooped = true;
+
+            
+            click = Content.Load<SoundEffect>("soundEffects/daClick");
+
             
         }
 
@@ -96,12 +101,15 @@ namespace CapitalStrategy.Windows
                         if (this.findMatchButton.checkClick(newState))
                         {
                             instance.Stop();
+                            click.Play();
                         }
                         if (this.customizeArmyButton.checkClick(newState))
                         {
+                            click.Play();
                         }
                         if (this.backButton.checkClick(newState))
                         {
+                            click.Play();
                         }
                     }
                     else
