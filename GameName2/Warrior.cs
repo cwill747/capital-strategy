@@ -129,6 +129,7 @@ namespace CapitalStrategy
                     this.state = State.stopped;
                     if (game.turnProgress == TurnProgress.attacking)
                     {
+                        this.game.attackInfoPane.isVisible = false;
                         game.turnProgress = TurnProgress.attacked;
                        
                     }
@@ -373,6 +374,7 @@ namespace CapitalStrategy
 
             return false;
         }
+
         public void setDirection(int xDiff, int yDiff)
         {
             // angle is in radians, always between 0 and pi
@@ -581,19 +583,19 @@ namespace CapitalStrategy
                 {
                     damage = (int)(damage * 1.33);
                 }
-
-                if (this.isFacingTowards((int)this.row, (int)this.col, (int)target.row, (int)target.col, target.direction))
+                int direction = target.getDirectionTo(this);
+                if (direction == target.direction || direction == (target.direction + 1) % 8 || direction == (target.direction - 1) % 8)
                 {
                     //if target is facing towards from attacking unit, 80% chance of hitting
                     doesHit = randomNum <= 80;
                 }
-                else if (this.isFacingAway((int)this.row, (int)this.col, (int)target.row, (int)target.col, target.direction))
+                else if (direction == (target.direction + 4) % 8)
                 {
                     //if target is facing away from attacking unit, does 1.5* damage and always hits
                     damage = (int)(damage * 1.33);
                     doesHit = true;
                 }
-                else if (this.isFacingSide((int)this.row, (int)this.col, (int)target.row, (int)target.col, target.direction))
+                else
                 {
                     //if target's side is towards attacking unit, 90% chance to hit
                     doesHit = randomNum <= 90;
@@ -615,61 +617,36 @@ namespace CapitalStrategy
             return 0;
             // handle death in motions
         }
-        public Boolean isFacingTowards(int thisRow, int thisCol, int targetRow, int targetCol, int targetDir)
+        public int getDirectionTo(Warrior attacker)
         {
-            if (thisCol != targetCol)
-            {
-                if (thisCol < targetCol && targetDir == 0)
-                {
-                    return true;
-                }
-                if (thisCol > targetCol && targetDir == 4)
-                {
-                    return true;
-                }
-            }
-            if (thisCol == targetCol)
-            {
-                if (thisRow < targetRow && targetDir == 6)
-                {
-                    return true;
-                }
-                if (thisRow > targetRow && targetDir == 2)
-                {
-                    return true;
-                }
+            int rowDiff = (int)(attacker.row - this.row);
+            int colDiff = (int)(attacker.col - this.col);
+            // angle is in radians, always between 0 and pi
+            rowDiff *= -1;
+            double angle = 360 * Math.Atan(((double)rowDiff) / colDiff) / (2 * Math.PI);
 
+            if (angle < 90 && colDiff < 0)
+            {
+                angle = angle + 180;
             }
-            return false;
+            if (angle < 0)
+            {
+                angle += 360;
+            }
+
+            // now we want it to be clockwise, with 0 at 3pi/4
+            angle = angle - 112.5;
+            if (angle < 0)
+            {
+                angle += 360;
+            }
+            angle = 360 - angle;
+
+            // now normalize to int 0 - 7
+            return (int)(8 * angle / (360));
+
+            
         }
-        public Boolean isFacingAway(int thisRow, int thisCol, int targetRow, int targetCol, int targetDir)
-        {
-            if (thisCol != targetCol)
-            {
-                if (thisCol < targetCol && targetDir == 4)
-                {
-                    return true;
-                }
-                if (thisCol > targetCol && targetDir == 0)
-                {
-                    return true;
-                }
-            }
-            if (thisCol == targetCol)
-            {
-                if (thisRow < targetRow && targetDir == 2)
-                {
-                    return true;
-                }
-                if (thisRow > targetRow && targetDir == 6)
-                {
-                    return true;
-                }
-
-            }
-            return false;
-        }
-
         public override bool Equals(object obj)
         {
             if (obj.GetType() == typeof(Warrior))
@@ -680,22 +657,6 @@ namespace CapitalStrategy
             return false;
         }
 
-
-        public Boolean isFacingSide(int thisRow, int thisCol, int targetRow, int targetCol, int targetDir)
-        {
-            if (thisRow == targetRow)
-            {
-                if (targetDir == 2 || targetDir == 6)
-                    return true;
-            }
-            if (thisCol == targetCol)
-            {
-                if (targetDir == 0 || targetDir == 4)
-                    return true;
-
-            }
-            return false;
-        }
 
 
         public class BredthFirstNode

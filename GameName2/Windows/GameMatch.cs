@@ -166,8 +166,8 @@ namespace CapitalStrategy.Windows
 
             this.missFadingMessage = new FadingMessage(0, 0, "Miss!", Game1.menuFont, 2000, Color.White);
             this.btnMisuseFadingMessage = new FadingMessage(attackBtn.location.X + attackBtn.location.Width / 2, btn_Y - 20, "You must select a warrior first.", Game1.smallFont, 2000, Color.Red);
-            this.yourTurnFadingMessage = new FadingMessage(this.BOARDWIDTH / 2, this.BOARDHEIGHT / 2, "Your turn!", Game1.menuFont, 1000, Color.White);
-            this.attackInfoPane = new AttackInfoPane(100, 100);
+            this.yourTurnFadingMessage = new FadingMessage(this.BOARDWIDTH / 2, this.BOARDHEIGHT / 2, "Your turn!", Game1.menuFont, 2500, Color.White);
+            this.attackInfoPane = new AttackInfoPane(200, 200);
         }
         public void Update(GameTime gameTime)
         {
@@ -765,6 +765,15 @@ namespace CapitalStrategy.Windows
                     this.turnProgress = TurnProgress.targetAcquired;
                     this.targetRow = this.mouseState.row;
                     this.targetCol = this.mouseState.col;
+                    if (this.board.warriors[targetRow][targetCol] != null)
+                    {
+                        this.attackInfoPane.isVisible = true;
+                        this.attackInfoPane.updateContents(this.currentTurnWarrior, this.board.warriors[targetRow][targetCol]);
+                    }
+                    else
+                    {
+                        this.attackInfoPane.isVisible = false;
+                    }
                 }
             }
             else if ( this.isYourTurn && this.turnProgress == TurnProgress.targetAcquired)
@@ -796,6 +805,7 @@ namespace CapitalStrategy.Windows
                 }
                 else
                 {
+                    this.attackInfoPane.isVisible = false;
                     this.turnProgress = TurnProgress.moved;
                     return;
                 }
