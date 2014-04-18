@@ -39,7 +39,7 @@ namespace CapitalStrategy.Windows
         public Rectangle capitalLogoLoc { get; set; }
         public Button newUserClick { get; set;}
         public Button existingUserClick {get; set;}
-        public ContentManager Content { get; set; }
+        
 
         public SoundEffect click;
 

@@ -48,6 +48,19 @@ namespace CapitalStrategy.GUI
             }
         }
 
+        public void draw2()
+        {
+            if (this.isVisible)
+            {
+                // draw dialog box background
+                this.windowManager.spriteBatch.End();
+                this.windowManager.spriteBatch.Begin();
+                this.windowManager.spriteBatch.Draw(Game1.charcoal, new Rectangle(dialogBox.X - MARGIN, dialogBox.Y - MARGIN, dialogBox.Width + 2 * MARGIN, dialogBox.Height + 2 * MARGIN), Color.White);
+                this.windowManager.spriteBatch.Draw(Game1.background, this.dialogBox, Color.White);
+                this.windowManager.spriteBatch.End();
+            }
+        }
+
         public Rectangle getComponentLocation(int relativeHeight, int width, int height)
         {
             return new Rectangle((this.windowManager.Window.ClientBounds.Width - width) / 2,

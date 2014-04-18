@@ -9,6 +9,8 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Storage;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Input.Touch;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 using MySql.Data.MySqlClient;
 using CapitalStrategy.GUI;
 using CapitalStrategy.Primitives;
@@ -56,6 +58,9 @@ namespace CapitalStrategy.Windows
         MouseWrapper mouseState;
         Boolean warriorIsPickedUp { get; set; }
         Vector2 offsetPickedUpWarrior { get; set; }
+
+        public SoundEffect click;
+
         public CustomizeArmy(Game1 windowManager)
         {
             this.windowManager = windowManager;
@@ -112,6 +117,8 @@ namespace CapitalStrategy.Windows
             this.bars = this.windowManager.Content.Load<Texture2D>("GUI/bars");
             primitiveBatch = new PrimitiveBatch(this.windowManager.GraphicsDevice);
 
+            click = windowManager.Content.Load<SoundEffect>("soundEffects/daClick");
+
         }
 
         public void Update(GameTime gameTime)
@@ -123,10 +130,14 @@ namespace CapitalStrategy.Windows
             {
                 if (newMouseState.LeftButton == ButtonState.Pressed && oldMouseState.LeftButton != ButtonState.Pressed)
                 {
-                    this.backButton.checkClick(newMouseState);
-                    this.save.checkClick(newMouseState);
-                    this.aRange.checkClick(newMouseState);
-                    this.mRange.checkClick(newMouseState);
+                    if(this.backButton.checkClick(newMouseState))
+                        click.Play();
+                    if(this.save.checkClick(newMouseState))
+                        click.Play();
+                    if(this.aRange.checkClick(newMouseState))
+                        click.Play();
+                    if(this.mRange.checkClick(newMouseState))
+                        click.Play();
                     if (board.isClickOverGrid(newMouseState.X, newMouseState.Y))
                     {
                         Vector2 coord = board.clickOverGrid(newMouseState.X, newMouseState.Y);
