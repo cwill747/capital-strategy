@@ -69,6 +69,8 @@ namespace CapitalStrategy.Windows
         private Texture2D background;
         private Texture2D bars;
 
+        private int finalFacing; // for simulating opponents move, final facing
+
         // GUI STUFF
         Button movementBtn;
         Button attackBtn;
@@ -382,79 +384,85 @@ namespace CapitalStrategy.Windows
 
 
                     }
-
+                    
                     
 
                     this.turnProgress = TurnProgress.turnOver;
                     
                 }
-                if (turnProgress == TurnProgress.turnOver)
-                {
-                    if (this.isYourTurn)
-                    {
-                        this.waitingForTurn = true;
-                    }
-                    // add message here
-                    this.decrementCooldowns();
-                    this.isYourTurn = !this.isYourTurn;
-                    this.turnProgress = TurnProgress.beginning;
-                    this.selectedWarrior = null;
-                    if (!this.isYourTurn)
-                    {
-                        Message toSend;
-                        if (this.didSkipTurn)
-                        {
-                            toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
-                            new int[2] { 0,0 },
-                            new int[2] { 0,0 },
-                            0,
-                            0,
-                            this.currentTurnWarrior.id,
-                            false,
-                            this.currentTurnWarrior.direction);
-                            this.didSkipTurn = false;
-                        }
-                        else{
-                            toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
-                            new int[2] { (int)this.currentTurnWarrior.row, (int)this.currentTurnWarrior.col},
-                            new int[2] { this.targetRow, this.targetCol },
-                            0,
-                            0,
-                            this.currentTurnWarrior.id,
-                            false,
-                            0);
-                        }
-
-
-                        if (this.beingAttacked != null)
-                        {
-                            toSend.attackedUnitID = this.beingAttacked.id;
-                            toSend.attackedLocation = new int[2] { (int) this.beingAttacked.row, (int) this.beingAttacked.col};
-                            toSend.damageDealt = this.opponentDamage;
-                        }
-                        /*
-                        Message message = new Message();
-                        message.attackedLocation = new int[2] { 2, 2 };
-                        message.attackedUnitID = 2;
-                        message.attackerUnitID = 105;
-                        message.damageDealt = 30;
-                        message.attackedLocation = new int[2] { 5, 3 };
-                        message.endLocation = new int[2] { 8, 1 };
-                         */
-                        /*NetOutgoingMessage om = this.windowManager.client.CreateMessage();
-                        toSend.handleMoveMessage(ref om);
-                        this.windowManager.client.SendMessage(om, NetDeliveryMethod.ReliableOrdered);
-                        this.currentTurnWarrior = null;
-                        this.beingAttacked = null;*/
-                        this.windowManager.msgManager.addToOutgoingQueue(toSend);
-                    }
-                    this.beingAttacked = null;
+                
 
 
                     
-                }
+                
             }
+            if (turnProgress == TurnProgress.turnOver)
+            {
+                if (!this.isYourTurn && this.currentTurnWarrior != null)
+                {
+                    this.currentTurnWarrior.direction = this.finalFacing;
+                }
+                if (this.isYourTurn)
+                {
+                    this.waitingForTurn = true;
+                }
+                // add message here
+                this.decrementCooldowns();
+                this.isYourTurn = !this.isYourTurn;
+                this.turnProgress = TurnProgress.beginning;
+                this.selectedWarrior = null;
+                if (!this.isYourTurn)
+                {
+                    Message toSend;
+                    if (this.didSkipTurn || this.currentTurnWarrior == null)
+                    {
+                        toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
+                        new int[2] { 0, 0 },
+                        new int[2] { 0, 0 },
+                        0,
+                        0,
+                        this.currentTurnWarrior == null ? -1 : this.currentTurnWarrior.id,
+                        false,
+                        this.currentTurnWarrior == null ? -1 : this.currentTurnWarrior.direction);
+                        this.didSkipTurn = false;
+                    }
+                    else
+                    {
+                        toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
+                        new int[2] { (int)this.currentTurnWarrior.row, (int)this.currentTurnWarrior.col },
+                        new int[2] { this.targetRow, this.targetCol },
+                        0,
+                        0,
+                        this.currentTurnWarrior.id,
+                        false,
+                        0);
+                    }
 
+
+                    if (this.beingAttacked != null)
+                    {
+                        toSend.attackedUnitID = this.beingAttacked.id;
+                        toSend.attackedLocation = new int[2] { (int)this.beingAttacked.row, (int)this.beingAttacked.col };
+                        toSend.damageDealt = this.opponentDamage;
+                    }
+                    /*
+                    Message message = new Message();
+                    message.attackedLocation = new int[2] { 2, 2 };
+                    message.attackedUnitID = 2;
+                    message.attackerUnitID = 105;
+                    message.damageDealt = 30;
+                    message.attackedLocation = new int[2] { 5, 3 };
+                    message.endLocation = new int[2] { 8, 1 };
+                     */
+                    /*NetOutgoingMessage om = this.windowManager.client.CreateMessage();
+                    toSend.handleMoveMessage(ref om);
+                    this.windowManager.client.SendMessage(om, NetDeliveryMethod.ReliableOrdered);
+                    this.currentTurnWarrior = null;
+                    this.beingAttacked = null;*/
+                    this.windowManager.msgManager.addToOutgoingQueue(toSend);
+                }
+                this.beingAttacked = null;
+            }
             // handle skip
 
 
@@ -1042,11 +1050,11 @@ namespace CapitalStrategy.Windows
             {
                 return false;
             }
-
+            this.finalFacing = message.facing;
             // they skipped their turn
-            if(message.attackerUnitID == int.MaxValue)
+            if(message.attackerUnitID == -1)
             {
-                this.turnProgress = TurnProgress.moving;
+                this.turnProgress = TurnProgress.turnOver;
             }
             else
             {
