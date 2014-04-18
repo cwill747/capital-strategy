@@ -730,12 +730,14 @@ namespace CapitalStrategy.Windows
                         int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
                         //beingAttacked.setDirection(xDiff, yDiff);
 
-                        string attackSound = currentTurnWarrior.attackSound;
-                        SoundEffect effect;     
-                        effect = Content.Load<SoundEffect>(attackSound);
-                        effect.Play();
+                        
                         
                         beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
+
+                        string attackSound = currentTurnWarrior.attackSound;
+                        SoundEffect effect;
+                        effect = Content.Load<SoundEffect>(attackSound);
+                        effect.Play();
                     }
                     else
                     {
@@ -962,10 +964,13 @@ namespace CapitalStrategy.Windows
                 this.beingAttacked = attackedWarrior;
                 this.opponentDamage = message.damageDealt;
 
-                string attackSound = this.currentTurnWarrior.attackSound;
-                SoundEffect effect;
-                effect = Content.Load<SoundEffect>(attackSound);
-                effect.Play();
+                if (this.opponentDamage != 0)
+                {
+                    string attackSound = this.currentTurnWarrior.attackSound;
+                    SoundEffect effect;
+                    effect = Content.Load<SoundEffect>(attackSound);
+                    effect.Play();
+                }
             }
 
             
