@@ -69,6 +69,7 @@ namespace CapitalStrategy.Windows
 
         public AttackInfoPane attackInfoPane { get; set; } // attack preview pane that shows up on confirmation of attack
 
+        public Boolean didQuit = false;
 
         public Dialog dialogEnd { get; set; }
         public Button dialogOK { get; set; }
@@ -171,7 +172,7 @@ namespace CapitalStrategy.Windows
             dialogOK = new Button("OK", dialogEnd.getComponentLocation(200, 200, 70), Game1.menuFont, isVisible: false);
             phrases = new List<String>();
             dialogWinner = new TextAnimation(dialogEnd.getComponentLocation(100, (int)Game1.menuFont.MeasureString("Searching for opponent...").X, 100), phrases, 500, Game1.menuFont, isVisible: false);
-            quitBtn = new Button("QUIT", new Rectangle(SELECTED_WARRIOR_INFO_X, btn_Y * 2, 100, 25), Game1.smallFont);
+            quitBtn = new Button("QUIT", new Rectangle(SELECTED_WARRIOR_INFO_X, btn_Y * 2 +40, 100, 25), Game1.smallFont);
 
             dialogOK = new Button("OK", dialogEnd.getComponentLocation(200, 200, 70), Game1.menuFont, isVisible: false);
             dialogConfirmQuit = new Dialog(this.windowManager, dialogWidth, dialogHeight, isVisible: false);
@@ -193,6 +194,7 @@ namespace CapitalStrategy.Windows
 
         public void reset()
         {
+            
             this.Initialize();
             this.LoadContent();
             int newGameState = Game1.gameStates.Pop();
@@ -207,6 +209,21 @@ namespace CapitalStrategy.Windows
             this.btnMisuseFadingMessage.update(gameTime);
             this.yourTurnFadingMessage.update(gameTime);
             quitBtn.isDisabled = false;
+
+            ////for quitting
+            if (this.didQuit)
+            {
+                Message toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
+                new int[2] { 0, 0 },
+                new int[2] { 0, 0 },
+                0,
+                0,
+                this.currentTurnWarrior == null ? -1 : this.currentTurnWarrior.id,
+                false,
+                -2);
+                this.windowManager.msgManager.addToOutgoingQueue(toSend);
+                this.didQuit = false;
+            }
             // manages button states
             if (this.isYourTurn)
             {
@@ -428,6 +445,19 @@ namespace CapitalStrategy.Windows
                 if (!this.isYourTurn)
                 {
                     Message toSend;
+                  
+                    if (this.didQuit)
+                    {
+                        toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
+                        new int[2] { 0, 0 },
+                        new int[2] { 0, 0 },
+                        0,
+                        0,
+                        this.currentTurnWarrior == null ? -1 : this.currentTurnWarrior.id,
+                        false,
+                        -2);
+                        this.didQuit = false;
+                    }
                     if (this.didSkipTurn || this.currentTurnWarrior == null)
                     {
                         toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
@@ -581,6 +611,9 @@ namespace CapitalStrategy.Windows
                             confirmOK.isVisible = false;
                             dialogconfirmText.isVisible = false;
                             yourWarriors.Clear();
+                            this.board.resetTints();
+                            didQuit = true;
+
                         }
                         if (this.skipBtn.unClick(mouseState.mouseState))
                         {
@@ -1123,6 +1156,11 @@ namespace CapitalStrategy.Windows
         // kicks off opponent animation for move
         public Boolean handleOpponentMove(Message message)
         {
+
+            if (message.facing == -2)
+            {
+                this.opponentWarriors.Clear();
+            }
             message = this.flipOverXAxis(message);
             if (this.isYourTurn)
             {
@@ -1134,6 +1172,14 @@ namespace CapitalStrategy.Windows
             {
                 this.turnProgress = TurnProgress.turnOver;
             }
+                /*
+            else if (message.facing == -2)
+            {
+                this.opponentWarriors.Clear();
+                this.isYourTurn = false;
+                this.turnProgress = TurnProgress.turnOver;
+            }
+                 * */
             else
             {
                 Warrior attackingWarrior = this.getWarriorById(message.attackerUnitID);
@@ -1146,7 +1192,7 @@ namespace CapitalStrategy.Windows
                 {
                     this.turnProgress = TurnProgress.moved;
                 }
-                
+
                 this.currentTurnWarrior = attackingWarrior;
 
                 this.targetRow = message.attackedLocation[0];
