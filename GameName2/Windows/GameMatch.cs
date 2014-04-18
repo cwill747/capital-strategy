@@ -67,6 +67,8 @@ namespace CapitalStrategy.Windows
         MouseWrapper mouseState;
         MouseState oldMouseState;
 
+        public AttackInfoPane attackInfoPane { get; set; } // attack preview pane that shows up on confirmation of attack
+
 
         public Dialog dialogEnd { get; set; }
         public Button dialogOK { get; set; }
@@ -163,7 +165,7 @@ namespace CapitalStrategy.Windows
 
             this.missFadingMessage = new FadingMessage(0, 0, "Miss!", Game1.menuFont, 2000, Color.White);
             this.btnMisuseFadingMessage = new FadingMessage(attackBtn.location.X + attackBtn.location.Width / 2, btn_Y - 20, "You must select a warrior first.", Game1.smallFont, 2000, Color.Red);
-            
+            this.attackInfoPane = new AttackInfoPane(100, 100);
         }
         public void Update(GameTime gameTime)
         {
@@ -171,6 +173,44 @@ namespace CapitalStrategy.Windows
             this.missFadingMessage.update(gameTime);
             this.btnMisuseFadingMessage.update(gameTime);
 
+            // manages button states
+            if (this.isYourTurn)
+            {
+                switch (this.turnProgress)
+                {
+                    case TurnProgress.beginning:
+                        this.hasMoved = false;
+                        movementBtn.isDisabled = true;
+                        attackBtn.isDisabled = false;
+                        skipBtn.isDisabled = false;
+                        break;
+                    case TurnProgress.moving:
+                        this.hasMoved = true;
+                        movementBtn.isDisabled = true;
+                        attackBtn.isDisabled = false;
+                        skipBtn.isDisabled = false;
+                        break;
+                    case TurnProgress.moved:
+                    case TurnProgress.attacking:
+                        movementBtn.isDisabled = false;
+                        attackBtn.isDisabled = true;
+                        skipBtn.isDisabled = false;
+                        break;
+                    case TurnProgress.attacked:
+                        movementBtn.isDisabled = true;
+                        attackBtn.isDisabled = true;
+                        skipBtn.isDisabled = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                movementBtn.isDisabled = true;
+                attackBtn.isDisabled = true;
+                skipBtn.isDisabled = true;
+            }
 
             if (this.opponentWarriors.Count == 0 || this.yourWarriors.Count == 0)
             {
@@ -205,44 +245,7 @@ namespace CapitalStrategy.Windows
 
                         }
                     }
-                    // manages button states
-                    if (this.isYourTurn)
-                    {
-                        switch (this.turnProgress)
-                        {
-                            case TurnProgress.beginning:
-                                this.hasMoved = false;
-                                movementBtn.isDisabled = true;
-                                attackBtn.isDisabled = false;
-                                skipBtn.isDisabled = false;
-                                break;
-                            case TurnProgress.moving:
-                                this.hasMoved = true;
-                                movementBtn.isDisabled = true;
-                                attackBtn.isDisabled = false;
-                                skipBtn.isDisabled = false;
-                                break;
-                            case TurnProgress.moved:
-                            case TurnProgress.attacking:
-                                movementBtn.isDisabled = false;
-                                attackBtn.isDisabled = true;
-                                skipBtn.isDisabled = false;
-                                break;
-                            case TurnProgress.attacked:
-                                movementBtn.isDisabled = true;
-                                attackBtn.isDisabled = true;
-                                skipBtn.isDisabled = true;
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        movementBtn.isDisabled = true;
-                        attackBtn.isDisabled = true;
-                        skipBtn.isDisabled = true;
-                    }
+                    
                     movementBtn.update(gameTime);
                     attackBtn.update(gameTime);
                     skipBtn.update(gameTime);
@@ -685,13 +688,13 @@ namespace CapitalStrategy.Windows
             this.spriteBatch.End();
 
           
-            if (this.isYourTurn)
-            {
-                this.movementBtn.draw(windowManager.spriteBatch);
-                this.attackBtn.draw(windowManager.spriteBatch);
-                this.skipBtn.draw(windowManager.spriteBatch);
+            
+            this.movementBtn.draw(windowManager.spriteBatch);
+            this.attackBtn.draw(windowManager.spriteBatch);
+            this.skipBtn.draw(windowManager.spriteBatch);
 
-            }
+            this.attackInfoPane.draw(this.spriteBatch);
+
             
             this.dialogEnd.draw2();
             this.dialogOK.draw(this.windowManager.spriteBatch);

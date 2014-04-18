@@ -29,6 +29,18 @@ namespace CapitalStrategy.GUI
             this.dialogBox = new Rectangle(0, 0, width, height);
             this.isVisible = isVisible;
             this.warriorToAttack = null;
+            
         }
+
+        public void draw(SpriteBatch spriteBatch)
+        {
+            if (this.isVisible)
+            {
+                spriteBatch.Begin();
+                spriteBatch.Draw(Game1.background, dialogBox, Color.White);
+                spriteBatch.End();
+            }
+        }
+
     }
 }
