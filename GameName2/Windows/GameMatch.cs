@@ -269,7 +269,8 @@ namespace CapitalStrategy.Windows
                             0,
                             0,
                             int.MaxValue,
-                            false);
+                            false,
+                            0);
                             this.didSkipTurn = false;
                             this.windowManager.msgManager.addToOutgoingQueue(toSend);
                         }
@@ -409,7 +410,8 @@ namespace CapitalStrategy.Windows
                             0,
                             0,
                             this.currentTurnWarrior.id,
-                            false);
+                            false,
+                            this.currentTurnWarrior.direction);
                             this.didSkipTurn = false;
                         }
                         else{
@@ -419,7 +421,8 @@ namespace CapitalStrategy.Windows
                             0,
                             0,
                             this.currentTurnWarrior.id,
-                            false);
+                            false,
+                            0);
                         }
 
 

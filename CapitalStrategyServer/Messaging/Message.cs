@@ -27,6 +27,7 @@ namespace CapitalStrategyServer.Messaging
         public int attackedUnitID;
         public int attackerUnitID;
         public bool unitAttackDied;
+        public int facing;
         public Client matchmadeClient;
 
         public Message()
@@ -65,7 +66,7 @@ namespace CapitalStrategyServer.Messaging
         /// <param name="attackerUnitID">What the id of the attacking piece was</param>
         /// <param name="unitAttackDied">Whether the attacked piece died or not</param>
         public Message(msgType type, long sentFrom, long sendToUUID, int[] endLocation, int[] attackedLocation, int damageDealt,
-            int attackedUnitID, int attackerUnitID, bool unitAttackDied)
+            int attackedUnitID, int attackerUnitID, bool unitAttackDied, int facing)
         {
             this.type = (int)msgType.Move;
             this.sentFrom = sentFrom;
@@ -76,6 +77,7 @@ namespace CapitalStrategyServer.Messaging
             this.attackedUnitID = attackedUnitID;
             this.attackerUnitID = attackerUnitID;
             this.unitAttackDied = unitAttackDied;
+            this.facing = facing;
         }
 
         public override string ToString()
@@ -121,6 +123,7 @@ namespace CapitalStrategyServer.Messaging
             m.Write(this.attackedUnitID);
             m.Write(this.attackerUnitID);
             m.Write(this.unitAttackDied);
+            m.Write(this.facing);
         }
     }
 
