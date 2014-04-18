@@ -72,6 +72,8 @@ namespace CapitalStrategy.Windows
         Button attackBtn;
         Button skipBtn;
 
+        FadingMessage missFadingMessage;
+
         public Boolean waitingForTurn { get; set; }
 
         //for after match
@@ -136,10 +138,12 @@ namespace CapitalStrategy.Windows
 
             mouseState = new MouseWrapper(board, Mouse.GetState());
 
+            this.missFadingMessage = new FadingMessage(0, 0, "Miss!", Game1.menuFont, 2000);
         }
         public void Update(GameTime gameTime)
         {
             this.healthBarFadeDelay -= gameTime.ElapsedGameTime.Milliseconds;
+            this.missFadingMessage.update(gameTime);
             if (isYourTurn)
             {
                 //for end game
@@ -293,10 +297,22 @@ namespace CapitalStrategy.Windows
                         if (this.isYourTurn)
                         {
                             this.opponentDamage = this.currentTurnWarrior.strike(this.beingAttacked);
+                            if (this.opponentDamage == 0)
+                            {
+                                Vector2 warriorLoc = this.board.getLocation(this.currentTurnWarrior.row, this.currentTurnWarrior.col);
+                                this.missFadingMessage.moveTo(warriorLoc.X + this.BOARDWIDTH / this.board.cols / 2, warriorLoc.Y - this.BOARDHEIGHT / this.board.rows / 4);
+                                this.missFadingMessage.show();
+                            }
                         }
                         else
                         {
                             this.beingAttacked.health -= this.opponentDamage;
+                            if (this.opponentDamage == 0)
+                            {
+                                Vector2 warriorLoc = this.board.getLocation(this.currentTurnWarrior.row, this.currentTurnWarrior.col);
+                                this.missFadingMessage.moveTo(warriorLoc.X + this.BOARDWIDTH / this.board.cols / 2, warriorLoc.Y - this.BOARDHEIGHT / this.board.rows / 4);
+                                this.missFadingMessage.show();
+                            }
                             if (this.beingAttacked.health > this.beingAttacked.maxHealth)
                             {
                                 this.beingAttacked.health = this.beingAttacked.maxHealth;
@@ -485,7 +501,6 @@ namespace CapitalStrategy.Windows
             spriteBatch.Begin();
             spriteBatch.Draw(Game1.background, backgroundRec, Color.White);
             
-            
             for (int i = 0; i < ROWS; i++)
                     {  
                            for (int j = 0; j < COLS; j++)
@@ -512,25 +527,6 @@ namespace CapitalStrategy.Windows
                                         this.spriteBatch.Draw(white, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.maxHealth), tileHeight / 10), Color.WhiteSmoke);
                                         this.spriteBatch.Draw(red, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.health), tileHeight / 10), Color.WhiteSmoke);
                                     }
-                                    /* COMMENTED OUT BECAUSE THIS CAUSED OUT OF MEMORY ERROR
-                                     * INFINITE WHILE LOOP
-                                     * CHECK YO CODE BEFORE YOU COMMIT!
-                                    //draw MISS or HIT! over the attacked warrior
-                                    if (warrior == beingAttacked && this.turnProgress == TurnProgress.attacked)
-                                    {
-                                        while (warrior.state == State.beenHit)
-                                        {
-                                            if (this.opponentDamage == 0)
-                                            {
-                                                this.windowManager.spriteBatch.DrawString(this.menufont, "MISS", new Vector2(xLoc - (tileWidth / 2), yLoc - tileHeight), Color.DarkMagenta);
-                                            }
-                                            else
-                                            {
-                                                this.windowManager.spriteBatch.DrawString(this.menufont, "HIT!", new Vector2(xLoc - (tileWidth / 3), yLoc - tileHeight), Color.Gold);
-                                            }
-                                        }
-                                    }
-                                    */
                                 }
                             }
                        
@@ -551,7 +547,7 @@ namespace CapitalStrategy.Windows
                 w.draw();
                 this.drawCooldownOnWarrior(w);
             }
-
+            this.missFadingMessage.draw(spriteBatch);
             if (mouseState.isOverGrid && board.warriors[mouseState.row][mouseState.col] != null)
             {
                 this.drawHealthBar(mouseState.row, mouseState.col);
