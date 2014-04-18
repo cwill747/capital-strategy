@@ -66,6 +66,14 @@ namespace CapitalStrategy.Windows
         Warrior displayWarrior;
         MouseWrapper mouseState;
         MouseState oldMouseState;
+
+
+        public Dialog dialogEnd { get; set; }
+        public Button dialogOK { get; set; }
+        public TextAnimation dialogWinner { get; set; }
+        public List<String> phrases { get; set; }
+        public Boolean armyStillAround = false;
+        public Boolean armyStillAround2 = false;
         private Texture2D background;
         private Texture2D bars;
 
@@ -81,7 +89,7 @@ namespace CapitalStrategy.Windows
         public Boolean waitingForTurn { get; set; }
         public Boolean didSkipTurn = false;
         //for after match
-        public Boolean armyStillAround = false;
+       // public Boolean armyStillAround = false;
 
         public int opponentDamage { get; set; }
 
@@ -144,6 +152,12 @@ namespace CapitalStrategy.Windows
 
 
             mouseState = new MouseWrapper(board, Mouse.GetState());
+            int dialogWidth = 600;
+            int dialogHeight = 300;
+            dialogEnd = new Dialog(this.windowManager, dialogWidth, dialogHeight, isVisible: false);
+            dialogOK = new Button("OK", dialogEnd.getComponentLocation(200, 200, 70), Game1.menuFont, isVisible: false);
+            phrases = new List<String>();
+            dialogWinner = new TextAnimation(dialogEnd.getComponentLocation(100, (int)Game1.menuFont.MeasureString("Searching for opponent...").X, 100), phrases, 500, Game1.menuFont, isVisible: false);
 
             this.missFadingMessage = new FadingMessage(0, 0, "Miss!", Game1.menuFont, 2000, Color.White);
             this.btnMisuseFadingMessage = new FadingMessage(attackBtn.location.X + attackBtn.location.Width / 2, btn_Y - 20, "You must select a warrior first.", Game1.smallFont, 2000, Color.Red);
@@ -154,408 +168,363 @@ namespace CapitalStrategy.Windows
             this.healthBarFadeDelay -= gameTime.ElapsedGameTime.Milliseconds;
             this.missFadingMessage.update(gameTime);
             this.btnMisuseFadingMessage.update(gameTime);
-            if (isYourTurn)
+
+
+            if (this.opponentWarriors.Count == 0 || this.yourWarriors.Count == 0)
             {
+                String winner = "Winner is: ";
+                winner += this.board.getName(this.windowManager, this.yourWarriors.Count != 0);
+                phrases.Add(winner);
+                dialogEnd.isVisible = true;
+                dialogOK.isVisible = true;
+                dialogWinner.isVisible = true;
+
+            }
                 //for end game
-                this.armyStillAround = false;
-                Boolean endCheck = true;
-                if (!armyStillAround)
+                if (this.mouseState.mouseState.LeftButton == ButtonState.Pressed)
                 {
-                    for (int i = 0; i < ROWS; i++)
+                    if (this.dialogOK.checkClick(mouseState.mouseState))
                     {
-                        if (!armyStillAround)
+                    }
+
+                    if (this.dialogEnd.isVisible)
+                    {
+                        if (this.dialogOK.unClick(mouseState.mouseState))
                         {
-                            for (int j = 0; j < COLS; j++)
-                            {
-                                Warrior unitC = board.warriors[i][j];
-                                if (unitC != null && unitC.isYours)
-                                {
-                                    armyStillAround = true;
-                                    endCheck = false;
-                                }
-                            }
+                            this.dialogEnd.isVisible = false;
+                            this.dialogWinner.isVisible = false;
+                            this.dialogOK.isVisible = false;
+                            this.dialogOK.isDisabled = false;
+                            int newGameState = Game1.gameStates.Pop();
+                            this.windowManager.gameState = newGameState;
+                            this.windowManager.windows[newGameState].Initialize();
                         }
                     }
-                }
-                // manages button states
-                if (this.isYourTurn)
-                {
-                    switch (this.turnProgress)
+                    // manages button states
+                    if (this.isYourTurn)
                     {
-                        case TurnProgress.beginning:
-                            this.hasMoved = false;
-                            movementBtn.isDisabled = true;
-                            attackBtn.isDisabled = false;
-                            skipBtn.isDisabled = false;
-                            break;
-                        case TurnProgress.moving:
-                            this.hasMoved = true;
-                            movementBtn.isDisabled = true;
-                            attackBtn.isDisabled = false;
-                            skipBtn.isDisabled = false;
-                            break;
-                        case TurnProgress.moved:
-                        case TurnProgress.attacking:
-                            movementBtn.isDisabled = false;
-                            attackBtn.isDisabled = true;
-                            skipBtn.isDisabled = false;
-                            break;
-                        case TurnProgress.attacked:
-                            movementBtn.isDisabled = true;
-                            attackBtn.isDisabled = true;
-                            skipBtn.isDisabled = true;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                else
-                {
-                    movementBtn.isDisabled = true;
-                    attackBtn.isDisabled = true;
-                    skipBtn.isDisabled = true;
-                }
-                movementBtn.update(gameTime);
-                attackBtn.update(gameTime);
-                skipBtn.update(gameTime);
-
-
-                if (endCheck)
-                {
-                    int newGameState = Game1.gameStates.Pop();
-                    this.windowManager.gameState = newGameState;
-                    this.windowManager.windows[newGameState].Initialize();
-                }
-            }
-            else
-            {
-                
-                    this.armyStillAround = false;
-                    Boolean endCheck = true;
-                    if (!armyStillAround)
-                    {
-                        for (int i = 0; i < ROWS; i++)
+                        switch (this.turnProgress)
                         {
-                            if (!armyStillAround)
-                            {
-                                for (int j = 0; j < COLS; j++)
-                                {
-                                    Warrior unitC = board.warriors[i][j];
-                                    if (unitC != null && !unitC.isYours)
-                                    {
-                                        armyStillAround = true;
-                                        endCheck = false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (endCheck)
-                    {
-                        int newGameState = Game1.gameStates.Pop();
-                        this.windowManager.gameState = newGameState;
-                        this.windowManager.windows[newGameState].Initialize();
-                    }
-           
-                    if (!this.isYourTurn)
-                    {
-                        Message toSend;
-                        if (this.didSkipTurn)
-                        {
-                            toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
-                            new int[2] { 0,0 },
-                            new int[2] { 0,0 },
-                            0,
-                            0,
-                            int.MaxValue,
-                            false,
-                            0);
-                            this.didSkipTurn = false;
-                            this.windowManager.msgManager.addToOutgoingQueue(toSend);
-                        }
-                    }
-                    // end of end game
-                
-            }
-
-
-            if (this.currentTurnWarrior != null)
-            {
-
-                if (this.turnProgress == TurnProgress.moving)
-                {
-                    Boolean finishedMoving = currentTurnWarrior.move(gameTime);
-                    if (finishedMoving && !warriorIsResetting)
-                    {
-                        this.turnProgress = TurnProgress.moved;
-                        
-                    }
-                    else if (finishedMoving && warriorIsResetting)
-                    {
-                        this.turnProgress = TurnProgress.beginning;
-                        this.currentTurnWarrior.direction = previousWarriorDirection;
-                        this.currentTurnWarrior = null;
-                        this.movementBtn.isDisabled = true;
-                        this.attackBtn.isDisabled = false;
-                        this.attackBtn.isDisabled = false;
-                        this.board.resetTints();
-                        this.warriorIsResetting = false;
-                        this.selectedWarrior = null;
-                    }
-                }
-                if (this.turnProgress == TurnProgress.moved)
-                {
-                    if (!this.isYourTurn)
-                    {
-                        if (this.targetRow < 0 || beingAttacked == null)
-                        {
-                            // todo either make you unable to attack nothing or correct facing
-                            this.turnProgress = TurnProgress.turnOver;
-                        }
-                        else
-                        {
-                            this.turnProgress = TurnProgress.attacking;
-                            int xDiff = (int)(currentTurnWarrior.col - beingAttacked.col);
-                            int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
-                            beingAttacked.setDirection(xDiff, yDiff);
-                            beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
-                            this.currentTurnWarrior.beginAttack(this.targetRow, this.targetCol);
+                            case TurnProgress.beginning:
+                                this.hasMoved = false;
+                                movementBtn.isDisabled = true;
+                                attackBtn.isDisabled = false;
+                                skipBtn.isDisabled = false;
+                                break;
+                            case TurnProgress.moving:
+                                this.hasMoved = true;
+                                movementBtn.isDisabled = true;
+                                attackBtn.isDisabled = false;
+                                skipBtn.isDisabled = false;
+                                break;
+                            case TurnProgress.moved:
+                            case TurnProgress.attacking:
+                                movementBtn.isDisabled = false;
+                                attackBtn.isDisabled = true;
+                                skipBtn.isDisabled = false;
+                                break;
+                            case TurnProgress.attacked:
+                                movementBtn.isDisabled = true;
+                                attackBtn.isDisabled = true;
+                                skipBtn.isDisabled = true;
+                                break;
+                            default:
+                                break;
                         }
                     }
                     else
                     {
-                        this.currentTurnWarrior.drawAttackRange();
+                        movementBtn.isDisabled = true;
+                        attackBtn.isDisabled = true;
+                        skipBtn.isDisabled = true;
                     }
+                    movementBtn.update(gameTime);
+                    attackBtn.update(gameTime);
+                    skipBtn.update(gameTime);
+
+
+                    // end of end game
+
                 }
-                if (this.turnProgress == TurnProgress.targetAcquired)
-                {
-                    this.board.tileTints[this.targetRow][this.targetCol] = Warrior.targetAcquiredColor;
-                }
-                if (this.turnProgress == TurnProgress.attacked)
+
+
+                if (this.currentTurnWarrior != null)
                 {
 
-                    
-                    
-                    // calculate damage
-                    this.justAttacked = this.beingAttacked;
-                    this.healthBarFadeDelay = 1500;
-                    if (this.beingAttacked != null)
+                    if (this.turnProgress == TurnProgress.moving)
                     {
-
-                        int targetHealthCheck = this.beingAttacked.health;
-                        if (this.isYourTurn)
+                        Boolean finishedMoving = currentTurnWarrior.move(gameTime);
+                        if (finishedMoving && !warriorIsResetting)
                         {
-                            this.opponentDamage = this.currentTurnWarrior.strike(this.beingAttacked);
-                            if (this.opponentDamage == 0)
+                            this.turnProgress = TurnProgress.moved;
+
+                        }
+                        else if (finishedMoving && warriorIsResetting)
+                        {
+                            this.turnProgress = TurnProgress.beginning;
+                            this.currentTurnWarrior.direction = previousWarriorDirection;
+                            this.currentTurnWarrior = null;
+                            this.movementBtn.isDisabled = true;
+                            this.attackBtn.isDisabled = false;
+                            this.attackBtn.isDisabled = false;
+                            this.board.resetTints();
+                            this.warriorIsResetting = false;
+                            this.selectedWarrior = null;
+                        }
+                    }
+                    if (this.turnProgress == TurnProgress.moved)
+                    {
+                        if (!this.isYourTurn)
+                        {
+                            if (this.targetRow < 0 || beingAttacked == null)
                             {
-                                Vector2 warriorLoc = this.board.getLocation(this.currentTurnWarrior.row, this.currentTurnWarrior.col);
-                                this.missFadingMessage.moveTo(warriorLoc.X + this.BOARDWIDTH / this.board.cols / 2, warriorLoc.Y - this.BOARDHEIGHT / this.board.rows / 4);
-                                this.missFadingMessage.show();
-                            }
-                        }
-                        else
-                        {
-                            this.beingAttacked.health -= this.opponentDamage;
-                            if (this.opponentDamage == 0)
-                            {
-                                Vector2 warriorLoc = this.board.getLocation(this.currentTurnWarrior.row, this.currentTurnWarrior.col);
-                                this.missFadingMessage.moveTo(warriorLoc.X + this.BOARDWIDTH / this.board.cols / 2, warriorLoc.Y - this.BOARDHEIGHT / this.board.rows / 4);
-                                this.missFadingMessage.show();
-                            }
-                            if (this.beingAttacked.health > this.beingAttacked.maxHealth)
-                            {
-                                this.beingAttacked.health = this.beingAttacked.maxHealth;
-                            }
-                        }
-                        
-                        if (targetHealthCheck != this.beingAttacked.health)
-                        {
-                            // int xDiff = (int)(currentTurnWarrior.col - beingAttacked.col);
-                            // int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
-                            //beingAttacked.setDirection(xDiff, yDiff);
-                            // beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
-                            this.currentTurnWarrior.cooldown = this.currentTurnWarrior.maxCooldown;
-
-                        }
-
-
-
-                    }
-
-                    
-
-                    this.turnProgress = TurnProgress.turnOver;
-                    
-                }
-                if (turnProgress == TurnProgress.turnOver)
-                {
-                    if (this.isYourTurn)
-                    {
-                        this.waitingForTurn = true;
-                    }
-                    // add message here
-                    this.decrementCooldowns();
-                    this.isYourTurn = !this.isYourTurn;
-                    this.turnProgress = TurnProgress.beginning;
-                    this.selectedWarrior = null;
-                    if (!this.isYourTurn)
-                    {
-                        Message toSend;
-                        if (this.didSkipTurn)
-                        {
-                            toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
-                            new int[2] { 0,0 },
-                            new int[2] { 0,0 },
-                            0,
-                            0,
-                            this.currentTurnWarrior.id,
-                            false,
-                            this.currentTurnWarrior.direction);
-                            this.didSkipTurn = false;
-                        }
-                        else{
-                            toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
-                            new int[2] { (int)this.currentTurnWarrior.row, (int)this.currentTurnWarrior.col},
-                            new int[2] { this.targetRow, this.targetCol },
-                            0,
-                            0,
-                            this.currentTurnWarrior.id,
-                            false,
-                            0);
-                        }
-
-
-                        if (this.beingAttacked != null)
-                        {
-                            toSend.attackedUnitID = this.beingAttacked.id;
-                            toSend.attackedLocation = new int[2] { (int) this.beingAttacked.row, (int) this.beingAttacked.col};
-                            toSend.damageDealt = this.opponentDamage;
-                        }
-                        /*
-                        Message message = new Message();
-                        message.attackedLocation = new int[2] { 2, 2 };
-                        message.attackedUnitID = 2;
-                        message.attackerUnitID = 105;
-                        message.damageDealt = 30;
-                        message.attackedLocation = new int[2] { 5, 3 };
-                        message.endLocation = new int[2] { 8, 1 };
-                         */
-                        /*NetOutgoingMessage om = this.windowManager.client.CreateMessage();
-                        toSend.handleMoveMessage(ref om);
-                        this.windowManager.client.SendMessage(om, NetDeliveryMethod.ReliableOrdered);
-                        this.currentTurnWarrior = null;
-                        this.beingAttacked = null;*/
-                        this.windowManager.msgManager.addToOutgoingQueue(toSend);
-                    }
-                    this.beingAttacked = null;
-
-
-                    
-                }
-            }
-
-            // handle skip
-
-
-            mouseState.update(Mouse.GetState());
-
-            if (mouseState.wasClicked() && mouseState.isOverGrid)
-            {
-                this.handleClickOverGrid();
-                oldMouseState = mouseState.mouseState;
-
-            }
-            if (!mouseState.Equals(oldMouseState))
-            {
-
-
-                if (mouseState.mouseState.LeftButton == ButtonState.Pressed)
-                {
-                    if (this.movementBtn.checkClick(mouseState.mouseState))
-                    {
-
-                    }
-                    if (this.attackBtn.checkClick(mouseState.mouseState))
-                    {
-                    }
-                    if (this.skipBtn.checkClick(mouseState.mouseState))
-                    {
-
-                    }
-                }
-
-
-                if (mouseState.mouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
-                {
-                    if (this.movementBtn.unClick(mouseState.mouseState))
-                    {
-                        this.turnProgress = TurnProgress.beginning;
-                        if (this.isYourTurn && this.hasMoved)
-                        {
-                            int[,] lastMove = p1MovementStack.Pop();
-                            int[] movedFrom = { lastMove[0, 0], lastMove[0, 1] };
-                            int[] movedTo = { lastMove[1, 0], lastMove[1, 1] };
-                            this.selectedWarrior = this.board.warriors[movedTo[0]][movedTo[1]];
-                            if (this.selectedWarrior.moveTo(movedFrom[0], movedFrom[1]))
-                            {
-                                this.turnProgress = TurnProgress.moving;
-                                warriorIsResetting = true;
+                                // todo either make you unable to attack nothing or correct facing
+                                this.turnProgress = TurnProgress.turnOver;
                             }
                             else
                             {
-                                this.turnProgress = TurnProgress.moved;
-                                warriorIsResetting = false;
+                                this.turnProgress = TurnProgress.attacking;
+                                int xDiff = (int)(currentTurnWarrior.col - beingAttacked.col);
+                                int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
+                                beingAttacked.setDirection(xDiff, yDiff);
+                                beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
+                                this.currentTurnWarrior.beginAttack(this.targetRow, this.targetCol);
                             }
-                            
-                            board.resetTints();
-                            this.currentTurnWarrior = selectedWarrior;
-                            
-                            this.previousWarriorDirection = lastMove[2, 0];
-                            //this.currentTurnWarrior.state = State.
                         }
                         else
                         {
-                            this.board.resetTints();
-                            this.currentTurnWarrior.updateUserOptions(true);
+                            this.currentTurnWarrior.drawAttackRange();
                         }
                     }
+                    if (this.turnProgress == TurnProgress.targetAcquired)
+                    {
+                        this.board.tileTints[this.targetRow][this.targetCol] = Warrior.targetAcquiredColor;
+                    }
+                    if (this.turnProgress == TurnProgress.attacked)
+                    {
 
-                    if (this.skipBtn.unClick(mouseState.mouseState))
+
+
+                        // calculate damage
+                        this.justAttacked = this.beingAttacked;
+                        this.healthBarFadeDelay = 1500;
+                        if (this.beingAttacked != null)
+                        {
+
+                            int targetHealthCheck = this.beingAttacked.health;
+                            if (this.isYourTurn)
+                            {
+                                this.opponentDamage = this.currentTurnWarrior.strike(this.beingAttacked);
+                                if (this.opponentDamage == 0)
+                                {
+                                    Vector2 warriorLoc = this.board.getLocation(this.currentTurnWarrior.row, this.currentTurnWarrior.col);
+                                    this.missFadingMessage.moveTo(warriorLoc.X + this.BOARDWIDTH / this.board.cols / 2, warriorLoc.Y - this.BOARDHEIGHT / this.board.rows / 4);
+                                    this.missFadingMessage.show();
+                                }
+                            }
+                            else
+                            {
+                                this.beingAttacked.health -= this.opponentDamage;
+                                if (this.opponentDamage == 0)
+                                {
+                                    Vector2 warriorLoc = this.board.getLocation(this.currentTurnWarrior.row, this.currentTurnWarrior.col);
+                                    this.missFadingMessage.moveTo(warriorLoc.X + this.BOARDWIDTH / this.board.cols / 2, warriorLoc.Y - this.BOARDHEIGHT / this.board.rows / 4);
+                                    this.missFadingMessage.show();
+                                }
+                                if (this.beingAttacked.health > this.beingAttacked.maxHealth)
+                                {
+                                    this.beingAttacked.health = this.beingAttacked.maxHealth;
+                                }
+                            }
+
+                            if (targetHealthCheck != this.beingAttacked.health)
+                            {
+                                // int xDiff = (int)(currentTurnWarrior.col - beingAttacked.col);
+                                // int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
+                                //beingAttacked.setDirection(xDiff, yDiff);
+                                // beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
+                                this.currentTurnWarrior.cooldown = this.currentTurnWarrior.maxCooldown;
+
+                            }
+
+
+
+                        }
+
+
+
+                        this.turnProgress = TurnProgress.turnOver;
+
+                    }
+                    if (turnProgress == TurnProgress.turnOver)
                     {
                         if (this.isYourTurn)
                         {
-                            this.turnProgress = TurnProgress.turnOver;
-                            this.beingAttacked = null;
-                            board.resetTints();
+                            this.waitingForTurn = true;
+                        }
+                        // add message here
+                        this.decrementCooldowns();
+                        this.isYourTurn = !this.isYourTurn;
+                        this.turnProgress = TurnProgress.beginning;
+                        this.selectedWarrior = null;
+                        if (!this.isYourTurn)
+                        {
+                            Message toSend;
+                            if (this.didSkipTurn)
+                            {
+                                toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
+                                new int[2] { 0, 0 },
+                                new int[2] { 0, 0 },
+                                0,
+                                0,
+                                this.currentTurnWarrior.id,
+                                false,
+                                this.currentTurnWarrior.direction);
+                                this.didSkipTurn = false;
+                            }
+                            else
+                            {
+                                toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
+                                new int[2] { (int)this.currentTurnWarrior.row, (int)this.currentTurnWarrior.col },
+                                new int[2] { this.targetRow, this.targetCol },
+                                0,
+                                0,
+                                this.currentTurnWarrior.id,
+                                false,
+                                0);
+                            }
+
+
+                            if (this.beingAttacked != null)
+                            {
+                                toSend.attackedUnitID = this.beingAttacked.id;
+                                toSend.attackedLocation = new int[2] { (int)this.beingAttacked.row, (int)this.beingAttacked.col };
+                                toSend.damageDealt = this.opponentDamage;
+                            }
+                            /*
+                            Message message = new Message();
+                            message.attackedLocation = new int[2] { 2, 2 };
+                            message.attackedUnitID = 2;
+                            message.attackerUnitID = 105;
+                            message.damageDealt = 30;
+                            message.attackedLocation = new int[2] { 5, 3 };
+                            message.endLocation = new int[2] { 8, 1 };
+                             */
+                            /*NetOutgoingMessage om = this.windowManager.client.CreateMessage();
+                            toSend.handleMoveMessage(ref om);
+                            this.windowManager.client.SendMessage(om, NetDeliveryMethod.ReliableOrdered);
+                            this.currentTurnWarrior = null;
+                            this.beingAttacked = null;*/
+                            this.windowManager.msgManager.addToOutgoingQueue(toSend);
+                        }
+                        this.beingAttacked = null;
+
+
+
+                    }
+                }
+
+                // handle skip
+
+
+                mouseState.update(Mouse.GetState());
+
+                if (mouseState.wasClicked() && mouseState.isOverGrid)
+                {
+                    this.handleClickOverGrid();
+                    oldMouseState = mouseState.mouseState;
+
+                }
+                if (!mouseState.Equals(oldMouseState))
+                {
+
+
+                    if (mouseState.mouseState.LeftButton == ButtonState.Pressed)
+                    {
+                        if (this.movementBtn.checkClick(mouseState.mouseState))
+                        {
+
+                        }
+                        if (this.attackBtn.checkClick(mouseState.mouseState))
+                        {
+                        }
+                        if (this.skipBtn.checkClick(mouseState.mouseState))
+                        {
+
                         }
                     }
-                    if (this.attackBtn.unClick(mouseState.mouseState))
+
+
+                    if (mouseState.mouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
                     {
-                        if (this.selectedWarrior == null || !this.selectedWarrior.isYours)
+                        if (this.movementBtn.unClick(mouseState.mouseState))
                         {
-                            this.btnMisuseFadingMessage.message = "You must select a unit on your team.";
-                            this.btnMisuseFadingMessage.show();
-                        }
-                        else
-                        {
-                            if (this.selectedWarrior.cooldown > 0)
+                            this.turnProgress = TurnProgress.beginning;
+                            if (this.isYourTurn && this.hasMoved)
                             {
-                                this.btnMisuseFadingMessage.message = "Selected unit cannot be on cooldown.";
+                                int[,] lastMove = p1MovementStack.Pop();
+                                int[] movedFrom = { lastMove[0, 0], lastMove[0, 1] };
+                                int[] movedTo = { lastMove[1, 0], lastMove[1, 1] };
+                                this.selectedWarrior = this.board.warriors[movedTo[0]][movedTo[1]];
+                                if (this.selectedWarrior.moveTo(movedFrom[0], movedFrom[1]))
+                                {
+                                    this.turnProgress = TurnProgress.moving;
+                                    warriorIsResetting = true;
+                                }
+                                else
+                                {
+                                    this.turnProgress = TurnProgress.moved;
+                                    warriorIsResetting = false;
+                                }
+
+                                board.resetTints();
+                                this.currentTurnWarrior = selectedWarrior;
+
+                                this.previousWarriorDirection = lastMove[2, 0];
+                                //this.currentTurnWarrior.state = State.
+                            }
+                            else
+                            {
+                                this.board.resetTints();
+                                this.currentTurnWarrior.updateUserOptions(true);
+                            }
+                        }
+
+                        if (this.skipBtn.unClick(mouseState.mouseState))
+                        {
+                            if (this.isYourTurn)
+                            {
+                                this.turnProgress = TurnProgress.turnOver;
+                                this.beingAttacked = null;
+                                board.resetTints();
+                            }
+                        }
+                        if (this.attackBtn.unClick(mouseState.mouseState))
+                        {
+                            if (this.selectedWarrior == null || !this.selectedWarrior.isYours)
+                            {
+                                this.btnMisuseFadingMessage.message = "You must select a unit on your team.";
                                 this.btnMisuseFadingMessage.show();
                             }
                             else
                             {
-                                this.hasMoved = false;
-                                this.turnProgress = TurnProgress.moved;
-                                this.currentTurnWarrior = this.selectedWarrior;
-                                board.resetTints();
+                                if (this.selectedWarrior.cooldown > 0)
+                                {
+                                    this.btnMisuseFadingMessage.message = "Selected unit cannot be on cooldown.";
+                                    this.btnMisuseFadingMessage.show();
+                                }
+                                else
+                                {
+                                    this.hasMoved = false;
+                                    this.turnProgress = TurnProgress.moved;
+                                    this.currentTurnWarrior = this.selectedWarrior;
+                                    board.resetTints();
+                                }
                             }
                         }
-                    }
 
+                    }
                 }
-            }
                 else
                 {
                     if (mouseState.mouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
@@ -565,7 +534,7 @@ namespace CapitalStrategy.Windows
                             if (this.isYourTurn)
                             {
                                 this.turnProgress = TurnProgress.turnOver;
-                                if(this.currentTurnWarrior != null)
+                                if (this.currentTurnWarrior != null)
                                     this.currentTurnWarrior.updateUserOptions(false);
                                 board.resetTints();
                                 this.isYourTurn = false;
@@ -573,7 +542,8 @@ namespace CapitalStrategy.Windows
                             }
                         }
                     }
-                }
+                
+            }
             oldMouseState = mouseState.mouseState;
 
             
@@ -713,6 +683,11 @@ namespace CapitalStrategy.Windows
                 this.skipBtn.draw(windowManager.spriteBatch);
 
             }
+            
+            this.dialogEnd.draw2();
+            this.dialogOK.draw(this.windowManager.spriteBatch);
+            this.dialogWinner.draw(this.windowManager.spriteBatch);
+
         }
 
 

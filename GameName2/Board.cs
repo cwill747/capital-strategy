@@ -94,6 +94,17 @@ namespace CapitalStrategy
             return x - this.location.X < this.location.Width && y - this.location.Y < this.location.Height && x - this.location.X >= 0 && y - this.location.Y >= 0;
         }
 
+
+        public String getName(Game1 windowManager, Boolean isPlayer1)
+        {
+            String username = windowManager.username;
+            if (!isPlayer1)
+            {
+                username = windowManager.otherPlayer.username;
+            }
+            return username;
+        }
+
         public List<Warrior> loadWarriors(Game1 windowManager, Boolean isPlayer1)
         {
             List<Warrior> retVal = new List<Warrior>();
