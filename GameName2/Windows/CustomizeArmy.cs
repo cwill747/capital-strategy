@@ -456,6 +456,12 @@ namespace CapitalStrategy.Windows
                     Color.Yellow, 0, Vector2.Zero, .7f, SpriteEffects.None, 1f
                     );
 
+                string attackExplanation = "ATTACK";
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, attackExplanation,
+                    new Vector2(850, 290),
+                    Color.Brown, 0, Vector2.Zero, .8f, SpriteEffects.None, 1f
+                    );
+
                 // Draw defensive bars
                 if (this.currentWarrior.defense >= 10)
                 {
@@ -478,6 +484,11 @@ namespace CapitalStrategy.Windows
                     Color.Yellow, 0, Vector2.Zero, .7f, SpriteEffects.None, 1f
                     );
 
+                string defenseExplanation = "DEFENSE";
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, defenseExplanation,
+                    new Vector2(850, 312),
+                    Color.Brown, 0, Vector2.Zero, .8f, SpriteEffects.None, 1f
+                    );
 
                 // Draw the warriors cooldown
                 if (this.currentWarrior.maxCooldown >= 1)
@@ -498,6 +509,21 @@ namespace CapitalStrategy.Windows
                 this.windowManager.spriteBatch.DrawString(Game1.smallFont, warriorCooldown,
                     new Vector2(708 + 45, 336),
                     Color.Yellow, 0, Vector2.Zero, .7f, SpriteEffects.None, 1f
+                    );
+
+                string cooldownExplanation = "COOLDOWN";
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, cooldownExplanation,
+                    new Vector2(850, 336),
+                    Color.Brown, 0, Vector2.Zero, .8f, SpriteEffects.None, 1f
+                    );
+
+
+                string cooldownExplained = "Cooldown is how many turns a warrior must wait before they can take any action after completing a turn. ";
+                List<String> splitCooldownExplained = StringHelper.SplitString(cooldownExplained, 40);
+                cooldownExplained = string.Join("\n", splitCooldownExplained);
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, cooldownExplained,
+                    new Vector2(this.pageContent.X + this.boardWidth + 42, 410),
+                    Color.Brown, 0, Vector2.Zero, .8f, SpriteEffects.None, 1f
                     );
 
                 this.windowManager.spriteBatch.End(); 
