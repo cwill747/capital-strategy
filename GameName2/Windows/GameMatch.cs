@@ -944,6 +944,11 @@ namespace CapitalStrategy.Windows
                     Color.Yellow, 0, Vector2.Zero, .7f, SpriteEffects.None, 1f
                     );
 
+                string attackExplanation = "ATTACK";
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, attackExplanation,
+                    new Vector2(880, barYStart),
+                    Color.Brown, 0, Vector2.Zero, .8f, SpriteEffects.None, 1f
+                    );
 
                 // Draw defensive bars
                 if (this.selectedWarrior.defense >= 10)
@@ -965,6 +970,12 @@ namespace CapitalStrategy.Windows
                 this.windowManager.spriteBatch.DrawString(Game1.smallFont, warriorDefense,
                     new Vector2(barStart + 30, 334),
                     Color.Yellow, 0, Vector2.Zero, .7f, SpriteEffects.None, 1f
+                    );
+
+                string defenseExplanation = "DEFENSE";
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, defenseExplanation,
+                    new Vector2(880, 334),
+                    Color.Brown, 0, Vector2.Zero, .8f, SpriteEffects.None, 1f
                     );
 
                 // Draw the warriors cooldown
@@ -990,6 +1001,14 @@ namespace CapitalStrategy.Windows
                     Color.Yellow, 0, Vector2.Zero, .7f, SpriteEffects.None, 1f
                     );
 
+                string cooldownExplanation = "COOLDOWN";
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, cooldownExplanation,
+                    new Vector2(880, 358),
+                    Color.Brown, 0, Vector2.Zero, .8f, SpriteEffects.None, 1f
+                    );
+
+
+
                 toDrawX += 20;
                 toDrawY += 30;
                 // Draw the warriors bonus
@@ -1000,6 +1019,13 @@ namespace CapitalStrategy.Windows
                 string bonusDisplay = "Bonus against: " + this.windowManager.warriorClasses[this.selectedWarrior.warriorClass.indexOfAdvantageAgainst].warriorClassName;
                 this.windowManager.spriteBatch.DrawString(Game1.smallFont, bonusDisplay, new Vector2(barStart, toDrawY), Color.Brown);
 
+                string cooldownExplained = "Cooldown is how many turns a warrior must wait before they can take any action after completing a turn. ";
+                List<String> splitCooldownExplained = StringHelper.SplitString(cooldownExplained, 40);
+                cooldownExplained = string.Join("\n", splitCooldownExplained);
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, cooldownExplained,
+                    new Vector2(640, toDrawY + 30),
+                    Color.Brown, 0, Vector2.Zero, .8f, SpriteEffects.None, 1f
+                    );
 
                 this.windowManager.spriteBatch.End();
             }
