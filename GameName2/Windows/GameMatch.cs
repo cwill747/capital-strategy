@@ -71,7 +71,7 @@ namespace CapitalStrategy.Windows
         Button skipBtn;
 
         public Boolean waitingForTurn { get; set; }
-
+        public Boolean didSkipTurn = false;
         //for after match
         public Boolean armyStillAround = false;
 
@@ -225,11 +225,29 @@ namespace CapitalStrategy.Windows
                         this.windowManager.gameState = newGameState;
                         this.windowManager.windows[newGameState].Initialize();
                     }
+           
+                    if (!this.isYourTurn)
+                    {
+                        Message toSend;
+                        if (this.didSkipTurn)
+                        {
+                            toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
+                            new int[2] { 0,0 },
+                            new int[2] { 0,0 },
+                            0,
+                            0,
+                            int.MaxValue,
+                            false);
+                            this.didSkipTurn = false;
+                            this.windowManager.msgManager.addToOutgoingQueue(toSend);
+                        }
+                    }
                     // end of end game
                 
             }
             if (this.currentTurnWarrior != null)
             {
+
                 if (this.turnProgress == TurnProgress.moving)
                 {
                     Boolean finishedMoving = currentTurnWarrior.move(gameTime);
@@ -331,13 +349,28 @@ namespace CapitalStrategy.Windows
                     
                     if (!this.isYourTurn)
                     {
-                        Message toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
+                        Message toSend;
+                        if (this.didSkipTurn)
+                        {
+                            toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
+                            new int[2] { 0,0 },
+                            new int[2] { 0,0 },
+                            0,
+                            0,
+                            this.currentTurnWarrior.id,
+                            false);
+                            this.didSkipTurn = false;
+                        }
+                        else{
+                            toSend = new Message(msgType.Move, this.windowManager.client.UniqueIdentifier, this.windowManager.otherPlayer.uniqueIdentifier,
                             new int[2] { (int)this.currentTurnWarrior.row, (int)this.currentTurnWarrior.col},
                             new int[2] { this.targetRow, this.targetCol },
                             0,
                             0,
                             this.currentTurnWarrior.id,
                             false);
+                        }
+
 
                         if (this.beingAttacked != null)
                         {
@@ -354,15 +387,20 @@ namespace CapitalStrategy.Windows
                         message.attackedLocation = new int[2] { 5, 3 };
                         message.endLocation = new int[2] { 8, 1 };
                          */
-                        NetOutgoingMessage om = this.windowManager.client.CreateMessage();
+                        /*NetOutgoingMessage om = this.windowManager.client.CreateMessage();
                         toSend.handleMoveMessage(ref om);
                         this.windowManager.client.SendMessage(om, NetDeliveryMethod.ReliableOrdered);
                         this.currentTurnWarrior = null;
-                        this.beingAttacked = null;
+                        this.beingAttacked = null;*/
+                        this.windowManager.msgManager.addToOutgoingQueue(toSend);
                     }
+
+
                     
                 }
             }
+
+            // handle skip
             mouseState.update(Mouse.GetState());
 
             if (mouseState.wasClicked() && mouseState.isOverGrid)
@@ -373,19 +411,20 @@ namespace CapitalStrategy.Windows
             }
             if (!mouseState.Equals(oldMouseState))
             {
+                if (mouseState.mouseState.LeftButton == ButtonState.Pressed)
+                {
+                    if (this.movementBtn.checkClick(mouseState.mouseState))
+                    {
+
+                    }
+                    if (this.skipBtn.checkClick(mouseState.mouseState))
+                    {
+
+                    }
+                }
+
                 if (this.turnProgress == TurnProgress.moved)
                 {
-                    if (mouseState.mouseState.LeftButton == ButtonState.Pressed)
-                    {
-                        if (this.movementBtn.checkClick(mouseState.mouseState))
-                        {
-
-                        }
-						if (this.skipBtn.checkClick(mouseState.mouseState))
-						{
-
-						}
-                    }
                     if (mouseState.mouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
                     {
                         if (this.movementBtn.unClick(mouseState.mouseState))
@@ -413,10 +452,27 @@ namespace CapitalStrategy.Windows
 							{
 								this.turnProgress = TurnProgress.turnOver;
                                 this.currentTurnWarrior.updateUserOptions(false);
-                                this.beingAttacked = null;
                                 board.resetTints();
 							}
 						}
+                    }
+                }
+                else
+                {
+                    if (mouseState.mouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
+                    {
+                        if (this.skipBtn.unClick(mouseState.mouseState))
+                        {
+                            if (this.isYourTurn)
+                            {
+                                this.turnProgress = TurnProgress.turnOver;
+                                if(this.currentTurnWarrior != null)
+                                    this.currentTurnWarrior.updateUserOptions(false);
+                                board.resetTints();
+                                this.isYourTurn = false;
+                                this.didSkipTurn = true;
+                            }
+                        }
                     }
                 }
                 oldMouseState = mouseState.mouseState;
@@ -639,10 +695,10 @@ namespace CapitalStrategy.Windows
                         int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
                         //beingAttacked.setDirection(xDiff, yDiff);
 
-                        //string attackSound = currentTurnWarrior.attackSound;
-                        //SoundEffect effect;     
-                        //effect = Content.Load<SoundEffect>(attackSound);
-                        //effect.Play();
+                        string attackSound = currentTurnWarrior.attackSound;
+                        SoundEffect effect;     
+                        effect = Content.Load<SoundEffect>(attackSound);
+                        effect.Play();
                         
                         beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
                     }
@@ -804,25 +860,34 @@ namespace CapitalStrategy.Windows
                 return false;
             }
 
-            Warrior attackingWarrior = this.getWarriorById(message.attackerUnitID);
-            Warrior attackedWarrior = this.getWarriorById(message.attackedUnitID);
-            attackingWarrior.moveTo(message.endLocation[0], message.endLocation[1]);
-            this.turnProgress = TurnProgress.moving;
-            this.currentTurnWarrior = attackingWarrior;
+            // they skipped their turn
+            if(message.attackerUnitID == int.MaxValue)
+            {
+                this.turnProgress = TurnProgress.moving;
+            }
+            else
+            {
+                Warrior attackingWarrior = this.getWarriorById(message.attackerUnitID);
+                Warrior attackedWarrior = this.getWarriorById(message.attackedUnitID);
+                attackingWarrior.moveTo(message.endLocation[0], message.endLocation[1]);
+                this.turnProgress = TurnProgress.moving;
+                this.currentTurnWarrior = attackingWarrior;
 
-            this.targetRow = message.attackedLocation[0];
-            this.targetCol = message.attackedLocation[1];
+                this.targetRow = message.attackedLocation[0];
+                this.targetCol = message.attackedLocation[1];
 
 
-            
 
-            this.beingAttacked = attackedWarrior;
-            this.opponentDamage = message.damageDealt;
 
-            string attackSound = this.currentTurnWarrior.attackSound;
-            SoundEffect effect;
-            effect = Content.Load<SoundEffect>(attackSound);
-            effect.Play();
+                this.beingAttacked = attackedWarrior;
+                this.opponentDamage = message.damageDealt;
+
+                string attackSound = this.currentTurnWarrior.attackSound;
+                SoundEffect effect;
+                effect = Content.Load<SoundEffect>(attackSound);
+                effect.Play();
+            }
+
             
             return true;
         }
