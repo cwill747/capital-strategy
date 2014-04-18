@@ -468,42 +468,43 @@ namespace CapitalStrategy.Windows
 
                 if (this.turnProgress == TurnProgress.moved)
                 {
-                if (mouseState.mouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
-                {
-                    if (this.movementBtn.unClick(mouseState.mouseState))
+                    if (mouseState.mouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
                     {
-                        this.turnProgress = TurnProgress.beginning;
-                        if (this.isYourTurn)
+                        if (this.movementBtn.unClick(mouseState.mouseState))
                         {
-                            int[,] lastMove = p1MovementStack.Pop();
-                            int[] movedFrom = { lastMove[0, 0], lastMove[0, 1] };
-                            int[] movedTo = { lastMove[1, 0], lastMove[1, 1] };
-                            this.selectedWarrior = this.board.warriors[movedTo[0]][movedTo[1]];
-                            this.selectedWarrior.moveTo(movedFrom[0], movedFrom[1]);
-                            this.turnProgress = TurnProgress.moving;
-                            board.resetTints();
-                            this.currentTurnWarrior = selectedWarrior;
-                            warriorIsResetting = true;
-                            this.previousWarriorDirection = lastMove[2, 0];
-                            //this.currentTurnWarrior.state = State.
+                            this.turnProgress = TurnProgress.beginning;
+                            if (this.isYourTurn)
+                            {
+                                int[,] lastMove = p1MovementStack.Pop();
+                                int[] movedFrom = { lastMove[0, 0], lastMove[0, 1] };
+                                int[] movedTo = { lastMove[1, 0], lastMove[1, 1] };
+                                this.selectedWarrior = this.board.warriors[movedTo[0]][movedTo[1]];
+                                this.selectedWarrior.moveTo(movedFrom[0], movedFrom[1]);
+                                this.turnProgress = TurnProgress.moving;
+                                board.resetTints();
+                                this.currentTurnWarrior = selectedWarrior;
+                                warriorIsResetting = true;
+                                this.previousWarriorDirection = lastMove[2, 0];
+                                //this.currentTurnWarrior.state = State.
+                            }
                         }
-                    }
 
-                    if (this.skipBtn.unClick(mouseState.mouseState))
-                    {
-                        if (this.isYourTurn)
+                        if (this.skipBtn.unClick(mouseState.mouseState))
                         {
-                            this.turnProgress = TurnProgress.turnOver;
-                            this.currentTurnWarrior.updateUserOptions(false);
-                            this.beingAttacked = null;
-                            board.resetTints();
+                            if (this.isYourTurn)
+                            {
+                                this.turnProgress = TurnProgress.turnOver;
+                                this.currentTurnWarrior.updateUserOptions(false);
+                                this.beingAttacked = null;
+                                board.resetTints();
+                            }
                         }
-                    }
-                    if (this.attackBtn.unClick(mouseState.mouseState))
-                    {
-                        this.missFadingMessage.show();
-                    }
+                        if (this.attackBtn.unClick(mouseState.mouseState))
+                        {
+                            this.missFadingMessage.show();
+                        }
 
+                    }
                 }
             }
                 else
