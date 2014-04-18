@@ -33,7 +33,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="Lidgren.Network">
-      <HintPath>..\..\monogame\assemblies\Linux\Lidgren.Network.dll</HintPath>
+      <HintPath>/home/cameron/repos/capital-strategy/Lidgren.Network/bin/Debug/Lidgren.Network.dll</HintPath>
       <Package>monogame</Package>
     </Reference>
   </ItemGroup>
