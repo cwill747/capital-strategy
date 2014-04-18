@@ -127,7 +127,12 @@ namespace CapitalStrategy.Windows
                         {
                             // will actually open find match dialog here in future
                             // then enter gameplay when match is found
-                           
+                            this.windowManager.gameMatch = new GameMatch(this.windowManager);
+                            this.windowManager.windows[GameState.gameMatch] = this.windowManager.gameMatch;
+                            this.windowManager.gameMatch.Initialize();
+                            this.windowManager.gameMatch.LoadContent();
+                            this.windowManager.warriorClasses = this.windowManager.loadWarriorClasses();
+                            this.windowManager.warriorTypes = this.windowManager.loadWarriorTypes();
                             this.dialogText.isVisible = true;
                             this.dialogCancel.isVisible = true;
                             this.dialog.isVisible = true;
