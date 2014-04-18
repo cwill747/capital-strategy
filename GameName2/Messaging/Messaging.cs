@@ -83,7 +83,8 @@ namespace CapitalStrategy.Messaging
                             msg.ReadInt32(), // The damage dealt
                             msg.ReadInt32(), //The attacked unit ID
                             msg.ReadInt32(), // The attacker unit ID
-                            msg.ReadBoolean() // Whether the unit died or not
+                            msg.ReadBoolean(), // Whether the unit died or not
+                            msg.ReadInt32() // which way the unit is facing
                         );
 
                         /*

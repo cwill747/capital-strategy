@@ -96,7 +96,8 @@ namespace CapitalStrategyServer
                                     msg.ReadInt32(),
                                     msg.ReadInt32(),
                                     msg.ReadInt32(),
-                                    msg.ReadBoolean()
+                                    msg.ReadBoolean(),
+                                    msg.ReadInt32()
                                 );
                             }
                             s.msgQueue.addToIncomingQueue(m);

@@ -269,7 +269,8 @@ namespace CapitalStrategy.Windows
                             0,
                             0,
                             int.MaxValue,
-                            false);
+                            false,
+                            0);
                             this.didSkipTurn = false;
                             this.windowManager.msgManager.addToOutgoingQueue(toSend);
                         }
@@ -409,7 +410,8 @@ namespace CapitalStrategy.Windows
                             0,
                             0,
                             this.currentTurnWarrior.id,
-                            false);
+                            false,
+                            this.currentTurnWarrior.direction);
                             this.didSkipTurn = false;
                         }
                         else{
@@ -419,7 +421,8 @@ namespace CapitalStrategy.Windows
                             0,
                             0,
                             this.currentTurnWarrior.id,
-                            false);
+                            false,
+                            0);
                         }
 
 
@@ -695,7 +698,7 @@ namespace CapitalStrategy.Windows
             }
             this.drawInfoFrame(this.selectedWarrior);
             this.spriteBatch.Begin();
-            string turnInfo = (this.isYourTurn) ? "It is your turn" : "Waiting for opponent";
+            string turnInfo = (this.isYourTurn) ? "It is your turn." : "Waiting for " + this.windowManager.otherPlayer.username + ".";
             //+ this.windowManager.otherPlayer.username
             this.spriteBatch.DrawString(Game1.smallFont, turnInfo, new Vector2(SELECTED_WARRIOR_INFO_X, SELECTED_WARRIOR_INFO_Y), Color.Brown);
 
