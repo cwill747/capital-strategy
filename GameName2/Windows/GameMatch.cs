@@ -55,12 +55,14 @@ namespace CapitalStrategy.Windows
         public Stack<int[,]> p2MovementStack;
         private bool warriorIsResetting;
         private int previousWarriorDirection;
+        private int healthBarFadeDelay = -1;
 
         private int endOfInfoPaneLocation;
         public int turnProgress { get; set; }
         public int targetCol { get; set; }
         public int targetRow { get; set; }
         public Warrior beingAttacked { get; set; }
+        private Warrior justAttacked { get; set; } // for displaying health bar after warrior is attacked
         Warrior displayWarrior;
         MouseWrapper mouseState;
         MouseState oldMouseState;
@@ -69,6 +71,8 @@ namespace CapitalStrategy.Windows
         Button movementBtn;
         Button attackBtn;
         Button skipBtn;
+
+        FadingMessage missFadingMessage;
 
         public Boolean waitingForTurn { get; set; }
         public Boolean didSkipTurn = false;
@@ -134,9 +138,12 @@ namespace CapitalStrategy.Windows
 
             mouseState = new MouseWrapper(board, Mouse.GetState());
 
+            this.missFadingMessage = new FadingMessage(0, 0, "Miss!", Game1.menuFont, 2000);
         }
         public void Update(GameTime gameTime)
         {
+            this.healthBarFadeDelay -= gameTime.ElapsedGameTime.Milliseconds;
+            this.missFadingMessage.update(gameTime);
             if (isYourTurn)
             {
                 //for end game
@@ -299,7 +306,8 @@ namespace CapitalStrategy.Windows
                     
                     
                     // calculate damage
-
+                    this.justAttacked = this.beingAttacked;
+                    this.healthBarFadeDelay = 1500;
                     if (this.beingAttacked != null)
                     {
 
@@ -307,10 +315,22 @@ namespace CapitalStrategy.Windows
                         if (this.isYourTurn)
                         {
                             this.opponentDamage = this.currentTurnWarrior.strike(this.beingAttacked);
+                            if (this.opponentDamage == 0)
+                            {
+                                Vector2 warriorLoc = this.board.getLocation(this.currentTurnWarrior.row, this.currentTurnWarrior.col);
+                                this.missFadingMessage.moveTo(warriorLoc.X + this.BOARDWIDTH / this.board.cols / 2, warriorLoc.Y - this.BOARDHEIGHT / this.board.rows / 4);
+                                this.missFadingMessage.show();
+                            }
                         }
                         else
                         {
                             this.beingAttacked.health -= this.opponentDamage;
+                            if (this.opponentDamage == 0)
+                            {
+                                Vector2 warriorLoc = this.board.getLocation(this.currentTurnWarrior.row, this.currentTurnWarrior.col);
+                                this.missFadingMessage.moveTo(warriorLoc.X + this.BOARDWIDTH / this.board.cols / 2, warriorLoc.Y - this.BOARDHEIGHT / this.board.rows / 4);
+                                this.missFadingMessage.show();
+                            }
                             if (this.beingAttacked.health > this.beingAttacked.maxHealth)
                             {
                                 this.beingAttacked.health = this.beingAttacked.maxHealth;
@@ -394,6 +414,7 @@ namespace CapitalStrategy.Windows
                         this.beingAttacked = null;*/
                         this.windowManager.msgManager.addToOutgoingQueue(toSend);
                     }
+                    this.beingAttacked = null;
 
 
                     
@@ -536,7 +557,6 @@ namespace CapitalStrategy.Windows
             spriteBatch.Begin();
             spriteBatch.Draw(Game1.background, backgroundRec, Color.White);
             
-            
             for (int i = 0; i < ROWS; i++)
                     {  
                            for (int j = 0; j < COLS; j++)
@@ -552,14 +572,7 @@ namespace CapitalStrategy.Windows
                                     int toDrawY = yLoc + (iconHeight / 2);
                                     int toDrawX = xLoc;
                                     int iconWidth = tileWidth / 2;
-                                    //modifed to constantly show their cooldown
-                                    //if (warrior.cooldown != 0)
-                                    //{
-                                    int cool = warrior.cooldown;
-                                    string coolString = cool.ToString();
-                                    this.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                                    this.spriteBatch.DrawString(this.infofont, coolString, new Vector2(xLoc + iconWidth, yLoc + (iconHeight / 3)), Color.White);
-                                    //}
+                                   
                                     //draw the health of the warrior being attacked
                                     if (warrior == beingAttacked && (this.turnProgress == TurnProgress.targetAcquired 
                                         ||this.turnProgress == TurnProgress.attacking|| this.turnProgress == TurnProgress.attacked))
@@ -570,25 +583,6 @@ namespace CapitalStrategy.Windows
                                         this.spriteBatch.Draw(white, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.maxHealth), tileHeight / 10), Color.WhiteSmoke);
                                         this.spriteBatch.Draw(red, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.health), tileHeight / 10), Color.WhiteSmoke);
                                     }
-                                    /* COMMENTED OUT BECAUSE THIS CAUSED OUT OF MEMORY ERROR
-                                     * INFINITE WHILE LOOP
-                                     * CHECK YO CODE BEFORE YOU COMMIT!
-                                    //draw MISS or HIT! over the attacked warrior
-                                    if (warrior == beingAttacked && this.turnProgress == TurnProgress.attacked)
-                                    {
-                                        while (warrior.state == State.beenHit)
-                                        {
-                                            if (this.opponentDamage == 0)
-                                            {
-                                                this.windowManager.spriteBatch.DrawString(this.menufont, "MISS", new Vector2(xLoc - (tileWidth / 2), yLoc - tileHeight), Color.DarkMagenta);
-                                            }
-                                            else
-                                            {
-                                                this.windowManager.spriteBatch.DrawString(this.menufont, "HIT!", new Vector2(xLoc - (tileWidth / 3), yLoc - tileHeight), Color.Gold);
-                                            }
-                                        }
-                                    }
-                                    */
                                 }
                             }
                        
@@ -602,15 +596,25 @@ namespace CapitalStrategy.Windows
             foreach (Warrior w in this.yourWarriors)
             {
                 w.draw();
+                this.drawCooldownOnWarrior(w);
             }
             foreach (Warrior w in this.opponentWarriors)
             {
                 w.draw();
+                this.drawCooldownOnWarrior(w);
             }
-
+            this.missFadingMessage.draw(spriteBatch);
             if (mouseState.isOverGrid && board.warriors[mouseState.row][mouseState.col] != null)
             {
                 this.drawHealthBar(mouseState.row, mouseState.col);
+            }
+            if (this.beingAttacked != null)
+            {
+                this.drawHealthBar((int)beingAttacked.row, (int)beingAttacked.col);
+            }
+            else if (this.justAttacked != null && healthBarFadeDelay > 0)
+            {
+                this.drawHealthBar((int)this.justAttacked.row, (int)this.justAttacked.col);
             }
             this.drawInfoFrame(this.selectedWarrior);
             this.spriteBatch.Begin();
@@ -734,20 +738,27 @@ namespace CapitalStrategy.Windows
             this.spriteBatch.Draw(white, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.maxHealth), tileHeight / 10), Color.WhiteSmoke);
             this.spriteBatch.Draw(red, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.health), tileHeight / 10), Color.WhiteSmoke);
 
-            //draw cooldown
-            int iconHeight = tileHeight /2;
-            int toDrawY = yLoc + (iconHeight /2);
-            int toDrawX = xLoc;
-            int iconWidth = tileWidth / 2;
-            if (warrior.cooldown != 0)
-            {
-                int cool = warrior.cooldown;
-                string cooldown = cool.ToString();
-                this.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.spriteBatch.DrawString(this.infofont, cooldown, new Vector2(xLoc+iconWidth, yLoc+(iconHeight/3)), Color.White);
-            }
+            
             this.spriteBatch.End();
             return healthBarY + tileHeight / 10;
+        }
+        public void drawCooldownOnWarrior(Warrior warrior)
+        {
+            if (warrior.cooldown != 0)
+            {
+                //draw cooldown
+                SpriteFont font = Game1.smallFont;
+                this.spriteBatch.Begin();
+                Vector2 warriorLoc = this.board.getLocation(warrior.row, warrior.col);
+                int iconHeight = (int)Game1.smallFont.MeasureString("1").Y;
+                int iconWidth = iconHeight;
+                int totalWidth = (int)(iconWidth + font.MeasureString(warrior.cooldown.ToString()).X);
+                int tileWidth = this.BOARDWIDTH / this.board.cols;
+                int offsetX = (tileWidth - totalWidth) / 2;
+                this.spriteBatch.Draw(hourglass, new Rectangle((int)warriorLoc.X + offsetX, (int)warriorLoc.Y, iconWidth, iconHeight), Color.White);
+                this.spriteBatch.DrawString(font, warrior.cooldown.ToString(), new Vector2(warriorLoc.X + iconWidth + offsetX, warriorLoc.Y), Color.White);
+                this.spriteBatch.End();
+            }
         }
         public void drawInfoFrame(Warrior selectedWarrior)
         {
