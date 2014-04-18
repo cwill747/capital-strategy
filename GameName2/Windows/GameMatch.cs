@@ -397,7 +397,7 @@ namespace CapitalStrategy.Windows
                     this.decrementCooldowns();
                     this.isYourTurn = !this.isYourTurn;
                     this.turnProgress = TurnProgress.beginning;
-                    
+                    this.selectedWarrior = null;
                     if (!this.isYourTurn)
                     {
                         Message toSend;
@@ -523,7 +523,6 @@ namespace CapitalStrategy.Windows
                         if (this.isYourTurn)
                         {
                             this.turnProgress = TurnProgress.turnOver;
-                            this.currentTurnWarrior.updateUserOptions(false);
                             this.beingAttacked = null;
                             board.resetTints();
                         }
@@ -537,10 +536,18 @@ namespace CapitalStrategy.Windows
                         }
                         else
                         {
-                            this.hasMoved = false;
-                            this.turnProgress = TurnProgress.moved;
-                            this.currentTurnWarrior = this.selectedWarrior;
-                            board.resetTints();
+                            if (this.selectedWarrior.cooldown > 0)
+                            {
+                                this.btnMisuseFadingMessage.message = "Selected unit cannot be on cooldown.";
+                                this.btnMisuseFadingMessage.show();
+                            }
+                            else
+                            {
+                                this.hasMoved = false;
+                                this.turnProgress = TurnProgress.moved;
+                                this.currentTurnWarrior = this.selectedWarrior;
+                                board.resetTints();
+                            }
                         }
                     }
 
