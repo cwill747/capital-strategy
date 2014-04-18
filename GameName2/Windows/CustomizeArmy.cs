@@ -9,6 +9,8 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Storage;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Input.Touch;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 using MySql.Data.MySqlClient;
 using CapitalStrategy.GUI;
 using CapitalStrategy.Primitives;
@@ -24,7 +26,7 @@ namespace CapitalStrategy.Windows
         public Board board { get; set; }
         public Warrior currentWarrior { get; set; }
         public Button save { get; set; }
-        public List<WarriorWrapper> warriorWrappers { get; set; }
+        public List<Warrior> warriors { get; set; }
         public Texture2D red;
         public Texture2D white;
         public Texture2D heartIcon;
@@ -38,6 +40,8 @@ namespace CapitalStrategy.Windows
         public SpriteFont smallfont;
         public Texture2D hourglass;
         private Texture2D arrowDown;
+        private Texture2D background;
+        private Texture2D bars;
         private Rectangle pageContent = new Rectangle();
         private int boardHeight;
         private int boardWidth;
@@ -49,10 +53,14 @@ namespace CapitalStrategy.Windows
         public Button aRange { get; set; }
         public Button mRange { get; set; }
         private PrimitiveBatch primitiveBatch;
-        private Vector2 oldWarriorXY;
         private bool isMousedOver = false;
         private long nextCheckMouseover = 0L;
         MouseWrapper mouseState;
+        Boolean warriorIsPickedUp { get; set; }
+        Vector2 offsetPickedUpWarrior { get; set; }
+
+        public SoundEffect click;
+
         public CustomizeArmy(Game1 windowManager)
         {
             this.windowManager = windowManager;
@@ -69,7 +77,7 @@ namespace CapitalStrategy.Windows
             this.pageContent.Width = boardWidth;
             board = new Board(10, 10, new Rectangle(this.pageContent.X, this.pageContent.Y, boardWidth, boardHeight), Game1.tileImage);
             this.oldMouseState = new MouseState();
-            this.warriorWrappers = this.board.loadWarriors(this.windowManager, true);
+            this.warriors = this.board.loadWarriors(this.windowManager, true);
 
             saveButtonWidth = 100;
             this.saveButtonHeight = 50;
@@ -84,7 +92,8 @@ namespace CapitalStrategy.Windows
                 this.pageContent.Y + this.pageContent.Height + padding, saveButtonWidth, saveButtonHeight), Game1.smallFont, isDisabled: false);
             this.mRange = new Button("Movement", new Rectangle(this.pageContent.X + this.pageContent.Width - padding - (3 * saveButtonWidth),
                 this.pageContent.Y + this.pageContent.Height + padding, saveButtonWidth, saveButtonHeight), Game1.smallFont, isDisabled: true);
-
+            this.warriorIsPickedUp = false;
+            this.offsetPickedUpWarrior = Vector2.Zero;
         }
 
         public void LoadContent()
@@ -104,7 +113,11 @@ namespace CapitalStrategy.Windows
             this.arrowDown = this.windowManager.Content.Load<Texture2D>("GUI/customizearrow");
             this.welcomeBackground = this.windowManager.Content.Load<Texture2D>("GUI/welcome_box_background");
             this.infoBoxBackground = this.windowManager.Content.Load<Texture2D>("GUI/info_box_background");
+            this.background = this.windowManager.Content.Load<Texture2D>("GUI/customize_army_background");
+            this.bars = this.windowManager.Content.Load<Texture2D>("GUI/bars");
             primitiveBatch = new PrimitiveBatch(this.windowManager.GraphicsDevice);
+
+            click = windowManager.Content.Load<SoundEffect>("soundEffects/daClick");
 
         }
 
@@ -117,10 +130,14 @@ namespace CapitalStrategy.Windows
             {
                 if (newMouseState.LeftButton == ButtonState.Pressed && oldMouseState.LeftButton != ButtonState.Pressed)
                 {
-                    this.backButton.checkClick(newMouseState);
-                    this.save.checkClick(newMouseState);
-                    this.aRange.checkClick(newMouseState);
-                    this.mRange.checkClick(newMouseState);
+                    if(this.backButton.checkClick(newMouseState))
+                        click.Play();
+                    if(this.save.checkClick(newMouseState))
+                        click.Play();
+                    if(this.aRange.checkClick(newMouseState))
+                        click.Play();
+                    if(this.mRange.checkClick(newMouseState))
+                        click.Play();
                     if (board.isClickOverGrid(newMouseState.X, newMouseState.Y))
                     {
                         Vector2 coord = board.clickOverGrid(newMouseState.X, newMouseState.Y);
@@ -128,13 +145,11 @@ namespace CapitalStrategy.Windows
                         board.warriors[(int)coord.X][(int)coord.Y] = null;
                         if (currentWarrior != null)
                         {
-                            oldWarriorXY = new Vector2(currentWarrior.x, currentWarrior.y);
-                            currentWarrior.x = newMouseState.X;
-                            currentWarrior.y = newMouseState.Y;
-                        }
-                        else
-                        {
-                            oldWarriorXY = Vector2.Zero;
+                            Vector2 oldWarriorXY = this.board.getLocation(this.currentWarrior.row, this.currentWarrior.col);
+                            this.currentWarrior.x = oldWarriorXY.X;
+                            this.currentWarrior.y = oldWarriorXY.Y;
+                            this.offsetPickedUpWarrior = new Vector2(newMouseState.X - currentWarrior.x, newMouseState.Y - currentWarrior.y);
+                            this.warriorIsPickedUp = true;
                         }
                     }
                 }
@@ -143,8 +158,8 @@ namespace CapitalStrategy.Windows
                     // update current warrior location
                     if (currentWarrior != null)
                     {
-                        currentWarrior.x = newMouseState.X;
-                        currentWarrior.y = newMouseState.Y;
+                        currentWarrior.x = newMouseState.X - this.offsetPickedUpWarrior.X;
+                        currentWarrior.y = newMouseState.Y - this.offsetPickedUpWarrior.Y;
                     }
                 }
                 if (newMouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton != ButtonState.Released)
@@ -179,22 +194,25 @@ namespace CapitalStrategy.Windows
                     }
                     if (currentWarrior != null)
                     {
-                        Vector2 rowCol = board.clickOverGrid(currentWarrior.x, currentWarrior.y);
+                        this.warriorIsPickedUp = false;
+                        Vector2 rowCol = board.clickOverGrid(newMouseState.X, newMouseState.Y);
                         int row = (int)rowCol.X;
                         int col = (int)rowCol.Y;
-                        if (!board.isClickOverGrid(currentWarrior.x, currentWarrior.y))
-                        {
-                            board.warriors[(int)currentWarrior.row][(int)currentWarrior.col] = currentWarrior;
-                        }
-                        else if (board.warriors[row][col] == null && row >= 5)
+                        if (board.isClickOverGrid(newMouseState.X, newMouseState.Y) && board.warriors[row][col] == null && row >= 5)
                         {
                             currentWarrior.row = row;
                             currentWarrior.col = col;
                             board.warriors[row][col] = currentWarrior;
+                            Vector2 loc = this.board.getLocation(row, col);
+                            this.currentWarrior.x = loc.X;
+                            this.currentWarrior.y = loc.Y;
                         }
                         else
                         {
                             board.warriors[(int)currentWarrior.row][(int)currentWarrior.col] = currentWarrior;
+                            Vector2 loc = this.board.getLocation(currentWarrior.row, (int)currentWarrior.col);
+                            this.currentWarrior.x = loc.X;
+                            this.currentWarrior.y = loc.Y;
                         }
                         currentWarrior = null;
                         this.save.isDisabled = false;
@@ -235,9 +253,9 @@ namespace CapitalStrategy.Windows
 
         public void Draw()
         {
-
             this.windowManager.spriteBatch.Begin();
             windowManager.spriteBatch.Draw(Game1.background, new Rectangle(0, 0, this.windowManager.Window.ClientBounds.Width, this.windowManager.Window.ClientBounds.Height), Color.White);
+            this.windowManager.spriteBatch.Draw(this.background, Vector2.Zero, Color.White);
             this.windowManager.spriteBatch.End();
             this.board.drawTiles(this.windowManager.spriteBatch);
 
@@ -267,23 +285,18 @@ namespace CapitalStrategy.Windows
                 new Vector2(this.pageContent.X + (boardWidth / 10) * 7.5f, this.pageContent.Y + (boardHeight / 2) - this.arrowDown.Height), Color.White);
 
 
-            this.windowManager.spriteBatch.Draw(this.welcomeBackground,
-    new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y), Color.White);
+            //this.windowManager.spriteBatch.Draw(this.welcomeBackground,
+            //new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y), Color.White);
 
-            this.windowManager.spriteBatch.Draw(this.infoBoxBackground,
-new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + this.welcomeBackground.Height), Color.White);
+            //this.windowManager.spriteBatch.Draw(this.infoBoxBackground,
+            //new Vector2(this.pageContent.X, this.pageContent.Y), Color.White);
 
-            string welcomeString1 = "Welcome to the custom warrior page. This is \n" + 
-                                    "where you set up your army for battle. Drag\n" +
-                                    "your warriors to set them up for battle,\n" + 
-                                    "mouse over a warrior for more information\n" +
-                                    "about that warrior. Click save to save your\n" + 
-                                    "configuration for battle.";
-            Vector2 welcomeStringDim1 = Game1.smallFont.MeasureString(welcomeString1);
-            this.windowManager.spriteBatch.DrawString(Game1.smallFont, welcomeString1,
-                new Vector2(this.pageContent.X + this.boardWidth + 30, this.pageContent.Y + 40),
-                Color.Yellow, 0, Vector2.Zero, .9f, SpriteEffects.None, 1f
-                );
+            string welcomeString1 = "Welcome to the custom warrior page. This is " +
+            "where you set up your army for battle. Drag " +
+            "your warriors to set them up for battle, " +
+            "mouse over a warrior for more information " +
+            "about that warrior. Click save to save your " +
+            "configuration for battle. ";
 
 
 
@@ -299,24 +312,6 @@ new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + this
                     {
                        
                         warrior.draw();
-
-                        //draws their maxcooldown
-                        this.windowManager.spriteBatch.Begin();
-                        //this.windowManager.spriteBatch.DrawString(Game1.smallFont, "hi", board.getLocation(row, col), Color.White);
-                        int tileWidth = this.boardWidth / this.board.cols;
-                        int tileHeight = this.boardHeight / this.board.rows;
-                        int xLoc = (int)(warrior.col * tileWidth + board.location.X);
-                        int yLoc = (int)(warrior.row * tileHeight + board.location.Y);
-                        int iconHeight = tileHeight / 2;
-                        int toDrawY = yLoc + (iconHeight / 2);
-                        int toDrawX = xLoc;
-                        int iconWidth = tileWidth / 2;
-                        int cool = warrior.maxCooldown;
-                        string coolString = cool.ToString();
-                        this.windowManager.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                        this.windowManager.spriteBatch.DrawString(this.infofont, coolString, new Vector2(xLoc + iconWidth, yLoc + (iconHeight / 3)), Color.White);
-                        this.windowManager.spriteBatch.End();
-
                     }
                 }
             }
@@ -324,10 +319,8 @@ new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + this
 
 
 
-            if (currentWarrior == null || isMousedOver == true)
-            {
-                board.resetTints();
-            }
+            board.resetTints();
+            
 
             for (int i = 0; i < 5; i++)
             {
@@ -339,39 +332,53 @@ new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + this
 
             if (currentWarrior != null)
             {
-                if (isMousedOver == false)
+                if (this.warriorIsPickedUp)
                 {
                     currentWarrior.drawToLocation();
                 }
+               // if (aRange.isDisabled && !this.warriorIsPickedUp)
                 if (aRange.isDisabled)
                 {
-                    currentWarrior.drawAttackRange(true);
-                }
-                else
-                {
-                    Boolean[][] discovered = currentWarrior.bredthFirst((int)currentWarrior.row, (int)currentWarrior.col, currentWarrior.maxMove);
+                    //currentWarrior.drawAttackRange(true);
+
+                    Vector2 currentLocation = board.clickOverGrid(this.oldMouseState.X, this.oldMouseState.Y);
+                    int attackR = (int)currentWarrior.attackRange;
+                    Boolean[][] discovered = currentWarrior.bredthFirst((int)currentLocation.X, (int)currentLocation.Y, attackR, passThroughTeam: true);
                     for (int i = 0; i < discovered.Length; i++)
                     {
                         for (int j = 0; j < discovered[i].Length; j++)
                         {
-                            if (discovered[i][j] && i >= 5)
+                            if (discovered[i][j] && this.board.warriors[i][j] == null)
                             {
-                                board.tileTints[i][j] = Warrior.yourMoveColor;
+                                    board.tileTints[i][j] = i >= 5 ? Warrior.attackColor : Color.DarkRed;
                             }
-                            else if (discovered[i][j])
+                        }
+
+                    }
+                }
+                else
+                {
+                    // get warriors current location
+                    Vector2 currentLocation = board.clickOverGrid(this.oldMouseState.X, this.oldMouseState.Y);
+                    Boolean[][] discovered = currentWarrior.bredthFirst((int)currentLocation.X, (int)currentLocation.Y, currentWarrior.maxMove, passThroughTeam: true);
+                    for (int i = 0; i < discovered.Length; i++)
+                    {
+                        for (int j = 0; j < discovered[i].Length; j++)
+                        {
+                            if (discovered[i][j] && this.board.warriors[i][j] == null)
                             {
-                                board.tileTints[i][j] = Color.DarkSlateBlue;
+                                board.tileTints[i][j] = i >= 5 ? Warrior.yourMoveColor : Color.DarkSlateBlue;
                             }
                         }
 
                     }
                 }
 
-                this.aRange.draw(this.windowManager.spriteBatch);
-                this.mRange.draw(this.windowManager.spriteBatch);
+                
             }
 
-
+            this.aRange.draw(this.windowManager.spriteBatch);
+            this.mRange.draw(this.windowManager.spriteBatch);
             this.backButton.drawBackButton(this.windowManager.spriteBatch);
 
             if (recentlySaved)
@@ -410,11 +417,24 @@ new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + this
 
             if (this.currentWarrior != null)
             {
+
+
                 Warrior displayWarrior = new Warrior(this.currentWarrior);
+
+                // replace the tutorial string with this warrior's description
+
+                if (this.currentWarrior.description != null)
+                {
+                    welcomeString1 = this.currentWarrior.description;
+                }
+                else
+                {
+                    welcomeString1 = "Description missing.";
+                }
                 int imgPadding = 20;
                 
-                int toDrawX = this.pageContent.X + this.boardWidth + 20;
-                int toDrawY = this.pageContent.Y + this.boardHeight / 2;
+                int toDrawX = 625;
+                int toDrawY = 300;
            
                 int iconWidth = tileWidth / 2;
                 int iconHeight = iconWidth;
@@ -423,35 +443,131 @@ new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + this
                 double widthPerPoint = ((double)tileWidth) / 100;
 
                 displayWarrior.drawInArbitraryLocation(toDrawX, toDrawY);
-                displayWarrior.drawWarriorType(toDrawX + board.WARRIORWIDTH / 2 + imgPadding, toDrawY - imgPadding);
+
                 toDrawX = toDrawX + board.WARRIORWIDTH / 2 + imgPadding;
                 toDrawY += iconHeight + padding;
 
 
                 this.windowManager.spriteBatch.Begin();
 
-                // Draw the warriors attack strength
-                this.windowManager.spriteBatch.Draw(attackIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.windowManager.spriteBatch.Draw(Game1.charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
-                this.windowManager.spriteBatch.Draw(white, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * 100), barHeight), Color.WhiteSmoke);
-                this.windowManager.spriteBatch.Draw(red, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * currentWarrior.attack), barHeight), Color.WhiteSmoke);
-                toDrawY += iconHeight + padding;
 
-                // Draw the warriors defense strength
-                // @TODO: Change the 2+ on this to be a resolution-independent value
-                this.windowManager.spriteBatch.Draw(shieldIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.windowManager.spriteBatch.Draw(Game1.charcoal, new Rectangle(2 + toDrawX + iconWidth + padding - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
-                this.windowManager.spriteBatch.Draw(white, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * 100), barHeight), Color.WhiteSmoke);
-                this.windowManager.spriteBatch.Draw(red, new Rectangle(2 + toDrawX + iconWidth + padding, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * currentWarrior.defense), barHeight), Color.WhiteSmoke);
-                toDrawY += iconHeight + padding;
+                string selwarrior = this.currentWarrior.type.ToUpperInvariant();
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, selwarrior,
+                    new Vector2(690, 268),
+                    Color.Brown, 0, Vector2.Zero, .9f, SpriteEffects.None, 1f
+                    );
+
+                int frameWidth = 9;
+                int frameHeight = 18;
+
+                // Draw attack strength bars
+                if (this.currentWarrior.attack >= 10)
+                {
+                    Rectangle source = new Rectangle(0, 0, frameWidth, frameHeight);
+                    this.windowManager.spriteBatch.Draw(bars, new Vector2(708, 290), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                }
+                if (Math.Abs(this.currentWarrior.attack) > 10 && Math.Abs(this.currentWarrior.attack) <= 100)
+                {
+                    int total10Blocks = (int) (this.currentWarrior.attack / 10);
+                    for(int i = 1; i < total10Blocks - 1; i++)
+                    {
+                        Rectangle source = new Rectangle(frameWidth + 1, 0, frameWidth * 2 + 1, frameHeight);
+                        this.windowManager.spriteBatch.Draw(bars, new Vector2(708 + 10 * i, 290), source, Color.White);
+                    }
+                }
+
+                string warriorAttack = this.currentWarrior.attack.ToString() + "/100";
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, warriorAttack,
+                    new Vector2(708 + 30, 290),
+                    Color.Yellow, 0, Vector2.Zero, .7f, SpriteEffects.None, 1f
+                    );
+
+                string attackExplanation = "ATTACK";
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, attackExplanation,
+                    new Vector2(850, 290),
+                    Color.Brown, 0, Vector2.Zero, .8f, SpriteEffects.None, 1f
+                    );
+
+                // Draw defensive bars
+                if (this.currentWarrior.defense >= 10)
+                {
+                    Rectangle source = new Rectangle(0, 19, frameWidth, frameHeight);
+                    this.windowManager.spriteBatch.Draw(bars, new Vector2(708, 312), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                }
+                if (Math.Abs(this.currentWarrior.defense) > 10 && Math.Abs(this.currentWarrior.defense) <= 100)
+                {
+                    int total10Blocks = (int)(this.currentWarrior.defense / 10);
+                    for (int i = 1; i < total10Blocks - 1; i++)
+                    {
+                        Rectangle source = new Rectangle(frameWidth + 1, 19, frameWidth * 2 + 1, frameHeight);
+                        this.windowManager.spriteBatch.Draw(bars, new Vector2(708 + 10 * i, 312), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                    }
+                }
+
+                string warriorDefense = this.currentWarrior.defense.ToString() + "/100";
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, warriorDefense,
+                    new Vector2(708 + 30, 312),
+                    Color.Yellow, 0, Vector2.Zero, .7f, SpriteEffects.None, 1f
+                    );
+
+                string defenseExplanation = "DEFENSE";
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, defenseExplanation,
+                    new Vector2(850, 312),
+                    Color.Brown, 0, Vector2.Zero, .8f, SpriteEffects.None, 1f
+                    );
 
                 // Draw the warriors cooldown
-                string coolDisplay = this.currentWarrior.maxCooldown.ToString();
-                this.windowManager.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.windowManager.spriteBatch.DrawString(this.infofont, coolDisplay, new Vector2(2 + toDrawX + iconWidth + padding, toDrawY), Color.White);
+                if (this.currentWarrior.maxCooldown >= 1)
+                {
+                    Rectangle source = new Rectangle(0, 19 * 2, frameWidth, frameHeight);
+                    this.windowManager.spriteBatch.Draw(bars, new Vector2(708, 336), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                }
+                if (this.currentWarrior.maxCooldown > 1)
+                {
+                    for (int i = 1; i < this.currentWarrior.maxCooldown; i++)
+                    {
+                        Rectangle source = new Rectangle(frameWidth, 19 * 2, frameWidth, frameHeight);
+                        this.windowManager.spriteBatch.Draw(bars, new Vector2(708 + 10 * i, 336), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                    }
+                }
 
-                this.windowManager.spriteBatch.End();
+                string warriorCooldown = this.currentWarrior.maxCooldown.ToString();
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, warriorCooldown,
+                    new Vector2(708 + 45, 336),
+                    Color.Yellow, 0, Vector2.Zero, .7f, SpriteEffects.None, 1f
+                    );
+
+                string cooldownExplanation = "COOLDOWN";
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, cooldownExplanation,
+                    new Vector2(850, 336),
+                    Color.Brown, 0, Vector2.Zero, .8f, SpriteEffects.None, 1f
+                    );
+
+
+                string cooldownExplained = "Cooldown is how many turns a warrior must wait before they can take any action after completing a turn. ";
+                List<String> splitCooldownExplained = StringHelper.SplitString(cooldownExplained, 40);
+                cooldownExplained = string.Join("\n", splitCooldownExplained);
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, cooldownExplained,
+                    new Vector2(this.pageContent.X + this.boardWidth + 42, 410),
+                    Color.Brown, 0, Vector2.Zero, .8f, SpriteEffects.None, 1f
+                    );
+
+                this.windowManager.spriteBatch.End(); 
             }
+
+            this.windowManager.spriteBatch.Begin();
+
+            // Make sure the string fits on the screen
+
+            int characterWidthOfBox = 40;
+            List<String> splitString = StringHelper.SplitString(welcomeString1, characterWidthOfBox);
+            welcomeString1 = string.Join("\n", splitString);
+            Vector2 welcomeStringDim1 = Game1.smallFont.MeasureString(welcomeString1);
+            this.windowManager.spriteBatch.DrawString(Game1.smallFont, welcomeString1,
+                new Vector2(this.pageContent.X + this.boardWidth + 42, this.pageContent.Y + 40),
+                Color.Brown, 0, Vector2.Zero, .9f, SpriteEffects.None, 1f
+                );
+            this.windowManager.spriteBatch.End();
         }
 
         
@@ -461,19 +577,19 @@ new Vector2(this.pageContent.X + this.boardWidth + 15, this.pageContent.Y + this
             DBConnect db = new DBConnect("stardock.cs.virginia.edu", "cs4730capital", "cs4730capital", "spring2014");
             if (db.OpenConnection() == true)
             {
-                foreach (WarriorWrapper ww in this.warriorWrappers)
+                foreach (Warrior w in this.warriors)
                 {
-                    this.updateWarriorInDB(ww, db);
+                    this.updateWarriorInDB(w, db);
                 }
             }
         }
-        public void updateWarriorInDB(WarriorWrapper ww, DBConnect db)
+        public void updateWarriorInDB(Warrior w, DBConnect db)
         {
             String query = "UPDATE Warriors SET row=@row, col=@col WHERE warrior_id=@warrior_id";
             MySqlCommand cmd = new MySqlCommand(query, db.connection);
-            cmd.Parameters.AddWithValue("@row", this.board.rows - ww.warrior.row - 1);
-            cmd.Parameters.AddWithValue("@col", ww.warrior.col);
-            cmd.Parameters.AddWithValue("@warrior_id", ww.id);
+            cmd.Parameters.AddWithValue("@row", this.board.rows - w.row - 1);
+            cmd.Parameters.AddWithValue("@col", w.col);
+            cmd.Parameters.AddWithValue("@warrior_id", w.id);
             int result = cmd.ExecuteNonQuery();
             if (result == 1)
             {

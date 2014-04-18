@@ -43,7 +43,7 @@ namespace CapitalStrategyServer.Messaging
                             // Change the current client's looking for game property to true
                             //m.sentFrom.lookingForGame = true;
                             // Tell the server queue that we have a new client looking for a game
-                            server.qm.newClientLookingForGame(m.sentFrom);
+                            server.qm.newClientLookingForGame(m.sentFrom, m.username);
                         }
                         else if (m.msg == "CANCEL")
                         {

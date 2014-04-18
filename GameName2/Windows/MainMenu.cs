@@ -9,6 +9,8 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Storage;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Input.Touch;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 using MySql.Data.MySqlClient;
 using CapitalStrategy.GUI;
 using CapitalStrategyServer.Messaging;
@@ -28,6 +30,11 @@ namespace CapitalStrategy.Windows
         public Dialog dialog { get; set; }
         public Button dialogCancel { get; set; }
         public TextAnimation dialogText { get; set; }
+        public ContentManager Content { get; set; }
+
+        public Boolean musicIsPlaying = false;
+        public SoundEffectInstance instance;
+        public SoundEffect click;
         
         public MainMenu(Game1 windowManager)
         {
@@ -60,12 +67,31 @@ namespace CapitalStrategy.Windows
             phrases.Add("Searching for opponent...");
             
             this.dialogText = new TextAnimation(dialog.getComponentLocation(100, (int)Game1.menuFont.MeasureString("Searching for opponent...").X, 100), phrases, 500, Game1.menuFont, isVisible: false);
+
+
+            this.Content = windowManager.Content;
+            SoundEffect music;
+            music = Content.Load<SoundEffect>("Music/MenuMusic");
+            instance = music.CreateInstance();
+            instance.IsLooped = true;
+
+            
+            click = Content.Load<SoundEffect>("soundEffects/daClick");
+
+            
         }
 
         public void Update(GameTime gameTime)
         {
             MouseState newState = Mouse.GetState();
             this.dialogText.update(gameTime);
+
+            if (musicIsPlaying == false)
+            {
+                instance.Play();
+                musicIsPlaying = true;
+            }
+
             if (!this.pastState.Equals(newState))
             {
                 if (newState.LeftButton == ButtonState.Pressed && pastState.LeftButton != ButtonState.Pressed)
@@ -74,13 +100,16 @@ namespace CapitalStrategy.Windows
                     {
                         if (this.findMatchButton.checkClick(newState))
                         {
-
+                            instance.Stop();
+                            click.Play();
                         }
                         if (this.customizeArmyButton.checkClick(newState))
                         {
+                            click.Play();
                         }
                         if (this.backButton.checkClick(newState))
                         {
+                            click.Play();
                         }
                     }
                     else
@@ -98,14 +127,19 @@ namespace CapitalStrategy.Windows
                         {
                             // will actually open find match dialog here in future
                             // then enter gameplay when match is found
-                           
+                            this.windowManager.gameMatch = new GameMatch(this.windowManager);
+                            this.windowManager.windows[GameState.gameMatch] = this.windowManager.gameMatch;
+                            this.windowManager.gameMatch.Initialize();
+                            this.windowManager.gameMatch.LoadContent();
+                            this.windowManager.warriorClasses = this.windowManager.loadWarriorClasses();
+                            this.windowManager.warriorTypes = this.windowManager.loadWarriorTypes();
                             this.dialogText.isVisible = true;
                             this.dialogCancel.isVisible = true;
                             this.dialog.isVisible = true;
                             
                             Message clientReadyForMatch = new Message(msgType.Matchmaking, this.windowManager.client.UniqueIdentifier, 
                                 this.windowManager.client.ServerConnection.RemoteUniqueIdentifier);
-                            clientReadyForMatch.msg = "SEEKING";
+                            clientReadyForMatch.msg = "SEEKING:" + this.windowManager.username;
                             this.windowManager.msgManager.addToOutgoingQueue(clientReadyForMatch);
                         }
                         if (this.customizeArmyButton.unClick(newState))

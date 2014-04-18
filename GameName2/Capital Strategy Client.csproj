@@ -62,7 +62,9 @@
     <Compile Include="GUI\BackButton.cs" />
     <Compile Include="GUI\Button.cs" />
     <Compile Include="GUI\Dialog.cs" />
+    <Compile Include="GUI\FadingMessage.cs" />
     <Compile Include="GUI\InputDialog.cs" />
+    <Compile Include="GUI\StringHelper.cs" />
     <Compile Include="GUI\TextAnimation.cs" />
     <Compile Include="ImageAtlas.cs" />
     <Compile Include="Messaging\Messaging.cs" />
@@ -78,7 +80,6 @@
     <Compile Include="Warrior.cs" />
     <Compile Include="WarriorClass.cs" />
     <Compile Include="WarriorType.cs" />
-    <Compile Include="WarriorWrapper.cs" />
     <Compile Include="Windows\CustomizeArmy.cs" />
     <Compile Include="Windows\GameMatch.cs" />
     <Compile Include="Windows\MainMenu.cs" />
@@ -111,7 +112,7 @@
   <ItemGroup>
     <Content Include="Configuration\WarriorTypes.xml" />
     <Content Include="Content\colors\charcoal.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\colors\red.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -125,6 +126,9 @@
     <Content Include="Content\floortileatlas.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\GUI\bars.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\GUI\button.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -132,6 +136,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\GUI\customizearrow.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\GUI\customize_army_background.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\GUI\gamematch_background.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\GUI\info_background2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\GUI\info_box_background.png">
@@ -167,10 +180,16 @@
     <Content Include="Content\Music\intoBattle.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\Music\MenuMusic.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\shuttle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\soundEffects\bowShot.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\soundEffects\daClick.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\soundEffects\dragonRoar.wav">

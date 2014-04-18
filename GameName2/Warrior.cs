@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework;
 using CapitalStrategy.Windows;
 using Microsoft.Xna.Framework.Audio;
@@ -35,9 +36,10 @@ namespace CapitalStrategy
         public DijkstraNode currentStep { get; set; }
         public Board board { get; set; }
         public int curDelay { get; set; }
-
+        public string description;
         public float x { get; set; }
         public float y { get; set; }
+        public ContentManager Content { get; set; }
 
 
         public Warrior(Board board, int id, double row, double col, int direction, int state, Boolean isYours, WarriorType warriorType)
@@ -54,6 +56,7 @@ namespace CapitalStrategy
             this.cooldown = 0;
             this.stateDepth = 0;
             this.curDelay = 0;
+            this.description = warriorType.description;
         }
 
         public Warrior(Warrior previousWarrior)
@@ -69,6 +72,8 @@ namespace CapitalStrategy
             this.stateDepth = 0;
             this.curDelay = 0;
             this.isYours = previousWarrior.isYours;
+            this.description = previousWarrior.description;
+            this.health = previousWarrior.health;
         }
         public void draw()
         {
@@ -79,40 +84,19 @@ namespace CapitalStrategy
             Rectangle destination = new Rectangle((int)destinationLoc.X - (board.WARRIORWIDTH - board.location.Width / board.cols) / 2, (int)destinationLoc.Y - (board.WARRIORHEIGHT - board.location.Height / board.rows) / 2 - board.location.Height / board.rows / 3, board.WARRIORWIDTH, board.WARRIORHEIGHT);
             ImageAtlas source = this.states[state];
 
-            //Color color = this.isYours ? Color.LightBlue : Color.LightSalmon;
-            Color color;
-            if (this.cooldown > 0 && this.isYours)
-            {
-                color = Color.Yellow;
-            }
-            else if (this.cooldown > 0 && !this.isYours)
-            {
-                color = Color.Red;
-            }
-            else if (this.isYours && this.cooldown == 0)
-            {
-                color = Color.White;
-            }
-            else if (!this.isYours && this.cooldown == 0)
-            {
-                color = Color.IndianRed;
-            }
-            else
-            {
-                color = Color.LimeGreen;
-            }
-            source.draw(spriteBatch, destination, direction, (int)stateDepth, color);
+
+            source.draw(spriteBatch, destination, direction, (int)stateDepth, this.isYours ? Color.White : Color.Red);
             Vector2 vec = new Vector2(0, 0);
         }
         public void drawToLocation()
         {
             SpriteBatch spriteBatch = this.game.spriteBatch;
-            Vector2 destinationLoc = new Vector2(this.x - (this.board.WARRIORWIDTH/4), this.y);
+            Vector2 destinationLoc = new Vector2(this.x, this.y);
             //string EntityInfo = "This is a warrior";
             SpriteFont menufont = this.game.menufont;
             Rectangle destination = new Rectangle((int)destinationLoc.X - (board.WARRIORWIDTH - board.location.Width / board.cols) / 2, (int)destinationLoc.Y - (board.WARRIORHEIGHT - board.location.Height / board.rows) / 2 - board.location.Height / board.rows / 3, board.WARRIORWIDTH, board.WARRIORHEIGHT);
             ImageAtlas source = this.states[state];
-            Color color = this.isYours ? Color.LightBlue : Color.LightSalmon;
+            Color color = this.isYours ? Color.White : Color.LightSalmon;
             source.draw(spriteBatch, destination, direction, (int)stateDepth, color);
         }
 
@@ -124,7 +108,7 @@ namespace CapitalStrategy
             this.state = State.walking;
             this.direction = Direction.S;
             ImageAtlas source = this.states[state];
-            Color color = this.isYours ? Color.LightBlue : Color.LightSalmon;
+            Color color = this.isYours ? Color.White : Color.Red;
             source.draw(spriteBatch, destination, this.direction, (int)this.stateDepth, color);
         }
 
@@ -146,7 +130,9 @@ namespace CapitalStrategy
                     this.state = State.stopped;
                     if (game.turnProgress == TurnProgress.attacking)
                     {
+                        this.game.attackInfoPane.isVisible = false;
                         game.turnProgress = TurnProgress.attacked;
+                       
                     }
 
                 }
@@ -156,6 +142,8 @@ namespace CapitalStrategy
                     {
                         //death!
                         this.board.warriors[(int)this.row][(int)this.col] = null;
+                        this.game.yourWarriors.Remove(this);
+                        this.game.opponentWarriors.Remove(this);
                     }
                     this.curDelay = 500;
                     this.state = State.tippingOver;
@@ -175,12 +163,12 @@ namespace CapitalStrategy
             if (this.state == State.stopped)
             {
 
-                Boolean[][] discovered = this.bredthFirst((int)this.row, (int)this.col, this.maxMove);
+                Boolean[][] discovered = this.bredthFirst((int)this.row, (int)this.col, this.maxMove, passThroughTeam: true);
                 for (int i = 0; i < discovered.Length; i++)
                 {
                     for (int j = 0; j < discovered[i].Length; j++)
                     {
-                        if (discovered[i][j])
+                        if (discovered[i][j] && board.warriors[i][j] == null)
                         {
                             board.tileTints[i][j] = (this.isYours && isYourTurn) ? Warrior.yourMoveColor : Warrior.notYourMoveColor;
                         }
@@ -192,14 +180,19 @@ namespace CapitalStrategy
             {
             }
         }
-        public Boolean[][] bredthFirst(int startRow, int startCol, int maxDepth, Boolean ignoreWarriors = false)
+        public Boolean[][] bredthFirst(int startRow, int startCol, int maxDepth, Boolean ignoreWarriors = false, bool passThroughTeam = false)
         {
+            
             List<BredthFirstNode> bfns = new List<BredthFirstNode>();
             bfns.Add(new BredthFirstNode(startRow, startCol, 0));
             Boolean[][] discovered = new Boolean[board.rows][];
             for (int i = 0; i < discovered.Length; i++)
             {
                 discovered[i] = new Boolean[board.cols];
+            }
+            if (startRow < 0 || startRow >= this.board.rows || startCol < 0 || startCol >= this.board.cols)
+            {
+                return discovered;
             }
             discovered[startRow][startCol] = true;
             while (bfns.Count != 0)
@@ -213,29 +206,45 @@ namespace CapitalStrategy
                 int row = bfn.row;
                 int col = bfn.col;
                 int depth = bfn.depth;
-                if (row + 1 < board.rows && !discovered[row + 1][col] && (board.warriors[row + 1][col] == null || ignoreWarriors))
+                if (row + 1 < board.rows && !discovered[row + 1][col] && (board.warriors[row + 1][col] == null || ignoreWarriors ||
+                    (board.warriors[row + 1][col] != null && board.warriors[row + 1][col].isYours && passThroughTeam)))
                 {
                     //board.tileTints[row + 1][col] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row + 1][col] = true;
-                    bfns.Add(new BredthFirstNode(row + 1, col, depth + 1));
+                    if (!ignoreWarriors || board.warriors[row + 1][col] == null)
+                    {
+                        bfns.Add(new BredthFirstNode(row + 1, col, depth + 1));
+                    }
                 }
-                if (row - 1 > -1 && !discovered[row - 1][col] && (board.warriors[row - 1][col] == null || ignoreWarriors))
+                if (row - 1 > -1 && !discovered[row - 1][col] && (board.warriors[row - 1][col] == null || ignoreWarriors ||
+                    (row - 1 > -1 && board.warriors[row - 1][col] != null && board.warriors[row - 1][col].isYours && passThroughTeam)))
                 {
                     // board.tileTints[row - 1][col] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row - 1][col] = true;
-                    bfns.Add(new BredthFirstNode(row - 1, col, depth + 1));
+                    if (!ignoreWarriors || board.warriors[row - 1][col] == null)
+                    {
+                        bfns.Add(new BredthFirstNode(row - 1, col, depth + 1));
+                    }
                 }
-                if (col + 1 < board.cols && !discovered[row][col + 1] && (board.warriors[row][col + 1] == null || ignoreWarriors))
+                if (col + 1 < board.cols && !discovered[row][col + 1] && (board.warriors[row][col + 1] == null || ignoreWarriors ||
+                    (board.warriors[row][col + 1] != null && board.warriors[row][col + 1].isYours && passThroughTeam)))
                 {
                     // board.tileTints[row][col + 1] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row][col + 1] = true;
-                    bfns.Add(new BredthFirstNode(row, col + 1, depth + 1));
+                    if (!ignoreWarriors || board.warriors[row][col + 1] == null)
+                    {
+                        bfns.Add(new BredthFirstNode(row, col + 1, depth + 1));
+                    }
                 }
-                if (col - 1 > -1 && !discovered[row][col - 1] && (board.warriors[row][col - 1] == null || ignoreWarriors))
+                if (col - 1 > -1 && !discovered[row][col - 1] && (board.warriors[row][col - 1] == null || ignoreWarriors ||
+                    (board.warriors[row][col - 1] != null && board.warriors[row][col - 1].isYours && passThroughTeam)))
                 {
                     //board.tileTints[row][col - 1] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row][col - 1] = true;
-                    bfns.Add(new BredthFirstNode(row, col - 1, depth + 1));
+                    if (!ignoreWarriors || board.warriors[row][col - 1] == null)
+                    {
+                        bfns.Add(new BredthFirstNode(row, col - 1, depth + 1));
+                    }
                 }
             }
             return discovered;
@@ -243,21 +252,25 @@ namespace CapitalStrategy
 
         public Boolean isValidMove(Board board, int moveRow, int moveCol)
         {
-            return bredthFirst((int)this.row, (int)this.col, this.maxMove)[moveRow][moveCol];
+            return bredthFirst((int)this.row, (int)this.col, this.maxMove, passThroughTeam: true)[moveRow][moveCol] && this.board.warriors[moveRow][moveCol] == null;
         }
-        public void moveTo(int destRow, int destCol)
+        public bool moveTo(int destRow, int destCol)
         {
+            if (destRow == this.row && destCol == this.col)
+            {
+                return false;
+            }
             this.state = State.walking;
             this.stateDepth = 0;
             this.destRow = destRow;
             this.destCol = destCol;
-            this.currentStep = this.dijkstra((int)this.row, (int)this.col, destRow, destCol);
+            this.currentStep = this.dijkstra((int)this.row, (int)this.col, destRow, destCol, passThroughTeam: true);
+            return true;
         }
 
-        public DijkstraNode dijkstra(int startRow, int startCol, int destRow, int destCol)
+        public DijkstraNode dijkstra(int startRow, int startCol, int destRow, int destCol, bool passThroughTeam = false)
         {
             DijkstraNode start = new DijkstraNode(startRow, startCol, 0, null, null);
-
             List<DijkstraNode> dijkstras = new List<DijkstraNode>();
             dijkstras.Add(start);
             Boolean[][] discovered = new Boolean[board.rows][];
@@ -279,25 +292,29 @@ namespace CapitalStrategy
                 int row = dijkstraNode.row;
                 int col = dijkstraNode.col;
                 int depth = dijkstraNode.depth;
-                if (row + 1 < board.rows && !discovered[row + 1][col] && board.warriors[row + 1][col] == null)
+                if (row + 1 < board.rows && !discovered[row + 1][col] && (board.warriors[row + 1][col] == null ||
+                    (board.warriors[row + 1][col] != null && board.warriors[row + 1][col].isYours == this.isYours && passThroughTeam)))
                 {
                     //board.tileTints[row + 1][col] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row + 1][col] = true;
                     dijkstras.Add(new DijkstraNode(row + 1, col, depth + 1, dijkstraNode, null));
                 }
-                if (row - 1 > -1 && !discovered[row - 1][col] && board.warriors[row - 1][col] == null)
+                if (row - 1 > -1 && !discovered[row - 1][col] && (board.warriors[row - 1][col] == null ||
+                    (board.warriors[row - 1][col] != null && board.warriors[row - 1][col].isYours == this.isYours && passThroughTeam)))
                 {
                     // board.tileTints[row - 1][col] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row - 1][col] = true;
                     dijkstras.Add(new DijkstraNode(row - 1, col, depth + 1, dijkstraNode, null));
                 }
-                if (col + 1 < board.cols && !discovered[row][col + 1] && board.warriors[row][col + 1] == null)
+                if (col + 1 < board.cols && !discovered[row][col + 1] && (board.warriors[row][col + 1] == null ||
+                    (board.warriors[row][col + 1] != null && board.warriors[row][col + 1].isYours == this.isYours && passThroughTeam)))
                 {
                     // board.tileTints[row][col + 1] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row][col + 1] = true;
                     dijkstras.Add(new DijkstraNode(row, col + 1, depth + 1, dijkstraNode, null));
                 }
-                if (col - 1 > -1 && !discovered[row][col - 1] && board.warriors[row][col - 1] == null)
+                if (col - 1 > -1 && !discovered[row][col - 1] && (board.warriors[row][col - 1] == null ||
+                    (board.warriors[row][col - 1] != null && board.warriors[row][col - 1].isYours == this.isYours && passThroughTeam)))
                 {
                     //board.tileTints[row][col - 1] = this.isYours ? Warrior.moveColor : Warrior.enemyMoveColor;
                     discovered[row][col - 1] = true;
@@ -358,6 +375,7 @@ namespace CapitalStrategy
 
             return false;
         }
+
         public void setDirection(int xDiff, int yDiff)
         {
             // angle is in radians, always between 0 and pi
@@ -552,29 +570,36 @@ namespace CapitalStrategy
                 //target.health -= damage;
                 Random rand = new Random();
                 int randomNum = rand.Next(0, 101);
-                int damage = (this.attack * 25) / target.defense;
+                int damage = (this.attack * 20) / target.defense;
                 bool doesHit = true;
+
+                string attackSound = this.attackSound;
+                SoundEffect effect;
+                // effect = Content.Load<SoundEffect>(attackSound);
+                //effect.Play();
+
+
                 // bonus check
                 if (this.warriorClass.indexOfAdvantageAgainst == target.warriorClass.index)
                 {
                     damage = (int)(damage * 1.33);
                 }
-
-                if (this.isFacingTowards((int)this.row, (int)this.col, (int)target.row, (int)target.col, target.direction))
+                int direction = target.getDirectionTo(this);
+                if (direction == target.direction || direction == (target.direction + 1) % 8 || direction == (target.direction - 1) % 8)
                 {
                     //if target is facing towards from attacking unit, 80% chance of hitting
-                    doesHit = randomNum <= 80;
+                    doesHit = randomNum <= 70;
                 }
-                else if (this.isFacingAway((int)this.row, (int)this.col, (int)target.row, (int)target.col, target.direction))
+                else if (direction == (target.direction + 4) % 8)
                 {
                     //if target is facing away from attacking unit, does 1.5* damage and always hits
                     damage = (int)(damage * 1.33);
                     doesHit = true;
                 }
-                else if (this.isFacingSide((int)this.row, (int)this.col, (int)target.row, (int)target.col, target.direction))
+                else
                 {
                     //if target's side is towards attacking unit, 90% chance to hit
-                    doesHit = randomNum <= 90;
+                    doesHit = randomNum <= 85;
                     
                 }
 
@@ -593,77 +618,46 @@ namespace CapitalStrategy
             return 0;
             // handle death in motions
         }
-        public Boolean isFacingTowards(int thisRow, int thisCol, int targetRow, int targetCol, int targetDir)
+        public int getDirectionTo(Warrior attacker)
         {
-            if (thisCol != targetCol)
-            {
-                if (thisCol < targetCol && targetDir == 0)
-                {
-                    return true;
-                }
-                if (thisCol > targetCol && targetDir == 4)
-                {
-                    return true;
-                }
-            }
-            if (thisCol == targetCol)
-            {
-                if (thisRow < targetRow && targetDir == 6)
-                {
-                    return true;
-                }
-                if (thisRow > targetRow && targetDir == 2)
-                {
-                    return true;
-                }
+            int rowDiff = (int)(attacker.row - this.row);
+            int colDiff = (int)(attacker.col - this.col);
+            // angle is in radians, always between 0 and pi
+            rowDiff *= -1;
+            double angle = 360 * Math.Atan(((double)rowDiff) / colDiff) / (2 * Math.PI);
 
+            if (angle < 90 && colDiff < 0)
+            {
+                angle = angle + 180;
             }
-            return false;
+            if (angle < 0)
+            {
+                angle += 360;
+            }
+
+            // now we want it to be clockwise, with 0 at 3pi/4
+            angle = angle - 112.5;
+            if (angle < 0)
+            {
+                angle += 360;
+            }
+            angle = 360 - angle;
+
+            // now normalize to int 0 - 7
+            return (int)(8 * angle / (360));
+
+            
         }
-        public Boolean isFacingAway(int thisRow, int thisCol, int targetRow, int targetCol, int targetDir)
+        public override bool Equals(object obj)
         {
-            if (thisCol != targetCol)
+            if (obj.GetType() == typeof(Warrior))
             {
-                if (thisCol < targetCol && targetDir == 4)
-                {
-                    return true;
-                }
-                if (thisCol > targetCol && targetDir == 0)
-                {
-                    return true;
-                }
-            }
-            if (thisCol == targetCol)
-            {
-                if (thisRow < targetRow && targetDir == 2)
-                {
-                    return true;
-                }
-                if (thisRow > targetRow && targetDir == 6)
-                {
-                    return true;
-                }
-
+                Warrior w = (Warrior)obj;
+                return this.id == w.id;
             }
             return false;
         }
 
-
-        public Boolean isFacingSide(int thisRow, int thisCol, int targetRow, int targetCol, int targetDir)
-        {
-            if (thisRow == targetRow)
-            {
-                if (targetDir == 2 || targetDir == 6)
-                    return true;
-            }
-            if (thisCol == targetCol)
-            {
-                if (targetDir == 0 || targetDir == 4)
-                    return true;
-
-            }
-            return false;
-        }
 
 
         public class BredthFirstNode

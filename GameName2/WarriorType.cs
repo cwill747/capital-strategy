@@ -33,10 +33,10 @@ namespace CapitalStrategy
 		public int attackDelayConst { get; set; }
 		public int attackDelayRate { get; set; }
         public String attackSound { get; set; }
-
+        public String description;
 		// note: will need to add way of showing attack area
 
-		public WarriorType(GameMatch game, int maxHealth, int maxCooldown, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, WarriorClass warriorClass, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate, String attackSound)
+		public WarriorType(GameMatch game, int maxHealth, int maxCooldown, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, WarriorClass warriorClass, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate, String attackSound, String description)
 		{
 			this.game = game;
 			this.maxHealth = maxHealth;
@@ -56,6 +56,7 @@ namespace CapitalStrategy
 			this.attackDelayConst = attackDelayConst;
 			this.attackDelayRate = attackDelayRate;
             this.attackSound = "soundEffects/" + attackSound;
+            this.description = description;
 		}
 
 		public WarriorType(WarriorType warriorType)

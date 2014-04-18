@@ -14,7 +14,10 @@
    id="svg3075"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="New document 3">
+   sodipodi:docname="welcome_box_background.svg"
+   inkscape:export-filename="C:\Users\cameron\Documents\GitHub\capital-strategy\GameName2\Content\GUI\info_box_background.png"
+   inkscape:export-xdpi="216.22"
+   inkscape:export-ydpi="216.22">
   <defs
      id="defs3077" />
   <sodipodi:namedview
@@ -24,9 +27,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="5.6"
-     inkscape:cx="209.22341"
-     inkscape:cy="766.2403"
+     inkscape:zoom="3.959798"
+     inkscape:cx="372.9951"
+     inkscape:cy="815.11866"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -53,9 +56,21 @@
      id="layer1">
     <path
        inkscape:connector-curvature="0"
-       d="m 272.22231,239.85771 -133.01605,0 c -8.2302,0 -14.90227,4.55101 -14.90227,10.1648 l 0,80.27762 c 0,5.61379 6.67207,10.1648 14.90227,10.1648 l 133.01605,0 c 8.2302,0 14.90228,-4.55101 14.90228,-10.1648 l 0,-80.27762 c 0,-5.61379 -6.67208,-10.1648 -14.90228,-10.1648 z"
-       style="fill:#000000;stroke:#373535;stroke-width:3.66289782999999990;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:7;stroke-opacity:1;stroke-dasharray:none;fill-opacity:0.18518518"
+       d="m 622.22231,303.19198 -348.05234,0.13059 c -11.60852,0.004 -12.55119,0.39527 -12.51203,-8.71184 l 0.16957,-39.43743 212.58424,-1.01145 -0.10776,-104.90831 c 0,0 162.8206,-0.0781 162.8206,0 l 0,143.77366 c 0,5.61379 -6.67607,10.42112 -14.90228,10.1648 z"
+       style="fill:#000000;fill-opacity:0.18518515;stroke:#373535;stroke-width:1.91375005;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:7;stroke-opacity:1;stroke-dasharray:none"
        id="path3033"
-       sodipodi:nodetypes="sssssssss" />
+       sodipodi:nodetypes="cssccccssc"
+       inkscape:export-filename="C:\Users\cameron\Documents\GitHub\capital-strategy\GameName2\Content\GUI\info_box_background.png"
+       inkscape:export-xdpi="216.22"
+       inkscape:export-ydpi="216.22" />
+    <path
+       inkscape:connector-curvature="0"
+       d="m 622.67956,64.002494 -133.80863,0 c -8.27924,0 -14.99107,2.444893 -14.99107,5.460733 l 0,77.238063 c 0,0 163.79078,0.042 163.79078,0 l 0,-77.238063 c 0,-3.01584 -6.71184,-5.460733 -14.99108,-5.460733 z"
+       style="fill:#000000;fill-opacity:0.18518515;stroke:#373535;stroke-width:1.91375005;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:7;stroke-opacity:1;stroke-dasharray:none"
+       id="path3033-2"
+       sodipodi:nodetypes="sssccss"
+       inkscape:export-filename="C:\Users\cameron\Documents\GitHub\capital-strategy\GameName2\Content\GUI\info_box_background.png"
+       inkscape:export-xdpi="216.22"
+       inkscape:export-ydpi="216.22" />
   </g>
 </svg>
