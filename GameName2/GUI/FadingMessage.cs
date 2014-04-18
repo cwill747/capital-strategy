@@ -20,13 +20,15 @@ namespace CapitalStrategy.GUI
         private int currentDelay = -1;
         public string message { get; set; }
         private SpriteFont font;
+        public Color color { get; set; }
 
-        public FadingMessage(float centerX, float centerY, string message, SpriteFont font, int fadeDelay)
+        public FadingMessage(float centerX, float centerY, string message, SpriteFont font, int fadeDelay, Color color)
         {
             this.fadeDelay = fadeDelay;
             this.font = font;
             this.message = message;
             this.moveTo(centerX, centerY);
+            this.color = color;
         }
 
         public void show()
@@ -39,7 +41,7 @@ namespace CapitalStrategy.GUI
             if (currentDelay > 0)
             {
                 spriteBatch.Begin();
-                spriteBatch.DrawString(font, message, new Vector2(x, y), Color.White);
+                spriteBatch.DrawString(font, message, new Vector2(x, y), color);
                 spriteBatch.End();
             }
         }

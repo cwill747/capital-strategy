@@ -252,13 +252,18 @@ namespace CapitalStrategy
         {
             return bredthFirst((int)this.row, (int)this.col, this.maxMove, passThroughTeam: true)[moveRow][moveCol] && this.board.warriors[moveRow][moveCol] == null;
         }
-        public void moveTo(int destRow, int destCol)
+        public bool moveTo(int destRow, int destCol)
         {
+            if (destRow == this.row && destCol == this.col)
+            {
+                return false;
+            }
             this.state = State.walking;
             this.stateDepth = 0;
             this.destRow = destRow;
             this.destCol = destCol;
             this.currentStep = this.dijkstra((int)this.row, (int)this.col, destRow, destCol, passThroughTeam: true);
+            return true;
         }
 
         public DijkstraNode dijkstra(int startRow, int startCol, int destRow, int destCol, bool passThroughTeam = false)

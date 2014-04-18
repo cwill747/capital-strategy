@@ -55,6 +55,7 @@ namespace CapitalStrategy.Windows
         private bool warriorIsResetting;
         private int previousWarriorDirection;
         private int healthBarFadeDelay = -1;
+        private bool hasMoved = false; // so that attackbtn plays nicely with movement button
 
         private int endOfInfoPaneLocation;
         public int turnProgress { get; set; }
@@ -73,7 +74,9 @@ namespace CapitalStrategy.Windows
         Button attackBtn;
         Button skipBtn;
 
+        // fading messages
         FadingMessage missFadingMessage;
+        FadingMessage btnMisuseFadingMessage;
 
         public Boolean waitingForTurn { get; set; }
         public Boolean didSkipTurn = false;
@@ -142,12 +145,15 @@ namespace CapitalStrategy.Windows
 
             mouseState = new MouseWrapper(board, Mouse.GetState());
 
-            this.missFadingMessage = new FadingMessage(0, 0, "Miss!", Game1.menuFont, 2000);
+            this.missFadingMessage = new FadingMessage(0, 0, "Miss!", Game1.menuFont, 2000, Color.White);
+            this.btnMisuseFadingMessage = new FadingMessage(attackBtn.location.X + attackBtn.location.Width / 2, btn_Y - 20, "You must select a warrior first.", Game1.smallFont, 2000, Color.Red);
+            
         }
         public void Update(GameTime gameTime)
         {
             this.healthBarFadeDelay -= gameTime.ElapsedGameTime.Milliseconds;
             this.missFadingMessage.update(gameTime);
+            this.btnMisuseFadingMessage.update(gameTime);
             if (isYourTurn)
             {
                 //for end game
@@ -177,7 +183,13 @@ namespace CapitalStrategy.Windows
                     switch (this.turnProgress)
                     {
                         case TurnProgress.beginning:
+                            this.hasMoved = false;
+                            movementBtn.isDisabled = true;
+                            attackBtn.isDisabled = false;
+                            skipBtn.isDisabled = false;
+                            break;
                         case TurnProgress.moving:
+                            this.hasMoved = true;
                             movementBtn.isDisabled = true;
                             attackBtn.isDisabled = false;
                             skipBtn.isDisabled = false;
@@ -276,23 +288,7 @@ namespace CapitalStrategy.Windows
                     if (finishedMoving && !warriorIsResetting)
                     {
                         this.turnProgress = TurnProgress.moved;
-                        if (!this.isYourTurn)
-                        {
-                            if (this.targetRow < 0 || beingAttacked == null)
-                            {
-                                // todo either make you unable to attack nothing or correct facing
-                                this.turnProgress = TurnProgress.turnOver;
-                            }
-                            else
-                            {
-                                this.turnProgress = TurnProgress.attacking;
-                                int xDiff = (int)(currentTurnWarrior.col - beingAttacked.col);
-                                int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
-                                beingAttacked.setDirection(xDiff, yDiff);
-                                beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
-                                this.currentTurnWarrior.beginAttack(this.targetRow, this.targetCol);
-                            }
-                        }
+                        
                     }
                     else if (finishedMoving && warriorIsResetting)
                     {
@@ -309,7 +305,27 @@ namespace CapitalStrategy.Windows
                 }
                 if (this.turnProgress == TurnProgress.moved)
                 {
-                    this.currentTurnWarrior.drawAttackRange();
+                    if (!this.isYourTurn)
+                    {
+                        if (this.targetRow < 0 || beingAttacked == null)
+                        {
+                            // todo either make you unable to attack nothing or correct facing
+                            this.turnProgress = TurnProgress.turnOver;
+                        }
+                        else
+                        {
+                            this.turnProgress = TurnProgress.attacking;
+                            int xDiff = (int)(currentTurnWarrior.col - beingAttacked.col);
+                            int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
+                            beingAttacked.setDirection(xDiff, yDiff);
+                            beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
+                            this.currentTurnWarrior.beginAttack(this.targetRow, this.targetCol);
+                        }
+                    }
+                    else
+                    {
+                        this.currentTurnWarrior.drawAttackRange();
+                    }
                 }
                 if (this.turnProgress == TurnProgress.targetAcquired)
                 {
@@ -466,45 +482,68 @@ namespace CapitalStrategy.Windows
                     }
                 }
 
-                if (this.turnProgress == TurnProgress.moved)
+
+                if (mouseState.mouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
                 {
-                    if (mouseState.mouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
+                    if (this.movementBtn.unClick(mouseState.mouseState))
                     {
-                        if (this.movementBtn.unClick(mouseState.mouseState))
+                        this.turnProgress = TurnProgress.beginning;
+                        if (this.isYourTurn && this.hasMoved)
                         {
-                            this.turnProgress = TurnProgress.beginning;
-                            if (this.isYourTurn)
+                            int[,] lastMove = p1MovementStack.Pop();
+                            int[] movedFrom = { lastMove[0, 0], lastMove[0, 1] };
+                            int[] movedTo = { lastMove[1, 0], lastMove[1, 1] };
+                            this.selectedWarrior = this.board.warriors[movedTo[0]][movedTo[1]];
+                            if (this.selectedWarrior.moveTo(movedFrom[0], movedFrom[1]))
                             {
-                                int[,] lastMove = p1MovementStack.Pop();
-                                int[] movedFrom = { lastMove[0, 0], lastMove[0, 1] };
-                                int[] movedTo = { lastMove[1, 0], lastMove[1, 1] };
-                                this.selectedWarrior = this.board.warriors[movedTo[0]][movedTo[1]];
-                                this.selectedWarrior.moveTo(movedFrom[0], movedFrom[1]);
                                 this.turnProgress = TurnProgress.moving;
-                                board.resetTints();
-                                this.currentTurnWarrior = selectedWarrior;
                                 warriorIsResetting = true;
-                                this.previousWarriorDirection = lastMove[2, 0];
-                                //this.currentTurnWarrior.state = State.
                             }
-                        }
-
-                        if (this.skipBtn.unClick(mouseState.mouseState))
-                        {
-                            if (this.isYourTurn)
+                            else
                             {
-                                this.turnProgress = TurnProgress.turnOver;
-                                this.currentTurnWarrior.updateUserOptions(false);
-                                this.beingAttacked = null;
-                                board.resetTints();
+                                this.turnProgress = TurnProgress.moved;
+                                warriorIsResetting = false;
                             }
+                            
+                            board.resetTints();
+                            this.currentTurnWarrior = selectedWarrior;
+                            
+                            this.previousWarriorDirection = lastMove[2, 0];
+                            //this.currentTurnWarrior.state = State.
                         }
-                        if (this.attackBtn.unClick(mouseState.mouseState))
+                        else
                         {
-                            this.missFadingMessage.show();
+                            this.board.resetTints();
+                            this.currentTurnWarrior.updateUserOptions(true);
                         }
-
                     }
+
+                    if (this.skipBtn.unClick(mouseState.mouseState))
+                    {
+                        if (this.isYourTurn)
+                        {
+                            this.turnProgress = TurnProgress.turnOver;
+                            this.currentTurnWarrior.updateUserOptions(false);
+                            this.beingAttacked = null;
+                            board.resetTints();
+                        }
+                    }
+                    if (this.attackBtn.unClick(mouseState.mouseState))
+                    {
+                        if (this.selectedWarrior == null || !this.selectedWarrior.isYours)
+                        {
+                            this.btnMisuseFadingMessage.message = "You must select a unit on your team.";
+                            this.btnMisuseFadingMessage.show();
+                        }
+                        else
+                        {
+                            this.hasMoved = false;
+                            this.turnProgress = TurnProgress.moved;
+                            this.currentTurnWarrior = this.selectedWarrior;
+                            board.resetTints();
+                        }
+                    }
+
                 }
             }
                 else
@@ -634,6 +673,7 @@ namespace CapitalStrategy.Windows
                 this.drawCooldownOnWarrior(w);
             }
             this.missFadingMessage.draw(spriteBatch);
+            this.btnMisuseFadingMessage.draw(spriteBatch);
             if (mouseState.isOverGrid && board.warriors[mouseState.row][mouseState.col] != null)
             {
                 this.drawHealthBar(mouseState.row, mouseState.col);
@@ -684,7 +724,15 @@ namespace CapitalStrategy.Windows
                     // find if this is a valid move
                     if (selectedWarrior.isValidMove(board, mouseState.row, mouseState.col))
                     {
-                        selectedWarrior.moveTo(mouseState.row, mouseState.col);
+                        if (selectedWarrior.moveTo(mouseState.row, mouseState.col))
+                        {
+                            this.turnProgress = TurnProgress.moving;
+                        }
+                        else
+                        {
+                            this.turnProgress = TurnProgress.moved;
+                        }
+                        
                         if (this.isYourTurn)
                         {
                             p1MovementStack.Push(new int[,] { { (int)selectedWarrior.row, (int)selectedWarrior.col }, { mouseState.row, mouseState.col }, {selectedWarrior.direction, 0}});
@@ -693,7 +741,6 @@ namespace CapitalStrategy.Windows
                         {
                             p2MovementStack.Push(new int[,] { { (int)selectedWarrior.row, (int)selectedWarrior.col }, { mouseState.row, mouseState.col }, { selectedWarrior.direction, 0 } });
                         }
-                        this.turnProgress = TurnProgress.moving;
                         this.currentTurnWarrior = selectedWarrior;
                     }
                 }
@@ -949,8 +996,15 @@ namespace CapitalStrategy.Windows
             {
                 Warrior attackingWarrior = this.getWarriorById(message.attackerUnitID);
                 Warrior attackedWarrior = this.getWarriorById(message.attackedUnitID);
-                attackingWarrior.moveTo(message.endLocation[0], message.endLocation[1]);
-                this.turnProgress = TurnProgress.moving;
+                if (attackingWarrior.moveTo(message.endLocation[0], message.endLocation[1]))
+                {
+                    this.turnProgress = TurnProgress.moving;
+                }
+                else
+                {
+                    this.turnProgress = TurnProgress.moved;
+                }
+                
                 this.currentTurnWarrior = attackingWarrior;
 
                 this.targetRow = message.attackedLocation[0];
