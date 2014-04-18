@@ -29,10 +29,11 @@ namespace CapitalStrategyServer
         {
             clientsConnected.Add(c);
         }
-        public void newClientLookingForGame(long identifier)
+        public void newClientLookingForGame(long identifier, string username)
         {
             Client c = clientsConnected.Find(x => x.uniqueIdentifier == identifier);
             c.lookingForGame = true;
+            c.username = username;
             clientsLookingForAGame.Add(c);
 
             Client client1;

@@ -81,8 +81,13 @@ namespace CapitalStrategyServer
                             {
                                 long sentFrom = msg.ReadInt64();
                                 long sendToUUID = msg.ReadInt64();
-                                string message = msg.ReadString();
+                                string[] arr = msg.ReadString().Split(new char[] {':'});
+                                string message = arr[0];
                                 m = new Message(type, sentFrom, sendToUUID);
+                                if (arr.Length > 1)
+                                {
+                                    m.username = arr[1];
+                                }
                                 m.msg = message;
                             }
                             else

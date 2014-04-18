@@ -29,6 +29,7 @@ namespace CapitalStrategyServer.Messaging
         public bool unitAttackDied;
         public int facing;
         public Client matchmadeClient;
+        public string username;
 
         public Message()
         {

@@ -134,7 +134,7 @@ namespace CapitalStrategy.Windows
                             
                             Message clientReadyForMatch = new Message(msgType.Matchmaking, this.windowManager.client.UniqueIdentifier, 
                                 this.windowManager.client.ServerConnection.RemoteUniqueIdentifier);
-                            clientReadyForMatch.msg = "SEEKING";
+                            clientReadyForMatch.msg = "SEEKING:" + this.windowManager.username;
                             this.windowManager.msgManager.addToOutgoingQueue(clientReadyForMatch);
                         }
                         if (this.customizeArmyButton.unClick(newState))
