@@ -81,6 +81,14 @@ namespace CapitalStrategy.Windows
 
         private int finalFacing; // for simulating opponents move, final facing
 
+        public Dialog dialogConfirmQuit { get; set; }
+        public Button confirmOK { get; set; }
+        public Button confirmCancel { get; set; }
+        public TextAnimation dialogconfirmText { get; set; }
+        public List<String> confPhrases { get; set; }
+
+        Button quitBtn;
+
         // GUI STUFF
         Button movementBtn;
         Button attackBtn;
@@ -163,19 +171,42 @@ namespace CapitalStrategy.Windows
             dialogOK = new Button("OK", dialogEnd.getComponentLocation(200, 200, 70), Game1.menuFont, isVisible: false);
             phrases = new List<String>();
             dialogWinner = new TextAnimation(dialogEnd.getComponentLocation(100, (int)Game1.menuFont.MeasureString("Searching for opponent...").X, 100), phrases, 500, Game1.menuFont, isVisible: false);
+            quitBtn = new Button("QUIT", new Rectangle(SELECTED_WARRIOR_INFO_X, btn_Y * 2, 100, 25), Game1.smallFont);
+
+            dialogOK = new Button("OK", dialogEnd.getComponentLocation(200, 200, 70), Game1.menuFont, isVisible: false);
+            dialogConfirmQuit = new Dialog(this.windowManager, dialogWidth, dialogHeight, isVisible: false);
+            confirmCancel = new Button("Cancel", dialogConfirmQuit.getComponentLocation(230, 200, 70), Game1.menuFont, isVisible: false);
+            confirmOK = new Button("OK", dialogConfirmQuit.getComponentLocation(150, 200, 70), Game1.menuFont, isVisible: false);
+
+            confPhrases = new List<String>();
+            String rusure = "Do you really want to quit?";
+            confPhrases.Add(rusure);
+            dialogconfirmText = new TextAnimation(dialogConfirmQuit.getComponentLocation(100, (int)Game1.menuFont.MeasureString("Searching for opponent...").X, 100), confPhrases, 500, Game1.menuFont, isVisible: false);
+            
 
             this.missFadingMessage = new FadingMessage(0, 0, "Miss!", Game1.menuFont, 2000, Color.White);
             this.btnMisuseFadingMessage = new FadingMessage(attackBtn.location.X + attackBtn.location.Width / 2, btn_Y - 20, "You must select a warrior first.", Game1.smallFont, 2000, Color.Red);
             this.yourTurnFadingMessage = new FadingMessage(this.BOARDWIDTH / 2, this.BOARDHEIGHT / 2, "Your turn!", Game1.menuFont, 2500, Color.White);
             this.attackInfoPane = new AttackInfoPane(200, 200);
         }
+
+
+        public void reset()
+        {
+            this.Initialize();
+            this.LoadContent();
+            int newGameState = Game1.gameStates.Pop();
+            this.windowManager.gameState = newGameState;
+            this.windowManager.windows[newGameState].Initialize();
+        }
+
         public void Update(GameTime gameTime)
         {
             this.healthBarFadeDelay -= gameTime.ElapsedGameTime.Milliseconds;
             this.missFadingMessage.update(gameTime);
             this.btnMisuseFadingMessage.update(gameTime);
             this.yourTurnFadingMessage.update(gameTime);
-
+            quitBtn.isDisabled = false;
             // manages button states
             if (this.isYourTurn)
             {
@@ -240,19 +271,21 @@ namespace CapitalStrategy.Windows
                             this.dialogWinner.isVisible = false;
                             this.dialogOK.isVisible = false;
                             this.dialogOK.isDisabled = false;
+                            reset();
+                            /*
                             this.Initialize();
                             this.LoadContent();
                             int newGameState = Game1.gameStates.Pop();
                             this.windowManager.gameState = newGameState;
                             this.windowManager.windows[newGameState].Initialize();
-
+                            **/
                         }
                     }
                     
                     movementBtn.update(gameTime);
                     attackBtn.update(gameTime);
                     skipBtn.update(gameTime);
-
+                    quitBtn.update(gameTime);
 
                     // end of end game
 
@@ -471,6 +504,19 @@ namespace CapitalStrategy.Windows
                         {
 
                         }
+
+                        if (this.quitBtn.checkClick(mouseState.mouseState))
+                        {
+
+                        }
+                        if (this.confirmOK.checkClick(mouseState.mouseState))
+                        {
+
+                        }
+                        if (this.confirmCancel.checkClick(mouseState.mouseState))
+                        {
+
+                        }
                     }
 
 
@@ -508,7 +554,34 @@ namespace CapitalStrategy.Windows
                                 this.currentTurnWarrior.updateUserOptions(true);
                             }
                         }
-
+                        if (this.quitBtn.unClick(mouseState.mouseState))
+                        {
+                            dialogConfirmQuit.isVisible = true;
+                            confirmCancel.isDisabled = false;
+                            confirmOK.isDisabled = false;
+                            confirmCancel.isVisible = true;
+                            confirmOK.isVisible = true;
+                            dialogconfirmText.isVisible = true;
+                        }
+                        if (this.confirmCancel.unClick(mouseState.mouseState))
+                        {
+                            dialogConfirmQuit.isVisible = false;
+                            confirmCancel.isDisabled = true;
+                            confirmOK.isDisabled = true;
+                            confirmCancel.isVisible = false;
+                            confirmOK.isVisible = false;
+                            dialogconfirmText.isVisible = false;
+                        }
+                        if (this.confirmOK.unClick(mouseState.mouseState))
+                        {
+                            dialogConfirmQuit.isVisible = false;
+                            confirmCancel.isDisabled = true;
+                            confirmOK.isDisabled = true;
+                            confirmCancel.isVisible = false;
+                            confirmOK.isVisible = false;
+                            dialogconfirmText.isVisible = false;
+                            yourWarriors.Clear();
+                        }
                         if (this.skipBtn.unClick(mouseState.mouseState))
                         {
                             if (this.isYourTurn)
@@ -707,6 +780,15 @@ namespace CapitalStrategy.Windows
             this.dialogOK.draw(this.windowManager.spriteBatch);
             this.dialogWinner.draw(this.windowManager.spriteBatch);
 
+
+            this.quitBtn.draw(windowManager.spriteBatch);
+            this.dialogEnd.draw2();
+            this.dialogOK.draw(this.windowManager.spriteBatch);
+            this.dialogConfirmQuit.draw2();
+            this.confirmCancel.draw(this.windowManager.spriteBatch);
+            this.confirmOK.draw(this.windowManager.spriteBatch);
+            this.dialogWinner.draw(this.windowManager.spriteBatch);
+            this.dialogconfirmText.draw(this.windowManager.spriteBatch);
         }
 
 
