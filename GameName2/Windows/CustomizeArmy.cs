@@ -359,11 +359,11 @@ namespace CapitalStrategy.Windows
                     }
                 }
 
-                this.aRange.draw(this.windowManager.spriteBatch);
-                this.mRange.draw(this.windowManager.spriteBatch);
+                
             }
 
-
+            this.aRange.draw(this.windowManager.spriteBatch);
+            this.mRange.draw(this.windowManager.spriteBatch);
             this.backButton.drawBackButton(this.windowManager.spriteBatch);
 
             if (recentlySaved)
