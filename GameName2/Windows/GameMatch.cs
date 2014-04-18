@@ -591,9 +591,9 @@ namespace CapitalStrategy.Windows
             {
                 SoundEffect song;
                 song = Content.Load<SoundEffect>("Music/intoBattle");
-                song.Play();
                 SoundEffectInstance instance = song.CreateInstance();
                 instance.IsLooped = true;
+                instance.Play();
                 this.hasWindowBeenDrawn = true;
             }
             foreach (Warrior w in yourWarriors)
@@ -777,12 +777,13 @@ namespace CapitalStrategy.Windows
                         int yDiff = (int)(currentTurnWarrior.row - beingAttacked.row);
                         //beingAttacked.setDirection(xDiff, yDiff);
 
-                        string attackSound = currentTurnWarrior.attackSound;
-                        SoundEffect effect;     
-                        effect = Content.Load<SoundEffect>(attackSound);
-                        effect.Play();
                         
                         beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
+
+                        string attackSound = currentTurnWarrior.attackSound;
+                        SoundEffect effect;
+                        effect = Content.Load<SoundEffect>(attackSound);
+                        effect.Play();
                     }
                     else
                     {
@@ -889,7 +890,7 @@ namespace CapitalStrategy.Windows
                 int imgPadding = 40;
                 toDrawX = SELECTED_WARRIOR_INFO_X;
                 toDrawY = SELECTED_WARRIOR_INFO_Y + 80;
-                displayWarrior.drawInArbitraryLocation(656, 318);
+                displayWarrior.drawInArbitraryLocation(645, 318);
                 toDrawX = toDrawX + board.WARRIORWIDTH / 2 + imgPadding;
                 int xoffset = (int) iconHeight * 2;
                 padding = (int) iconHeight * 2;
@@ -909,6 +910,8 @@ namespace CapitalStrategy.Windows
                 int frameHeight = 18;
 
 
+
+
                 // Draw attack strength bars
                 if (this.selectedWarrior.attack >= 10)
                 {
@@ -918,12 +921,18 @@ namespace CapitalStrategy.Windows
                 if (Math.Abs(this.selectedWarrior.attack) > 10 && Math.Abs(this.selectedWarrior.attack) <= 100)
                 {
                     int total10Blocks = (int)(this.selectedWarrior.attack / 10);
-                    for (int i = 1; i <= total10Blocks; i++)
+                    for (int i = 1; i < total10Blocks - 1; i++)
                     {
                         Rectangle source = new Rectangle(frameWidth + 1, 0, frameWidth * 2 + 1, frameHeight);
                         this.windowManager.spriteBatch.Draw(bars, new Vector2(barStart + 10 * i, barYStart), source, Color.White);
                     }
                 }
+
+                string warriorAttack = this.selectedWarrior.attack.ToString() + "/100";
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, warriorAttack,
+                    new Vector2(barStart + 30, barYStart),
+                    Color.Yellow, 0, Vector2.Zero, .7f, SpriteEffects.None, 1f
+                    );
 
 
                 // Draw defensive bars
@@ -935,13 +944,18 @@ namespace CapitalStrategy.Windows
                 if (Math.Abs(this.selectedWarrior.defense) > 10 && Math.Abs(this.selectedWarrior.defense) <= 100)
                 {
                     int total10Blocks = (int)(this.selectedWarrior.defense / 10);
-                    for (int i = 1; i <= total10Blocks; i++)
+                    for (int i = 1; i < total10Blocks - 1; i++)
                     {
                         Rectangle source = new Rectangle(frameWidth + 1, 19, frameWidth * 2 + 1, frameHeight);
                         this.windowManager.spriteBatch.Draw(bars, new Vector2(barStart + 10 * i, 334), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
                     }
                 }
 
+                string warriorDefense = this.selectedWarrior.defense.ToString() + "/100";
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, warriorDefense,
+                    new Vector2(barStart + 30, 334),
+                    Color.Yellow, 0, Vector2.Zero, .7f, SpriteEffects.None, 1f
+                    );
 
                 // Draw the warriors cooldown
                 if (this.selectedWarrior.maxCooldown >= 1)
@@ -951,7 +965,7 @@ namespace CapitalStrategy.Windows
                 }
                 if (this.selectedWarrior.maxCooldown > 1)
                 {
-                    for (int i = 1; i <= this.selectedWarrior.maxCooldown; i++)
+                    for (int i = 1; i < this.selectedWarrior.maxCooldown; i++)
                     {
                         Rectangle source = new Rectangle(frameWidth, 19 * 2, frameWidth, frameHeight);
                         this.windowManager.spriteBatch.Draw(bars, new Vector2(barStart + 10 * i, 358), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
@@ -959,6 +973,12 @@ namespace CapitalStrategy.Windows
                         toDrawY = 358;
                     }
                 }
+
+                string warriorCooldown = this.selectedWarrior.maxCooldown.ToString();
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, warriorCooldown,
+                    new Vector2(barStart + 45, 358),
+                    Color.Yellow, 0, Vector2.Zero, .7f, SpriteEffects.None, 1f
+                    );
 
                 toDrawX += 20;
                 toDrawY += 30;
@@ -1016,10 +1036,13 @@ namespace CapitalStrategy.Windows
                 this.beingAttacked = attackedWarrior;
                 this.opponentDamage = message.damageDealt;
 
-                string attackSound = this.currentTurnWarrior.attackSound;
-                SoundEffect effect;
-                effect = Content.Load<SoundEffect>(attackSound);
-                effect.Play();
+                if (this.opponentDamage != 0)
+                {
+                    string attackSound = this.currentTurnWarrior.attackSound;
+                    SoundEffect effect;
+                    effect = Content.Load<SoundEffect>(attackSound);
+                    effect.Play();
+                }
             }
 
             
