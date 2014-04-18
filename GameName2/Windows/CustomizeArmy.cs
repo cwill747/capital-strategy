@@ -253,7 +253,6 @@ namespace CapitalStrategy.Windows
 
         public void Draw()
         {
-
             this.windowManager.spriteBatch.Begin();
             windowManager.spriteBatch.Draw(Game1.background, new Rectangle(0, 0, this.windowManager.Window.ClientBounds.Width, this.windowManager.Window.ClientBounds.Height), Color.White);
             this.windowManager.spriteBatch.Draw(this.background, Vector2.Zero, Color.White);
@@ -337,9 +336,25 @@ namespace CapitalStrategy.Windows
                 {
                     currentWarrior.drawToLocation();
                 }
-                if (aRange.isDisabled && !this.warriorIsPickedUp)
+               // if (aRange.isDisabled && !this.warriorIsPickedUp)
+                if (aRange.isDisabled)
                 {
-                    currentWarrior.drawAttackRange(true);
+                    //currentWarrior.drawAttackRange(true);
+
+                    Vector2 currentLocation = board.clickOverGrid(this.oldMouseState.X, this.oldMouseState.Y);
+                    int attackR = (int)currentWarrior.attackRange;
+                    Boolean[][] discovered = currentWarrior.bredthFirst((int)currentLocation.X, (int)currentLocation.Y, attackR, passThroughTeam: true);
+                    for (int i = 0; i < discovered.Length; i++)
+                    {
+                        for (int j = 0; j < discovered[i].Length; j++)
+                        {
+                            if (discovered[i][j] && this.board.warriors[i][j] == null)
+                            {
+                                    board.tileTints[i][j] = i >= 5 ? Warrior.attackColor : Color.DarkRed;
+                            }
+                        }
+
+                    }
                 }
                 else
                 {
