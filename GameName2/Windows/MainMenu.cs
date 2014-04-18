@@ -9,6 +9,8 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Storage;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Input.Touch;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 using MySql.Data.MySqlClient;
 using CapitalStrategy.GUI;
 using CapitalStrategyServer.Messaging;
@@ -28,6 +30,10 @@ namespace CapitalStrategy.Windows
         public Dialog dialog { get; set; }
         public Button dialogCancel { get; set; }
         public TextAnimation dialogText { get; set; }
+        public ContentManager Content { get; set; }
+
+        public Boolean musicIsPlaying = false;
+        public SoundEffectInstance instance;
         
         public MainMenu(Game1 windowManager)
         {
@@ -60,12 +66,27 @@ namespace CapitalStrategy.Windows
             phrases.Add("Searching for opponent...");
             
             this.dialogText = new TextAnimation(dialog.getComponentLocation(100, (int)Game1.menuFont.MeasureString("Searching for opponent...").X, 100), phrases, 500, Game1.menuFont, isVisible: false);
+
+
+            this.Content = windowManager.Content;
+            SoundEffect music;
+            music = Content.Load<SoundEffect>("Music/MenuMusic");
+            instance = music.CreateInstance();
+            instance.IsLooped = true;
+            
         }
 
         public void Update(GameTime gameTime)
         {
             MouseState newState = Mouse.GetState();
             this.dialogText.update(gameTime);
+
+            if (musicIsPlaying == false)
+            {
+                instance.Play();
+                musicIsPlaying = true;
+            }
+
             if (!this.pastState.Equals(newState))
             {
                 if (newState.LeftButton == ButtonState.Pressed && pastState.LeftButton != ButtonState.Pressed)
@@ -74,7 +95,7 @@ namespace CapitalStrategy.Windows
                     {
                         if (this.findMatchButton.checkClick(newState))
                         {
-
+                            instance.Stop();
                         }
                         if (this.customizeArmyButton.checkClick(newState))
                         {
