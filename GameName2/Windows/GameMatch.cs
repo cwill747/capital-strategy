@@ -55,6 +55,7 @@ namespace CapitalStrategy.Windows
         public Stack<int[,]> p2MovementStack;
         private bool warriorIsResetting;
         private int previousWarriorDirection;
+        private int healthBarFadeDelay = -1;
 
         private int endOfInfoPaneLocation;
         public int turnProgress { get; set; }
@@ -496,14 +497,7 @@ namespace CapitalStrategy.Windows
                                     int toDrawY = yLoc + (iconHeight / 2);
                                     int toDrawX = xLoc;
                                     int iconWidth = tileWidth / 2;
-                                    //modifed to constantly show their cooldown
-                                    //if (warrior.cooldown != 0)
-                                    //{
-                                    int cool = warrior.cooldown;
-                                    string coolString = cool.ToString();
-                                    this.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                                    this.spriteBatch.DrawString(this.infofont, coolString, new Vector2(xLoc + iconWidth, yLoc + (iconHeight / 3)), Color.White);
-                                    //}
+                                   
                                     //draw the health of the warrior being attacked
                                     if (warrior == beingAttacked && (this.turnProgress == TurnProgress.targetAcquired 
                                         ||this.turnProgress == TurnProgress.attacking|| this.turnProgress == TurnProgress.attacked))
@@ -546,15 +540,21 @@ namespace CapitalStrategy.Windows
             foreach (Warrior w in this.yourWarriors)
             {
                 w.draw();
+                this.drawCooldownOnWarrior(w);
             }
             foreach (Warrior w in this.opponentWarriors)
             {
                 w.draw();
+                this.drawCooldownOnWarrior(w);
             }
 
             if (mouseState.isOverGrid && board.warriors[mouseState.row][mouseState.col] != null)
             {
                 this.drawHealthBar(mouseState.row, mouseState.col);
+            }
+            if (this.beingAttacked != null)
+            {
+                this.drawHealthBar((int)beingAttacked.row, (int)beingAttacked.col);
             }
             this.drawInfoFrame(this.selectedWarrior);
             this.spriteBatch.Begin();
@@ -678,20 +678,27 @@ namespace CapitalStrategy.Windows
             this.spriteBatch.Draw(white, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.maxHealth), tileHeight / 10), Color.WhiteSmoke);
             this.spriteBatch.Draw(red, new Rectangle(xLoc, healthBarY, (int)(widthPerHP * warrior.health), tileHeight / 10), Color.WhiteSmoke);
 
-            //draw cooldown
-            int iconHeight = tileHeight /2;
-            int toDrawY = yLoc + (iconHeight /2);
-            int toDrawX = xLoc;
-            int iconWidth = tileWidth / 2;
-            if (warrior.cooldown != 0)
-            {
-                int cool = warrior.cooldown;
-                string cooldown = cool.ToString();
-                this.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.spriteBatch.DrawString(this.infofont, cooldown, new Vector2(xLoc+iconWidth, yLoc+(iconHeight/3)), Color.White);
-            }
+            
             this.spriteBatch.End();
             return healthBarY + tileHeight / 10;
+        }
+        public void drawCooldownOnWarrior(Warrior warrior)
+        {
+            if (warrior.cooldown != 0)
+            {
+                //draw cooldown
+                SpriteFont font = Game1.smallFont;
+                this.spriteBatch.Begin();
+                Vector2 warriorLoc = this.board.getLocation(warrior.row, warrior.col);
+                int iconHeight = (int)Game1.smallFont.MeasureString("1").Y;
+                int iconWidth = iconHeight;
+                int totalWidth = (int)(iconWidth + font.MeasureString(warrior.cooldown.ToString()).X);
+                int tileWidth = this.BOARDWIDTH / this.board.cols;
+                int offsetX = (tileWidth - totalWidth) / 2;
+                this.spriteBatch.Draw(hourglass, new Rectangle((int)warriorLoc.X + offsetX, (int)warriorLoc.Y, iconWidth, iconHeight), Color.White);
+                this.spriteBatch.DrawString(font, warrior.cooldown.ToString(), new Vector2(warriorLoc.X + iconWidth + offsetX, warriorLoc.Y), Color.White);
+                this.spriteBatch.End();
+            }
         }
         public void drawInfoFrame(Warrior selectedWarrior)
         {

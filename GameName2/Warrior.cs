@@ -83,29 +83,8 @@ namespace CapitalStrategy
             Rectangle destination = new Rectangle((int)destinationLoc.X - (board.WARRIORWIDTH - board.location.Width / board.cols) / 2, (int)destinationLoc.Y - (board.WARRIORHEIGHT - board.location.Height / board.rows) / 2 - board.location.Height / board.rows / 3, board.WARRIORWIDTH, board.WARRIORHEIGHT);
             ImageAtlas source = this.states[state];
 
-            //Color color = this.isYours ? Color.LightBlue : Color.LightSalmon;
-            Color color;
-            if (this.cooldown > 0 && this.isYours)
-            {
-                color = Color.Yellow;
-            }
-            else if (this.cooldown > 0 && !this.isYours)
-            {
-                color = Color.Red;
-            }
-            else if (this.isYours && this.cooldown == 0)
-            {
-                color = Color.White;
-            }
-            else if (!this.isYours && this.cooldown == 0)
-            {
-                color = Color.IndianRed;
-            }
-            else
-            {
-                color = Color.LimeGreen;
-            }
-            source.draw(spriteBatch, destination, direction, (int)stateDepth, color);
+
+            source.draw(spriteBatch, destination, direction, (int)stateDepth, this.isYours ? Color.White : Color.Red);
             Vector2 vec = new Vector2(0, 0);
         }
         public void drawToLocation()
@@ -151,6 +130,7 @@ namespace CapitalStrategy
                     if (game.turnProgress == TurnProgress.attacking)
                     {
                         game.turnProgress = TurnProgress.attacked;
+                       
                     }
 
                 }
@@ -587,8 +567,8 @@ namespace CapitalStrategy
 
                 string attackSound = this.attackSound;
                 SoundEffect effect;
-                effect = Content.Load<SoundEffect>(attackSound);
-                effect.Play();
+                // effect = Content.Load<SoundEffect>(attackSound);
+                //effect.Play();
 
 
                 // bonus check
