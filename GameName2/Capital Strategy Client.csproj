@@ -141,6 +141,9 @@
     <Content Include="Content\GUI\customize_army_background.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\GUI\gamematch_background.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\GUI\info_box_background.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
