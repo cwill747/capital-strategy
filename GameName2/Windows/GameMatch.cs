@@ -172,27 +172,36 @@ namespace CapitalStrategy.Windows
                     }
                 }
                 // manages button states
-                switch(this.turnProgress)
+                if (this.isYourTurn)
                 {
-                    case TurnProgress.beginning:
-                    case TurnProgress.moving:
-                        movementBtn.isDisabled = true;
-                        attackBtn.isDisabled = false;
-                        skipBtn.isDisabled = false;
-                        break;
-                    case TurnProgress.moved:
-                    case TurnProgress.attacking:
-                        movementBtn.isDisabled = false;
-                        attackBtn.isDisabled = true;
-                        skipBtn.isDisabled = false;
-                        break;
-                    case TurnProgress.attacked:
-                        movementBtn.isDisabled = true;
-                        attackBtn.isDisabled = true;
-                        skipBtn.isDisabled = true;
-                        break;
-                    default:
-                        break;
+                    switch (this.turnProgress)
+                    {
+                        case TurnProgress.beginning:
+                        case TurnProgress.moving:
+                            movementBtn.isDisabled = true;
+                            attackBtn.isDisabled = false;
+                            skipBtn.isDisabled = false;
+                            break;
+                        case TurnProgress.moved:
+                        case TurnProgress.attacking:
+                            movementBtn.isDisabled = false;
+                            attackBtn.isDisabled = true;
+                            skipBtn.isDisabled = false;
+                            break;
+                        case TurnProgress.attacked:
+                            movementBtn.isDisabled = true;
+                            attackBtn.isDisabled = true;
+                            skipBtn.isDisabled = true;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    movementBtn.isDisabled = true;
+                    attackBtn.isDisabled = true;
+                    skipBtn.isDisabled = true;
                 }
                 movementBtn.update(gameTime);
                 attackBtn.update(gameTime);
@@ -440,11 +449,16 @@ namespace CapitalStrategy.Windows
             }
             if (!mouseState.Equals(oldMouseState))
             {
+
+
                 if (mouseState.mouseState.LeftButton == ButtonState.Pressed)
                 {
                     if (this.movementBtn.checkClick(mouseState.mouseState))
                     {
 
+                    }
+                    if (this.attackBtn.checkClick(mouseState.mouseState))
+                    {
                     }
                     if (this.skipBtn.checkClick(mouseState.mouseState))
                     {
@@ -454,38 +468,44 @@ namespace CapitalStrategy.Windows
 
                 if (this.turnProgress == TurnProgress.moved)
                 {
-                    if (mouseState.mouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
+                if (mouseState.mouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
+                {
+                    if (this.movementBtn.unClick(mouseState.mouseState))
                     {
-                        if (this.movementBtn.unClick(mouseState.mouseState))
+                        this.turnProgress = TurnProgress.beginning;
+                        if (this.isYourTurn)
                         {
-                            this.turnProgress = TurnProgress.beginning;
-                            if (this.isYourTurn)
-                            {
-                                int[,] lastMove = p1MovementStack.Pop();
-                                int[] movedFrom = { lastMove[0, 0], lastMove[0, 1] };
-                                int[] movedTo = { lastMove[1, 0], lastMove[1, 1] };
-                                this.selectedWarrior = this.board.warriors[movedTo[0]][movedTo[1]];
-                                this.selectedWarrior.moveTo(movedFrom[0], movedFrom[1]);
-                                this.turnProgress = TurnProgress.moving;
-                                board.resetTints();
-                                this.currentTurnWarrior = selectedWarrior;
-                                warriorIsResetting = true;
-                                this.previousWarriorDirection = lastMove[2, 0];
-                                //this.currentTurnWarrior.state = State.
-                            }
+                            int[,] lastMove = p1MovementStack.Pop();
+                            int[] movedFrom = { lastMove[0, 0], lastMove[0, 1] };
+                            int[] movedTo = { lastMove[1, 0], lastMove[1, 1] };
+                            this.selectedWarrior = this.board.warriors[movedTo[0]][movedTo[1]];
+                            this.selectedWarrior.moveTo(movedFrom[0], movedFrom[1]);
+                            this.turnProgress = TurnProgress.moving;
+                            board.resetTints();
+                            this.currentTurnWarrior = selectedWarrior;
+                            warriorIsResetting = true;
+                            this.previousWarriorDirection = lastMove[2, 0];
+                            //this.currentTurnWarrior.state = State.
                         }
-
-						if (this.skipBtn.unClick(mouseState.mouseState))
-                        {
-							if(this.isYourTurn)
-							{
-								this.turnProgress = TurnProgress.turnOver;
-                                this.currentTurnWarrior.updateUserOptions(false);
-                                board.resetTints();
-							}
-						}
                     }
+
+                    if (this.skipBtn.unClick(mouseState.mouseState))
+                    {
+                        if (this.isYourTurn)
+                        {
+                            this.turnProgress = TurnProgress.turnOver;
+                            this.currentTurnWarrior.updateUserOptions(false);
+                            this.beingAttacked = null;
+                            board.resetTints();
+                        }
+                    }
+                    if (this.attackBtn.unClick(mouseState.mouseState))
+                    {
+                        this.missFadingMessage.show();
+                    }
+
                 }
+            }
                 else
                 {
                     if (mouseState.mouseState.LeftButton == ButtonState.Released && oldMouseState.LeftButton == ButtonState.Pressed)
@@ -504,9 +524,9 @@ namespace CapitalStrategy.Windows
                         }
                     }
                 }
-                oldMouseState = mouseState.mouseState;
+            oldMouseState = mouseState.mouseState;
 
-            }
+            
 
 
             // TODO: Add your update logic here
