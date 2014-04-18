@@ -108,7 +108,7 @@ namespace CapitalStrategy
             this.state = State.walking;
             this.direction = Direction.S;
             ImageAtlas source = this.states[state];
-            Color color = this.isYours ? Color.LightBlue : Color.LightSalmon;
+            Color color = this.isYours ? Color.White : Color.Red;
             source.draw(spriteBatch, destination, this.direction, (int)this.stateDepth, color);
         }
 

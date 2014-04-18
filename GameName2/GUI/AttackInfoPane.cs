@@ -47,8 +47,8 @@ namespace CapitalStrategy.GUI
             {
                 spriteBatch.Begin();
                 int padding = 5;
-                spriteBatch.Draw(Game1.charcoal, new Rectangle(this.x - padding, this.y - padding, width + 2 * padding,
-                    this.height + 2 * padding), Color.White);
+                //spriteBatch.Draw(Game1.charcoal, new Rectangle(this.x - padding, this.y - padding, width + 2 * padding,
+                 //   this.height + 2 * padding), Color.White);
                 spriteBatch.Draw(Game1.infoBackground, new Rectangle(x - 20, y - 7, width + 40, height + 14), Color.White);
                 string message = ""; 
                 if (this.baseDamage >= 0)
