@@ -29,8 +29,8 @@ namespace CapitalStrategy.Windows
         public int COLS = 10;
         public int BOARDWIDTH = 600;
         public int BOARDHEIGHT = 600;
-        public int SELECTED_WARRIOR_INFO_X = 610;
-        public int SELECTED_WARRIOR_INFO_Y = 40;
+        public int SELECTED_WARRIOR_INFO_X = 650;
+        public int SELECTED_WARRIOR_INFO_Y = 60;
 
         public Texture2D red;
         public Texture2D white;
@@ -42,7 +42,6 @@ namespace CapitalStrategy.Windows
         public SpriteFont infofont;
         public Texture2D hourglass;
         public bool hasWindowBeenDrawn = false;
-        Texture2D background;
         Rectangle backgroundRec;
 
         public Board board { get; set; }
@@ -66,6 +65,8 @@ namespace CapitalStrategy.Windows
         Warrior displayWarrior;
         MouseWrapper mouseState;
         MouseState oldMouseState;
+        private Texture2D background;
+        private Texture2D bars;
 
         // GUI STUFF
         Button movementBtn;
@@ -114,7 +115,6 @@ namespace CapitalStrategy.Windows
 
 
 
-            background = Content.Load<Texture2D>("stars");
             red = Content.Load<Texture2D>("colors/red");
             white = Content.Load<Texture2D>("colors/white");
             heartIcon = Content.Load<Texture2D>("icons/heartIcon");
@@ -122,6 +122,9 @@ namespace CapitalStrategy.Windows
             shieldIcon = Content.Load<Texture2D>("icons/shieldIcon");
             moveIcon = Content.Load<Texture2D>("icons/moveIcon");
             hourglass = Content.Load<Texture2D>("icons/hourglass");
+            this.bars = this.windowManager.Content.Load<Texture2D>("GUI/bars");
+
+            this.background = this.windowManager.Content.Load<Texture2D>("GUI/gamematch_background");
 
             backgroundRec = new Rectangle(0, 0, windowManager.Window.ClientBounds.Width, windowManager.Window.ClientBounds.Height);
             
@@ -129,11 +132,12 @@ namespace CapitalStrategy.Windows
             // Game1 game, int maxHealth, int attack, int defense, int accuracy, int evade, int maxMove, double speed, String type, int[] imageDimensions, int[] stateDurations, Point[] attackPoints, int? attackRange, int attackDelayConst, int attackDelayRate)
 
             XmlTextReader reader = new XmlTextReader("Configuration/WarriorTypes.xml");
-       
 
-            movementBtn = new Button("MOVEMENT", new Rectangle(SELECTED_WARRIOR_INFO_X, 300, 100, 25), Game1.smallFont);
-            attackBtn = new Button("ATTACK", new Rectangle(movementBtn.location.X + movementBtn.location.Width, 300, 100, 25), Game1.smallFont);
-            skipBtn = new Button("SKIP", new Rectangle(attackBtn.location.X + attackBtn.location.Width, 300, 100, 25), Game1.smallFont);
+
+            int btn_Y = 250;
+            movementBtn = new Button("MOVEMENT", new Rectangle(SELECTED_WARRIOR_INFO_X, btn_Y, 100, 25), Game1.smallFont);
+            attackBtn = new Button("ATTACK", new Rectangle(movementBtn.location.X + movementBtn.location.Width, btn_Y, 100, 25), Game1.smallFont);
+            skipBtn = new Button("SKIP", new Rectangle(attackBtn.location.X + attackBtn.location.Width, btn_Y, 100, 25), Game1.smallFont);
 
 
             mouseState = new MouseWrapper(board, Mouse.GetState());
@@ -252,6 +256,8 @@ namespace CapitalStrategy.Windows
                     // end of end game
                 
             }
+
+
             if (this.currentTurnWarrior != null)
             {
 
@@ -422,6 +428,8 @@ namespace CapitalStrategy.Windows
             }
 
             // handle skip
+
+
             mouseState.update(Mouse.GetState());
 
             if (mouseState.wasClicked() && mouseState.isOverGrid)
@@ -556,7 +564,8 @@ namespace CapitalStrategy.Windows
             // TODO: Add your drawing code here
             spriteBatch.Begin();
             spriteBatch.Draw(Game1.background, backgroundRec, Color.White);
-            
+            this.windowManager.spriteBatch.Draw(this.background, Vector2.Zero, Color.White);
+
             for (int i = 0; i < ROWS; i++)
                     {  
                            for (int j = 0; j < COLS; j++)
@@ -620,11 +629,12 @@ namespace CapitalStrategy.Windows
             this.spriteBatch.Begin();
             string turnInfo = (this.isYourTurn) ? "It is your turn" : "Waiting for opponent";
             //+ this.windowManager.otherPlayer.username
-            this.spriteBatch.DrawString(this.infofont, turnInfo, new Vector2(SELECTED_WARRIOR_INFO_X, SELECTED_WARRIOR_INFO_Y), Color.White);
+            this.spriteBatch.DrawString(Game1.smallFont, turnInfo, new Vector2(SELECTED_WARRIOR_INFO_X, SELECTED_WARRIOR_INFO_Y), Color.Brown);
 
 
             this.spriteBatch.End();
 
+          
             if (this.isYourTurn)
             {
                 this.movementBtn.draw(windowManager.spriteBatch);
@@ -811,51 +821,89 @@ namespace CapitalStrategy.Windows
                 int imgPadding = 40;
                 toDrawX = SELECTED_WARRIOR_INFO_X;
                 toDrawY = SELECTED_WARRIOR_INFO_Y + 80;
-                displayWarrior.drawInArbitraryLocation(toDrawX, toDrawY);
-                displayWarrior.drawWarriorType(toDrawX + board.WARRIORWIDTH / 2 + imgPadding, toDrawY - imgPadding);
-                this.spriteBatch.Begin();
+                displayWarrior.drawInArbitraryLocation(656, 318);
                 toDrawX = toDrawX + board.WARRIORWIDTH / 2 + imgPadding;
                 int xoffset = (int) iconHeight * 2;
                 padding = (int) iconHeight * 2;
 
-                // Draw the warriors health
-                this.spriteBatch.Draw(heartIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.spriteBatch.Draw(Game1.charcoal, new Rectangle(xoffset + toDrawX - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * selectedWarrior.maxHealth) + 4, barHeight + 4), Color.WhiteSmoke);
-                this.spriteBatch.Draw(white, new Rectangle(xoffset + toDrawX, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.maxHealth), barHeight), Color.WhiteSmoke);
-                this.spriteBatch.Draw(red, new Rectangle(xoffset + toDrawX, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.health), barHeight), Color.WhiteSmoke);
-                toDrawY += (int) ((double) iconHeight * 1.5);
+                this.windowManager.spriteBatch.Begin();
 
-                // Draw the warriors attack strength
-                this.spriteBatch.Draw(attackIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.spriteBatch.Draw(Game1.charcoal, new Rectangle(xoffset + toDrawX - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
-                this.spriteBatch.Draw(white, new Rectangle(xoffset + toDrawX, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * 100), barHeight), Color.WhiteSmoke);
-                this.spriteBatch.Draw(red, new Rectangle(xoffset + toDrawX, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.attack), barHeight), Color.WhiteSmoke);
-                toDrawY += (int)((double)iconHeight * 1.5);
+                int barStart = 739;
+                int barYStart = 310;
 
-                // Draw the warriors defense strength
-                // @TODO: Change the 2+ on this to be a resolution-independent value
-                this.spriteBatch.Draw(shieldIcon, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.spriteBatch.Draw(Game1.charcoal, new Rectangle(xoffset + toDrawX - 2, toDrawY + iconHeight / 2 - barHeight / 2 - 2, (int)(widthPerPoint * 100) + 4, barHeight + 4), Color.WhiteSmoke);
-                this.spriteBatch.Draw(white, new Rectangle(xoffset + toDrawX, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * 100), barHeight), Color.WhiteSmoke);
-                this.spriteBatch.Draw(red, new Rectangle(xoffset + toDrawX, toDrawY + iconHeight / 2 - barHeight / 2, (int)(widthPerPoint * selectedWarrior.defense), barHeight), Color.WhiteSmoke);
-                toDrawY += (int)((double)iconHeight * 1.5);
+                string selwarrior = this.selectedWarrior.type.ToUpperInvariant();
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, selwarrior,
+                    new Vector2(barStart, barYStart - 20),
+                    Color.Brown, 0, Vector2.Zero, .9f, SpriteEffects.None, 1f
+                    );
+
+                int frameWidth = 9;
+                int frameHeight = 18;
+
+
+                // Draw attack strength bars
+                if (this.selectedWarrior.attack >= 10)
+                {
+                    Rectangle source = new Rectangle(0, 0, frameWidth, frameHeight);
+                    this.windowManager.spriteBatch.Draw(bars, new Vector2(barStart, barYStart), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                }
+                if (Math.Abs(this.selectedWarrior.attack) > 10 && Math.Abs(this.selectedWarrior.attack) <= 100)
+                {
+                    int total10Blocks = (int)(this.selectedWarrior.attack / 10);
+                    for (int i = 1; i <= total10Blocks; i++)
+                    {
+                        Rectangle source = new Rectangle(frameWidth + 1, 0, frameWidth * 2 + 1, frameHeight);
+                        this.windowManager.spriteBatch.Draw(bars, new Vector2(barStart + 10 * i, barYStart), source, Color.White);
+                    }
+                }
+
+
+                // Draw defensive bars
+                if (this.selectedWarrior.defense >= 10)
+                {
+                    Rectangle source = new Rectangle(0, 19, frameWidth, frameHeight);
+                    this.windowManager.spriteBatch.Draw(bars, new Vector2(barStart, 334), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                }
+                if (Math.Abs(this.selectedWarrior.defense) > 10 && Math.Abs(this.selectedWarrior.defense) <= 100)
+                {
+                    int total10Blocks = (int)(this.selectedWarrior.defense / 10);
+                    for (int i = 1; i <= total10Blocks; i++)
+                    {
+                        Rectangle source = new Rectangle(frameWidth + 1, 19, frameWidth * 2 + 1, frameHeight);
+                        this.windowManager.spriteBatch.Draw(bars, new Vector2(barStart + 10 * i, 334), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                    }
+                }
+
 
                 // Draw the warriors cooldown
-                string coolDisplay = this.selectedWarrior.maxCooldown.ToString();
-                this.spriteBatch.Draw(hourglass, new Rectangle(toDrawX, toDrawY, iconWidth, iconHeight), Color.White);
-                this.spriteBatch.DrawString(this.infofont, coolDisplay, new Vector2(xoffset + toDrawX - 2, toDrawY), Color.White);
-                toDrawY += (int)((double)iconHeight * 1.5);
+                if (this.selectedWarrior.maxCooldown >= 1)
+                {
+                    Rectangle source = new Rectangle(0, 19 * 2, frameWidth, frameHeight);
+                    this.windowManager.spriteBatch.Draw(bars, new Vector2(barStart, 358), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                }
+                if (this.selectedWarrior.maxCooldown > 1)
+                {
+                    for (int i = 1; i <= this.selectedWarrior.maxCooldown; i++)
+                    {
+                        Rectangle source = new Rectangle(frameWidth, 19 * 2, frameWidth, frameHeight);
+                        this.windowManager.spriteBatch.Draw(bars, new Vector2(barStart + 10 * i, 358), source, Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                        toDrawX = barStart + 10 * i;
+                        toDrawY = 358;
+                    }
+                }
 
+                toDrawX += 20;
+                toDrawY += 30;
                 // Draw the warriors bonus
                 string baseDisplay = "Class: " + this.selectedWarrior.warriorClass.warriorClassName;
-                this.spriteBatch.DrawString(this.infofont, baseDisplay, new Vector2(toDrawX, toDrawY), Color.White);
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, baseDisplay, new Vector2(barStart, toDrawY), Color.Brown);
                 toDrawY += (int)((double)iconHeight * 1.5);
 
                 string bonusDisplay = "Bonus against: " + this.windowManager.warriorClasses[this.selectedWarrior.warriorClass.indexOfAdvantageAgainst].warriorClassName;
-                this.spriteBatch.DrawString(this.infofont, bonusDisplay, new Vector2(toDrawX, toDrawY), Color.White);
+                this.windowManager.spriteBatch.DrawString(Game1.smallFont, bonusDisplay, new Vector2(barStart, toDrawY), Color.Brown);
 
 
-                this.spriteBatch.End();
+                this.windowManager.spriteBatch.End();
             }
 
         
