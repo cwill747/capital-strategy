@@ -731,7 +731,6 @@ namespace CapitalStrategy.Windows
                         //beingAttacked.setDirection(xDiff, yDiff);
 
                         
-                        
                         beingAttacked.takeHit(currentTurnWarrior.getAttackDelay(xDiff, yDiff));
 
                         string attackSound = currentTurnWarrior.attackSound;
